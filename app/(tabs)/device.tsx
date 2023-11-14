@@ -6,6 +6,7 @@ import Colors from '@/constants/Colors'
 import Card from '@/components/Card/Card'
 import { Image } from 'expo-image';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
+import SimpleWeatherCard from '@/components/Card/SimpleWeatherCard'
 
 // Recursos
 import Lamp from '@/assets/images/lamp-icon.svg'
@@ -20,6 +21,9 @@ import BatteryIcon from "@/assets/icons/battery.svg"
 import DoseIcon from "@/assets/icons/dose.svg"
 import VolumenUpIcon from "@/assets/icons/volume_up.svg"
 import TrackChangesIcon from "@/assets/icons/track_changes.svg"
+import HelpIcon from "@/assets/icons/help.svg"
+import AqIcon from "@/assets/icons/aq.svg"
+import HumIcon from "@/assets/icons/humidity_percentage.svg"
 
 export default function TabOneScreen() {
 
@@ -138,9 +142,20 @@ export default function TabOneScreen() {
 
 					<View style={styles.timeView}>
 						<View style={styles.timeTitleView}>
-							<MontserratText>Pronóstico del</MontserratText>
-							<MontserratBoldText>Tiempo</MontserratBoldText>
-							<MontserratBoldText>En Guadalajara</MontserratBoldText>
+							<View style={styles.timeTitle}>
+								<MontserratText style={styles.timeText}>Pronóstico del</MontserratText>
+								<MontserratBoldText style={styles.timeText}>Tiempo</MontserratBoldText>
+								<MontserratBoldText style={styles.timeLocationText}>En Guadalajara</MontserratBoldText>
+							</View>
+
+							<Button style={styles.whiteButton} alignSelf="center" size="$6" circular>
+								<HelpIcon />
+							</Button>
+						</View>
+
+						<View style={styles.twoBlock}>
+							<SimpleWeatherCard Icon={AqIcon} color={Colors.pink} title="Calidad del aire" calification="Buena" value="25 ppm" />
+							<SimpleWeatherCard Icon={HumIcon} color={Colors.cyan} title="Humedad" calification="Excelente" value="35%" />
 						</View>
 					</View>
 				</View>
@@ -190,6 +205,9 @@ const styles = StyleSheet.create({
 	},
 	settingsButton: {
 		backgroundColor: Colors.secondary
+	},
+	whiteButton: {
+		backgroundColor: Colors.white
 	},
 	inahlerCard: {
 		position: "relative",
@@ -265,5 +283,33 @@ const styles = StyleSheet.create({
 	},
 	dotsView: {
 		marginVertical: 8
+	},
+	timeView: {
+		display: "flex",
+		flexDirection: "column"
+	},
+	timeTitleView: {
+		display: "flex",
+		flexDirection: "row",
+		alignItems: "center",
+		justifyContent: "space-between",
+		marginBottom: 16
+	},
+	timeTitle: {
+		display: "flex",
+	},
+	timeText: {
+		fontSize: 18
+	},
+	timeLocationText: {
+		marginTop: 8,
+		fontSize: 14,
+		color: Colors.darkGray
+	},
+	twoBlock: {
+		display: "flex",
+		flexDirection: "row",
+		justifyContent: "space-between",
+		gap: 16
 	}
 })
