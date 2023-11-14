@@ -1,0 +1,269 @@
+import { View, StyleSheet, Dimensions } from 'react-native'
+import { Button, ScrollView, Switch } from 'tamagui'
+import React, { useState } from 'react'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import Colors from '@/constants/Colors'
+import Card from '@/components/Card/Card'
+import { Image } from 'expo-image';
+import Carousel, { Pagination } from 'react-native-snap-carousel';
+
+// Recursos
+import Lamp from '@/assets/images/lamp-icon.svg'
+import CardTitle from '@/components/Card/CardTitle'
+import { MontserratText, MontserratBoldText, MontserratSemiText } from '@/components/StyledText'
+
+// Resourses
+import AddIcon from "@/assets/icons/add.svg"
+import SettingsIcon from "@/assets/icons/settings.svg"
+import inhaler from "@/assets/images/inhaler-img.png"
+import BatteryIcon from "@/assets/icons/battery.svg"
+import DoseIcon from "@/assets/icons/dose.svg"
+import VolumenUpIcon from "@/assets/icons/volume_up.svg"
+import TrackChangesIcon from "@/assets/icons/track_changes.svg"
+
+export default function TabOneScreen() {
+
+    const [ switchDevice, setSwitchDevice ] = useState<boolean>(true);
+	const [activeIndex, setActiveIndex] = React.useState(0);
+
+	const data = [
+		{ id: '1', title: 'Inhalador casa', connection: "Hace 2 días", battery: 50, dose: 20 },
+		{ id: '2', title: 'Inhalador Jorge', connection: "Hace 5 días", battery: 35, dose: 80 },
+		{ id: '3', title: 'Inhalador cajón', connection: "Hace 3 días", battery: 95, dose: 35 },
+	];
+
+	const { width: screenWidth } = Dimensions.get('window');
+	
+	const onSnapToItem = (index:number) => {
+		setActiveIndex(index);
+	};
+
+	const renderItem = ({ item }: any) => (
+
+		<Card style={styles.inahlerCard}>
+			<View style={styles.inahlerCardView}>
+				<View style={styles.inahlerCardContent}>
+					<View style={styles.inhalerCardLeft}>
+						<View style={styles.inahlerButton}>
+							<Button style={styles.settingsButton} alignSelf="center" size="$6" circular>
+								<SettingsIcon />
+							</Button>
+						</View>
+
+						<View style={styles.inahlerView}>
+							<View style={styles.inahlerTitleView}>
+								<MontserratBoldText style={styles.inahlerTitle}>{ item.title }</MontserratBoldText>
+								<MontserratText>{ item.connection }</MontserratText>
+							</View>
+
+							<View style={styles.inahlerStatus}>
+								<View style={styles.inahlerStatusInfo}>
+									<BatteryIcon style={styles.inahlerStatusIcon} />
+									<MontserratSemiText>{ item.battery }%</MontserratSemiText>
+								</View>
+
+								<View style={styles.inahlerStatusInfo}>
+									<DoseIcon style={styles.inahlerStatusIcon} />
+									<MontserratSemiText>{ item.dose } dosis</MontserratSemiText>
+								</View>
+							</View>
+						</View>
+					</View>
+
+					<View style={styles.inhalerCardRight}>
+						<Image style={styles.inahlerImage} source={inhaler} />
+					</View>
+				</View>
+
+				<View style={styles.inhalerButtonsView}>
+					<Button style={styles.inhalerButton} size="$6" borderRadius={'$radius.10'}>
+						<VolumenUpIcon />
+						<MontserratSemiText>Sonido</MontserratSemiText>
+					</Button>
+
+					<Button style={styles.inhalerButton} size="$6" borderRadius={'$radius.10'}>
+						<TrackChangesIcon />
+						<MontserratSemiText>Análisis</MontserratSemiText>
+					</Button>
+				</View>
+			</View>
+		</Card>
+	);
+
+	return (
+		<SafeAreaView style={styles.safeAre}>
+			<ScrollView>
+				<View style={styles.content}>
+					<View style={styles.header}>
+						<View style={styles.headerText}>
+							<MontserratBoldText style={styles.headerTitleText}>Dispositivos</MontserratBoldText>
+							<MontserratText style={styles.headerSubtitleText}>Información general</MontserratText>
+						</View>
+						
+						<Button style={styles.addButton} alignSelf="center" size="$6" circular>
+							<AddIcon />
+						</Button>
+					</View>
+					
+					<View style={styles.carouselView}>
+						<Carousel
+							contentContainerCustomStyle={{ paddingTop: 25 }}
+							data={data}
+							renderItem={renderItem}
+							sliderWidth={screenWidth - 48} // Ajusta según tus necesidades
+							itemWidth={screenWidth - 48} // Ajusta según tus necesidades
+							layout={'default'} // Esto indica el comportamiento de "scroll snap"
+							onSnapToItem={onSnapToItem}
+						/>
+					</View>
+
+					<View style={styles.dotsView}>
+						<Pagination
+							dotsLength={data.length}
+							activeDotIndex={activeIndex}
+							containerStyle={{ backgroundColor: 'transparent', paddingVertical: 8, gap: -5 }}
+							dotStyle={{
+								width: 8,
+								height: 8,
+								borderRadius: 5,
+								backgroundColor: Colors.tint,
+							}}
+							inactiveDotStyle={{
+								backgroundColor: Colors.dotsGray,
+							}}
+							inactiveDotOpacity={1}
+							inactiveDotScale={1}
+						/>
+					</View>
+
+					<View style={styles.timeView}>
+						<View style={styles.timeTitleView}>
+							<MontserratText>Pronóstico del</MontserratText>
+							<MontserratBoldText>Tiempo</MontserratBoldText>
+							<MontserratBoldText>En Guadalajara</MontserratBoldText>
+						</View>
+					</View>
+				</View>
+			</ScrollView>
+		</SafeAreaView>
+	)
+}
+
+const styles = StyleSheet.create({
+    safeAre: {
+        flex: 1,
+        backgroundColor: Colors.lightGrey
+    },
+    content: {
+        display: 'flex',
+        flexDirection: 'column',
+        marginTop: 24,
+        paddingHorizontal: 24,
+    },
+	carouselView: {
+		width: "100%",
+	},
+	carousel: {
+		width: "100%"
+	},
+	header: {
+		display: "flex",
+		flexDirection: "row",
+		alignItems: "center",
+		justifyContent: "space-between",
+		marginBottom: 30
+	},
+	headerText: {
+		display: "flex",
+		flexDirection: "column",
+	},
+	headerTitleText: {
+		fontSize: 18,
+		marginBottom: 4
+	},
+	headerSubtitleText: {
+		fontSize: 14,
+		color: Colors.light.grayText
+	},
+	addButton: {
+		backgroundColor: Colors.primary
+	},
+	settingsButton: {
+		backgroundColor: Colors.secondary
+	},
+	inahlerCard: {
+		position: "relative",
+	},
+	inahlerCardView: {
+		display: "flex",
+		flexDirection: "column"
+	},
+	inahlerCardContent: {
+		display: "flex",
+		flexDirection: "row",
+		justifyContent: "space-between",
+		width: "100%",
+		height: 215
+	},
+	inhalerCardLeft: {
+		display: "flex",
+		flexDirection: "column",
+		justifyContent: 'space-between',
+		flex: 1
+	},
+	inahlerButton: {
+		display: "flex",
+		flexDirection: "row",
+		justifyContent: "flex-start"
+	},
+	inahlerImage: {
+		top: -45,
+		left: -5,
+		width: '100%',
+    	aspectRatio: 16 / 26,
+		//backgroundColor: "red"
+	},
+	inhalerCardRight: {
+		position: "relative",
+		flex: 1
+	},
+	inahlerView: {
+		width: "100%"
+	},
+	inahlerTitleView: {
+		display: "flex",
+		flexDirection: "column",
+		width: "100%",
+		marginBottom: 8
+	},
+	inahlerTitle: {
+		fontSize: 18,
+	},
+	inahlerStatus: {
+		display: "flex",
+		flexDirection: "row",
+	},
+	inahlerStatusInfo: {
+		display: "flex",
+		flexDirection: "row",
+		alignItems: "center",
+		marginRight: 8
+	},
+	inahlerStatusIcon: {
+		marginRight: 4
+	},
+	inhalerButtonsView: {
+		display: "flex",
+		flexDirection: "row",
+		justifyContent: "space-between",
+		marginTop: 16,
+		gap: 8
+	},
+	inhalerButton: {
+		flex: 1,
+		backgroundColor: Colors.secondary
+	},
+	dotsView: {
+		marginVertical: 8
+	}
+})

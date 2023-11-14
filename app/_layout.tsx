@@ -1,9 +1,15 @@
+import CustomHeader from '@/components/CustomHeader';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { SplashScreen, Stack } from 'expo-router';
-import { useEffect } from 'react';
-import { useColorScheme } from 'react-native';
+import { useCallback, useEffect } from 'react';
+import { View, useColorScheme } from 'react-native';
+import '@tamagui/core/reset.css'
+
+import { TamaguiProvider } from 'tamagui'
+
+import config from '@/tamagui.config'
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -15,12 +21,13 @@ export const unstable_settings = {
   initialRouteName: '(tabs)',
 };
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    'Montserrat': require("@/assets/fonts/Montserrat-Regular.ttf"),
+    'Montserrat-Semi': require("@/assets/fonts/Montserrat-SemiBold.ttf"),
+    'Montserrat-Bold': require("@/assets/fonts/Montserrat-Bold.ttf"),
     ...FontAwesome.font,
   });
 
@@ -47,10 +54,11 @@ function RootLayoutNav() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-      </Stack>
+      <TamaguiProvider config={config}>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        </Stack>
+      </TamaguiProvider>
     </ThemeProvider>
   );
 }
