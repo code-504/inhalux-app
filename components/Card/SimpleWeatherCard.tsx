@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native'
 import React from 'react'
-import { MontserratBoldText, MontserratSemiText } from '../StyledText'
+import { MontserratBoldText, MontserratSemiText, MontserratText } from '../StyledText'
 import Colors from '@/constants/Colors'
 
 interface WeatherCardProps {
@@ -25,8 +25,8 @@ const SimpleWeatherCard = ({ Icon, color, title, calification, value }: WeatherC
         </View>
 
         <View style={styles.cardInfoView}>
-            <MontserratSemiText style={styles.cardInfo}>{ calification }</MontserratSemiText>
-            <MontserratSemiText style={styles.cardInfo}>{ value }</MontserratSemiText>
+            <MontserratText style={styles.cardInfo}>{ calification }</MontserratText>
+            <MontserratText style={styles.cardInfo}>{ value }</MontserratText>
         </View>
     </View>
   )

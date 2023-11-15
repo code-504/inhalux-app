@@ -12,6 +12,7 @@
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
     "./components", 
+    "./lib", 
     "./custom.d.ts"
   ]
 }

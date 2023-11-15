@@ -1,4 +1,4 @@
-import { View, StyleSheet, Dimensions } from 'react-native'
+import { ImageBackground, View, StyleSheet, Dimensions, Alert } from 'react-native'
 import { Button, ScrollView, Switch } from 'tamagui'
 import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -7,16 +7,18 @@ import Card from '@/components/Card/Card'
 import { Image } from 'expo-image';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import SimpleWeatherCard from '@/components/Card/SimpleWeatherCard'
+import { StatusBar } from 'expo-status-bar';
+import * as NavigationBar from 'expo-navigation-bar';
 
 // Recursos
-import Lamp from '@/assets/images/lamp-icon.svg'
-import CardTitle from '@/components/Card/CardTitle'
 import { MontserratText, MontserratBoldText, MontserratSemiText } from '@/components/StyledText'
+import BackgroundImage from "@/assets/images/background.png"
 
 // Resourses
 import AddIcon from "@/assets/icons/add.svg"
 import SettingsIcon from "@/assets/icons/settings.svg"
 import inhaler from "@/assets/images/inhaler-img.png"
+import inhalerShadow from "@/assets/images/inhaler-shadow-img.png"
 import BatteryIcon from "@/assets/icons/battery.svg"
 import DoseIcon from "@/assets/icons/dose.svg"
 import VolumenUpIcon from "@/assets/icons/volume_up.svg"
@@ -24,6 +26,10 @@ import TrackChangesIcon from "@/assets/icons/track_changes.svg"
 import HelpIcon from "@/assets/icons/help.svg"
 import AqIcon from "@/assets/icons/aq.svg"
 import HumIcon from "@/assets/icons/humidity_percentage.svg"
+import { supabase } from '@/lib/supabase'
+
+NavigationBar.setBackgroundColorAsync("white");
+NavigationBar.setButtonStyleAsync("dark");
 
 export default function TabOneScreen() {
 
@@ -42,8 +48,14 @@ export default function TabOneScreen() {
 		setActiveIndex(index);
 	};
 
-	const renderItem = ({ item }: any) => (
+	const doLogout = async () => {
+		const { error } = await supabase.auth.signOut();
 
+		if (error)
+			Alert.alert("Error", error.message)
+	}
+
+	const renderItem = ({ item }: any) => (
 		<Card style={styles.inahlerCard}>
 			<View style={styles.inahlerCardView}>
 				<View style={styles.inahlerCardContent}>
@@ -76,6 +88,7 @@ export default function TabOneScreen() {
 
 					<View style={styles.inhalerCardRight}>
 						<Image style={styles.inahlerImage} source={inhaler} />
+						<Image style={styles.inahlerShadowImage} source={inhalerShadow} />
 					</View>
 				</View>
 
@@ -95,7 +108,9 @@ export default function TabOneScreen() {
 	);
 
 	return (
-		<SafeAreaView style={styles.safeAre}>
+		<>
+		<View style={styles.safeAre}>
+			<ImageBackground source={BackgroundImage} style={styles.imageBackground}>
 			<ScrollView>
 				<View style={styles.content}>
 					<View style={styles.header}>
@@ -104,7 +119,7 @@ export default function TabOneScreen() {
 							<MontserratText style={styles.headerSubtitleText}>Información general</MontserratText>
 						</View>
 						
-						<Button style={styles.addButton} alignSelf="center" size="$6" circular>
+						<Button style={styles.addButton} alignSelf="center" size="$6" circular onPress={doLogout}>
 							<AddIcon />
 						</Button>
 					</View>
@@ -160,19 +175,29 @@ export default function TabOneScreen() {
 					</View>
 				</View>
 			</ScrollView>
-		</SafeAreaView>
+			</ImageBackground>
+		</View>
+		<StatusBar style="auto" backgroundColor={Colors.lightGrey} />
+		</>
 	)
 }
 
 const styles = StyleSheet.create({
     safeAre: {
         flex: 1,
-        backgroundColor: Colors.lightGrey
+        backgroundColor: Colors.lightGrey,
     },
+	imageBackground: {
+		flex: 1,
+		resizeMode: 'cover',
+		justifyContent: 'center',
+    	alignItems: 'center'
+	},
     content: {
         display: 'flex',
         flexDirection: 'column',
-        marginTop: 24,
+        marginTop: 22,
+		marginBottom: 24,
         paddingHorizontal: 24,
     },
 	carouselView: {
@@ -186,7 +211,7 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		alignItems: "center",
 		justifyContent: "space-between",
-		marginBottom: 30
+		marginBottom: 8
 	},
 	headerText: {
 		display: "flex",
@@ -235,11 +260,18 @@ const styles = StyleSheet.create({
 		justifyContent: "flex-start"
 	},
 	inahlerImage: {
-		top: -45,
+		top: -55,
 		left: -5,
 		width: '100%',
     	aspectRatio: 16 / 26,
-		//backgroundColor: "red"
+		zIndex: 1
+	},
+	inahlerShadowImage: {
+		top: -270,
+		left: -30,
+		width: '100%',
+    	aspectRatio: 16 / 26,
+		zIndex: 0
 	},
 	inhalerCardRight: {
 		position: "relative",

@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     header: {
         display: "flex",
         flexDirection: "row",
-        justifyContent: "space-between"
+        justifyContent: "space-between",
     },
     headerTitleView: {
         display: "flex",

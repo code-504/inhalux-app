@@ -1,14 +1,20 @@
-import CustomHeader from '@/components/CustomHeader';
+import React from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
+} from '@react-navigation/native';
+
 import { useFonts } from 'expo-font';
-import { SplashScreen, Stack } from 'expo-router';
-import { useCallback, useEffect } from 'react';
-import { View, useColorScheme } from 'react-native';
+import { Slot, SplashScreen, Stack } from 'expo-router';
+import { useEffect } from 'react';
+import { useColorScheme } from 'react-native';
+import { AuthProvider, useAuth } from '@/context/Authprovider';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
 import '@tamagui/core/reset.css'
-
 import { TamaguiProvider } from 'tamagui'
-
 import config from '@/tamagui.config'
 
 export {
@@ -18,9 +24,10 @@ export {
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(tabs)',
+  initialRouteName: '/(tabs)',
 };
 
+// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -46,18 +53,25 @@ export default function RootLayout() {
     return null;
   }
 
-  return <RootLayoutNav />;
+  return (
+    <AuthProvider>
+        <RootLayoutNav />
+    </AuthProvider>
+  );
 }
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
+  const { session, authInitialized } = useAuth();
+
+  if (!authInitialized && !session?.user) return null;
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <TamaguiProvider config={config}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        </Stack>
+        <SafeAreaProvider>
+          <Slot />
+        </SafeAreaProvider>
       </TamaguiProvider>
     </ThemeProvider>
   );
