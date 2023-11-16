@@ -218,11 +218,11 @@ const styles = StyleSheet.create({
 		flexDirection: "column",
 	},
 	headerTitleText: {
-		fontSize: 18,
-		marginBottom: 4
+		fontSize: 20,
+		marginBottom: 2
 	},
 	headerSubtitleText: {
-		fontSize: 14,
+		fontSize: 16,
 		color: Colors.light.grayText
 	},
 	addButton: {

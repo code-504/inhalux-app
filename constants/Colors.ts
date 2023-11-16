@@ -20,11 +20,14 @@ export default {
   primary: '#C6E8FF',
   secondary: '#F2F6FC',
   tint: '#0B289A',
+  buttonTextPrimary: "#073250",
   white: '#FFFFFF',
   lightGrey: '#FAFAFA',
   darkGray: "#8E8E8E",
   focus: '#F2F6FC',
   pink: "#F9EDFF",
   cyan: "#DEF6F5",
-  dotsGray: '#E2E2E2'
+  dotsGray: '#E2E2E2',
+  buttonGray: "#F8F8F8",
+  bottomBarGray: "#F1F2F2"
 };
