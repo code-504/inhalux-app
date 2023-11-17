@@ -63,13 +63,13 @@ export default function Login() {
 								value={email}
 								borderRadius={32}
 								borderWidth={0}
-								paddingHorizontal={24}
 								style={styles.input}
 							/>
 						</View>
 						<View style={styles.inputView}>
-							<Label style={styles.inputLabel} htmlFor="email"><MontserratSemiText>Contraseña</MontserratSemiText></Label>
+							<Label style={styles.inputLabel} htmlFor="password"><MontserratSemiText>Contraseña</MontserratSemiText></Label>
 							<Input
+								id="password"
 								onChangeText={(text) => setPassword(text)}
 								value={password}
 								secureTextEntry={true}
@@ -102,7 +102,7 @@ export default function Login() {
 					</View>
 
 					<View style={styles.createAccountView}>
-						<Link href="/signup"><MontserratText style={styles.createAccountText}>¿No tienes una cuenta?</MontserratText>   <MontserratSemiText style={styles.createAccountButton}>Crea una</MontserratSemiText></Link>
+						<Link href="/(auth)/signup"><MontserratText style={styles.createAccountText}>¿No tienes una cuenta?</MontserratText>   <MontserratSemiText style={styles.createAccountButton}>Crea una</MontserratSemiText></Link>
 					</View>
 				</View>
 			</ImageBackground>
@@ -157,6 +157,7 @@ const styles = StyleSheet.create({
 	},
 	input: {
 		height: 60,
+		backgroundColor: Colors.inputBackground
 	},
 	loginButtonView: {
 		marginTop: 32,
@@ -187,7 +188,7 @@ const styles = StyleSheet.create({
 		flexDirection: "column",
 		justifyContent: "flex-end",
 		alignItems: "center",
-		paddingVertical: 32
+		paddingVertical: 32,
 	},
 	createAccountText: {
 		fontSize: 16

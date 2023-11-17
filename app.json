@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "AirCheck",
-    "slug": "AirCheck",
+    "name": "inhaLux",
+    "slug": "inhaLux",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -16,7 +16,8 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.inhalabs.inhalux"
     },
     "androidStatusBar": {
       "backgroundColor": "#F6F7FB",
@@ -29,7 +30,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.inhalabs.inhalux"
     },
     "web": {
       "bundler": "metro",
@@ -42,6 +44,14 @@
     "experiments": {
       "typedRoutes": true,
       "tsconfigPaths": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "f9822285-6761-48ff-9ba7-2562be1e4cba"
+      }
     }
   }
 }

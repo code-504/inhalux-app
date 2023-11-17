@@ -12,6 +12,7 @@ import LocationIcon from "@/assets/icons/location.svg";
 import DeviceHeader from '@/components/Headers/DeviceHeader';
 import { useAuth } from '@/context/Authprovider';
 import { MontserratText } from '@/components/StyledText';
+import MonitorHeader from '@/components/Headers/MonitorHeader';
 
 /**
  * You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
@@ -54,6 +55,7 @@ export default function TabLayout() {
                 <Tabs.Screen
                     name="monitor"
                     options={{
+                        header: () => <MonitorHeader />,
                         tabBarIcon: ({ color }) => <MonitorIcon name="code" color={color} />,
                     }}
                 />

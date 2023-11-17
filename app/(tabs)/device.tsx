@@ -27,6 +27,7 @@ import HelpIcon from "@/assets/icons/help.svg"
 import AqIcon from "@/assets/icons/aq.svg"
 import HumIcon from "@/assets/icons/humidity_percentage.svg"
 import { supabase } from '@/lib/supabase'
+import HeaderAction from '@/components/HeaderAction'
 
 NavigationBar.setBackgroundColorAsync("white");
 NavigationBar.setButtonStyleAsync("dark");
@@ -113,16 +114,12 @@ export default function TabOneScreen() {
 			<ImageBackground source={BackgroundImage} style={styles.imageBackground}>
 			<ScrollView>
 				<View style={styles.content}>
-					<View style={styles.header}>
-						<View style={styles.headerText}>
-							<MontserratBoldText style={styles.headerTitleText}>Dispositivos</MontserratBoldText>
-							<MontserratText style={styles.headerSubtitleText}>Información general</MontserratText>
-						</View>
-						
-						<Button style={styles.addButton} alignSelf="center" size="$6" circular onPress={doLogout}>
-							<AddIcon />
-						</Button>
-					</View>
+					<HeaderAction 
+						title="Dispositivos"
+						subtitle="Información general"
+						Icon={AddIcon}
+						action={doLogout}
+					/>
 					
 					<View style={styles.carouselView}>
 						<Carousel
@@ -205,28 +202,6 @@ const styles = StyleSheet.create({
 	},
 	carousel: {
 		width: "100%"
-	},
-	header: {
-		display: "flex",
-		flexDirection: "row",
-		alignItems: "center",
-		justifyContent: "space-between",
-		marginBottom: 8
-	},
-	headerText: {
-		display: "flex",
-		flexDirection: "column",
-	},
-	headerTitleText: {
-		fontSize: 20,
-		marginBottom: 2
-	},
-	headerSubtitleText: {
-		fontSize: 16,
-		color: Colors.light.grayText
-	},
-	addButton: {
-		backgroundColor: Colors.primary
 	},
 	settingsButton: {
 		backgroundColor: Colors.secondary
