@@ -15,7 +15,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import '@tamagui/core/reset.css'
 import { TamaguiProvider } from 'tamagui'
-import config from '@/tamagui.config'
+import appConfig from "@/tamagui.config"
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -32,8 +32,8 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
-    'Montserrat': require("@/assets/fonts/Montserrat-Regular.ttf"),
-    'Montserrat-Semi': require("@/assets/fonts/Montserrat-SemiBold.ttf"),
+    'Montserrat-Regular': require("@/assets/fonts/Montserrat-Regular.ttf"),
+    'Montserrat-Semibold': require("@/assets/fonts/Montserrat-SemiBold.ttf"),
     'Montserrat-Bold': require("@/assets/fonts/Montserrat-Bold.ttf"),
     ...FontAwesome.font,
   });
@@ -68,7 +68,7 @@ function RootLayoutNav() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <TamaguiProvider config={config}>
+      <TamaguiProvider config={appConfig}>
         <SafeAreaProvider>
           <Slot />
         </SafeAreaProvider>

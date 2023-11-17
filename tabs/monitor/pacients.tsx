@@ -1,13 +1,17 @@
 import { View, Text, StyleSheet } from 'react-native'
 import React from 'react'
-import { MontserratText } from '@/components/StyledText'
+import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/components/StyledText'
 import HeaderAction from '@/components/HeaderAction'
+import { Image } from 'expo-image'
+import Colors from '@/constants/Colors'
+import { Avatar, Input, ScrollView } from 'tamagui'
 
 // Resources
 import pacientBackground from "@/assets/images/pacients-empty.png"
 import AddIcon from "@/assets/icons/add.svg"
-import { Image } from 'expo-image'
-import Colors from '@/constants/Colors'
+import ArrowIcon from "@/assets/icons/arrow_outward.svg"
+import SearchIcon from "@/assets/icons/search.svg"
+import ContactCard from '@/components/Card/ContactCard'
 
 const PacientsTab = ({ list }: PacientsProps) => {
 
@@ -25,12 +29,22 @@ const PacientsTab = ({ list }: PacientsProps) => {
             />
 
             {
-                list.length >= 1 ? list.map((item, index) => (
-                    <View key={index} >
-                        <MontserratText>{ item.name }</MontserratText>
-                    </View>
-                )) :
+                list.length >= 1 ? 
                 (
+                    <View style={styles.listView}>
+                        <View style={styles.searchInputView}>
+                            <Input style={styles.searchInput} id="search-in-pacients" borderRadius="$10" borderWidth={1} placeholder="Buscar por nombre" />
+                            <SearchIcon style={styles.searchIcon}/>
+                        </View>
+
+                        { 
+                            list.map((item, index) => (
+                                <ContactCard key={index} name={item.name} kindred={item.kindred} avatar={item.avatar} />
+                            ))
+                        }
+                    </View>
+                ) :
+                (   
                     <View style={styles.emptyView}>
                         <Image style={styles.imageEmpy} source={pacientBackground} />
 
@@ -50,10 +64,12 @@ const styles = StyleSheet.create({
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        gap: 24
+        gap: 24,
     },
     imageEmpy: {
-        width: '100%',
+        marginTop: 24,
+        height: "100%",
+        maxHeight: '20%',
     	aspectRatio: 1 / 1,
     },
     infoText: {
@@ -63,5 +79,25 @@ const styles = StyleSheet.create({
     infoEmpty: {
         textAlign: "center",
         color: Colors.darkGray
+    },
+    listView: {
+        display: "flex",
+        flexDirection: "column",
+    },
+    searchInputView: {
+        position: "relative"
+    },
+    searchInput: {
+        marginTop: 12,
+        marginBottom: 24,
+        height: 56,
+        paddingLeft: 24,
+        paddingRight: 60,
+        backgroundColor: Colors.white
+    },
+    searchIcon: {
+        position: "absolute",
+        top: "31%",
+        right: 22
     }
 })

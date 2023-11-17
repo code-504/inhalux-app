@@ -7,7 +7,6 @@ import { MontserratBoldText, MontserratText } from '../StyledText'
 
 // Resources
 import MoreIcon from "@/assets/icons/more_vert.svg";
-import TabSwitcher from '../TabSwitcher'
 
 export default function MonitorHeader() {
   return (
@@ -21,10 +20,11 @@ export default function MonitorHeader() {
                     />
                     <Avatar.Fallback backgroundColor="$blue10" />
                 </Avatar>
-            </View>
 
-            <View>
-                
+                <View style={styles.headerTitleView}>
+                    <MontserratText style={styles.headerTitleWellcomeText}>Bienvenido 👋</MontserratText>
+                    <MontserratBoldText style={styles.headerTitleNameText}>Jorge Ibarra</MontserratBoldText>
+                </View>
             </View>
 
             <Button style={styles.notificationButton} alignSelf="center" size="$6" circular>

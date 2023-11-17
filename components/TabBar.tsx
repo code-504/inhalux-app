@@ -60,7 +60,7 @@ function TabBar({ tabs }:TabBarProps) {
 					onLayout={handleLayout}
 					style={{
 						width: "50%",
-						height: 52,
+						height: 60,
 						borderRadius: 100,
 						backgroundColor: Colors.secondary, // Cambia el color del slider según tus preferencias
 						position: 'absolute',
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
 	alignItems: "center",
 	width: "100%",
-	height: 56,
+	height: 64,
 	padding: 2,
 	marginTop: 16,
     marginBottom: 32,
@@ -105,15 +105,7 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 14,
-  },
-  slider: {
-	width: "50%",
-    height: 52,
-	borderRadius: 100,
-    backgroundColor: Colors.secondary, // Cambia el color del slider según tus preferencias
-    position: 'absolute',
-    zIndex: -1
-  },
+  }
 });
 
 export default TabBar;

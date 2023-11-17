@@ -23,7 +23,7 @@ export default function DeviceHeader() {
                 
                 <View style={styles.headerTitleView}>
                     <MontserratText style={styles.headerTitleWellcomeText}>Bienvenido 👋</MontserratText>
-                    <MontserratBoldText style={styles.headerTitleNameText}>Jorge Ibarra Pena</MontserratBoldText>
+                    <MontserratBoldText style={styles.headerTitleNameText}>Jorge Ibarra</MontserratBoldText>
                 </View>
             </View>
 
