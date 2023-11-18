@@ -13,33 +13,33 @@ import GoogleIcon from "@/assets/icons/google-icon.svg"
 import FacebookIcon from "@/assets/icons/facebook-icon.svg"
 
 export default function Signup() {
+	const [name, setName] = useState('')
+	const [lastName, setLastName] = useState('')
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
 	const [loading, setLoading] = useState(false)
 
-	async function signInWithEmail() {
-		setLoading(true)
-		const { error } = await supabase.auth.signInWithPassword({
-			email: email,
-			password: password,
-		})
-
-		if (error) Alert.alert(error.message)
-			setLoading(false)
-	}
-
 	async function signUpWithEmail() {
 		setLoading(true)
 		const {
-			data: { session },
-			error,
-		} = await supabase.auth.signUp({
+			data: { session }, error} = await supabase.auth.signUp({
 			email: email,
 			password: password,
 		})
 
 		if (error) Alert.alert(error.message)
-		if (!session) Alert.alert('Please check your inbox for email verification!')
+		else{
+			const { data: userData, error: userError } = await supabase
+            .from('users')
+            .update({ 
+                        name: name,
+                        last_name: lastName
+                    })
+            .eq('email', email)
+            .select()
+		}
+
+		if (!session && !error) Alert.alert('Please check your inbox for email verification!')
 			setLoading(false)
 	}
 
@@ -49,7 +49,7 @@ export default function Signup() {
 				<View style={styles.topContainerView}>
 					<View>
 						<MontserratBoldText style={styles.topContainerTitle}>Crear una cuenta</MontserratBoldText>
-						<MontserratText style={styles.topContainerInfo}>Crea una cuenta para disfrutar tu inhaLux</MontserratText>
+						<MontserratText style={styles.topContainerInfo}>Crea una cuenta para disfrutar tu InhaLux</MontserratText>
 					</View>
 				</View>
 
@@ -60,8 +60,8 @@ export default function Signup() {
                                 <Label style={styles.inputLabel} htmlFor="nameSignup"><MontserratSemiText>Nombre</MontserratSemiText></Label>
                                 <Input
                                     id="nameSignup"
-                                    onChangeText={(text) => setEmail(text)}
-                                    value={email}
+                                    onChangeText={(text) => setName(text)}
+                                    value={name}
                                     borderRadius={32}
                                     borderWidth={0}
                                     style={styles.input}
@@ -71,8 +71,8 @@ export default function Signup() {
                                 <Label style={styles.inputLabel} htmlFor="lastnameSignup"><MontserratSemiText>Apellidos</MontserratSemiText></Label>
                                 <Input
                                     id="lastnameSignup"
-                                    onChangeText={(text) => setEmail(text)}
-                                    value={email}
+                                    onChangeText={(text) => setLastName(text)}
+                                    value={lastName}
                                     borderRadius={32}
                                     borderWidth={0}
                                     style={styles.input}
@@ -105,7 +105,7 @@ export default function Signup() {
                         </View>
 
                         <View style={styles.loginButtonView}>
-                            <Button style={styles.loginButton} borderRadius={32} height={52}  disabled={loading} onPress={() => signInWithEmail()}>
+                            <Button style={styles.loginButton} borderRadius={32} height={52}  disabled={loading} onPress={() => signUpWithEmail()}>
                                 <MontserratSemiText style={styles.loginText}>Iniciar sesión</MontserratSemiText>
                             </Button>
                         </View>
