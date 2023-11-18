@@ -1,6 +1,7 @@
-import { ImageBackground, View, StyleSheet, Dimensions, Alert } from 'react-native'
+import { ImageBackground, View, StyleSheet, Dimensions, Alert, NativeSyntheticEvent, NativeScrollEvent, Animated, ViewToken } from 'react-native'
+import { FlashList } from "@shopify/flash-list";
 import { Button, ScrollView, Switch } from 'tamagui'
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Colors from '@/constants/Colors'
 import Card from '@/components/Card/Card'
@@ -9,6 +10,9 @@ import Carousel, { Pagination } from 'react-native-snap-carousel';
 import SimpleWeatherCard from '@/components/Card/SimpleWeatherCard'
 import { StatusBar } from 'expo-status-bar';
 import * as NavigationBar from 'expo-navigation-bar';
+import {ExpandingDot} from "react-native-animated-pagination-dots";
+import { supabase } from '@/lib/supabase'
+import HeaderAction from '@/components/HeaderAction'
 
 // Recursos
 import { MontserratText, MontserratBoldText, MontserratSemiText } from '@/components/StyledText'
@@ -26,16 +30,14 @@ import TrackChangesIcon from "@/assets/icons/track_changes.svg"
 import HelpIcon from "@/assets/icons/help.svg"
 import AqIcon from "@/assets/icons/aq.svg"
 import HumIcon from "@/assets/icons/humidity_percentage.svg"
-import { supabase } from '@/lib/supabase'
-import HeaderAction from '@/components/HeaderAction'
 
 NavigationBar.setBackgroundColorAsync("white");
 NavigationBar.setButtonStyleAsync("dark");
 
 export default function TabOneScreen() {
 
-    const [ switchDevice, setSwitchDevice ] = useState<boolean>(true);
-	const [activeIndex, setActiveIndex] = React.useState(0);
+	const [pagination, setPagination] = useState(0);
+	const scrollX = useRef(new Animated.Value(0)).current
 
 	const data = [
 		{ id: '1', title: 'Inhalador casa', connection: "Hace 2 días", battery: 50, dose: 20 },
@@ -44,10 +46,8 @@ export default function TabOneScreen() {
 	];
 
 	const { width: screenWidth } = Dimensions.get('window');
-	
-	const onSnapToItem = (index:number) => {
-		setActiveIndex(index);
-	};
+	const SPACING = 12;
+	const ITEM_WIDTH = screenWidth - 24;
 
 	const doLogout = async () => {
 		const { error } = await supabase.auth.signOut();
@@ -56,8 +56,8 @@ export default function TabOneScreen() {
 			Alert.alert("Error", error.message)
 	}
 
-	const renderItem = ({ item }: any) => (
-		<Card style={styles.inahlerCard}>
+	const RenderItem = ({ item }: any) => (
+		<Card style={styles.inahlerCard} radius={44}>
 			<View style={styles.inahlerCardView}>
 				<View style={styles.inahlerCardContent}>
 					<View style={styles.inhalerCardLeft}>
@@ -120,38 +120,53 @@ export default function TabOneScreen() {
 						Icon={AddIcon}
 						action={doLogout}
 					/>
+				</View>
 					
 					<View style={styles.carouselView}>
-						<Carousel
-							contentContainerCustomStyle={{ paddingTop: 25 }}
+
+						<FlashList 
 							data={data}
-							renderItem={renderItem}
-							sliderWidth={screenWidth - 48} // Ajusta según tus necesidades
-							itemWidth={screenWidth - 48} // Ajusta según tus necesidades
-							layout={'default'} // Esto indica el comportamiento de "scroll snap"
-							onSnapToItem={onSnapToItem}
-						/>
-					</View>
-
-					<View style={styles.dotsView}>
-						<Pagination
-							dotsLength={data.length}
-							activeDotIndex={activeIndex}
-							containerStyle={{ backgroundColor: 'transparent', paddingVertical: 8, gap: -5 }}
-							dotStyle={{
-								width: 8,
-								height: 8,
-								borderRadius: 5,
-								backgroundColor: Colors.tint,
+							keyExtractor={(item) => item.id}
+							horizontal
+							showsHorizontalScrollIndicator={false}
+							pagingEnabled
+							decelerationRate={0}
+							snapToInterval={ITEM_WIDTH}
+							snapToAlignment={"center"}
+        					scrollEventThrottle={16}
+							estimatedItemSize={ITEM_WIDTH}
+							onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } }}], {
+								useNativeDriver: false
+							})}
+							renderItem={({ item, index }) => {
+								return (
+									<View style={{ width: ITEM_WIDTH, marginTop: 20 }}>
+										<View style={ index === 0 ? { marginLeft: SPACING * 2 } : index === data.length - 1 ? { marginRight: SPACING * 2 } : { marginHorizontal: SPACING }}>
+											<RenderItem item={ item } />
+										</View>
+									</View>
+								);
 							}}
-							inactiveDotStyle={{
-								backgroundColor: Colors.dotsGray,
-							}}
-							inactiveDotOpacity={1}
-							inactiveDotScale={1}
 						/>
+						<View style={styles.dotContainer}>
+							<ExpandingDot
+									data={data}
+									expandingDotWidth={30}
+									scrollX={scrollX}
+									inActiveDotOpacity={0.6}
+									dotStyle={{
+										width: 10,
+										height: 10,
+										borderRadius: 5,
+										marginHorizontal: 5
+									}}
+									inActiveDotColor={Colors.dotsGray}
+            						activeDotColor={Colors.tint}
+									containerStyle={styles.dotsView}
+								/>
+						</View>
 					</View>
-
+				<View style={styles.content}>
 					<View style={styles.timeView}>
 						<View style={styles.timeTitleView}>
 							<View style={styles.timeTitle}>
@@ -194,7 +209,7 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'column',
         marginTop: 22,
-		marginBottom: 24,
+		marginBottom: 12,
         paddingHorizontal: 24,
     },
 	carouselView: {
@@ -288,8 +303,13 @@ const styles = StyleSheet.create({
 		flex: 1,
 		backgroundColor: Colors.secondary
 	},
+	dotContainer: {
+		justifyContent: 'center',
+		alignSelf: 'center',
+		height: 18
+	},
 	dotsView: {
-		marginVertical: 8
+		top: 16
 	},
 	timeView: {
 		display: "flex",
