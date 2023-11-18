@@ -4,6 +4,7 @@ import { View, StyleSheet, LayoutChangeEvent, TouchableHighlightBase } from 'rea
 import Animated, { useSharedValue, withSpring } from 'react-native-reanimated';
 import { MontserratSemiText } from './StyledText';
 import { Button } from 'tamagui';
+import { FlatList } from 'react-native-gesture-handler';
 
 interface Tab {
 	name: string
