@@ -3,8 +3,9 @@ import { Alert, ImageBackground, StyleSheet, View } from 'react-native'
 import { supabase } from '@/lib/supabase'
 import { Button, Input, Label, ScrollView, Separator } from 'tamagui'
 import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/components/StyledText'
-import { Link, Stack } from 'expo-router'
+import { Link, Redirect, Stack, useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { z } from 'zod';
 
 // Resources
 import BackgroundImage from "@/assets/images/background.png"
@@ -13,34 +14,86 @@ import GoogleIcon from "@/assets/icons/google-icon.svg"
 import FacebookIcon from "@/assets/icons/facebook-icon.svg"
 
 export default function Signup() {
+	const router = useRouter();
 	const [name, setName] = useState('')
 	const [lastName, setLastName] = useState('')
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
 	const [loading, setLoading] = useState(false)
+	const [formErrors, setFormErrors] = useState({
+		name: "",
+		lastName: "",
+		email: "",
+		password: ""
+	})
+
+	const formSchema = z.object({
+		name: z.string().min(1, { message: "El nombre del usuario es obligatorio" }),
+		lastName: z.string().min(1, { message: "El apellido del usuario es obligatorio" }),
+		email: z.string().email({ message: "Formato de correo inválido" }),
+		password: z.string().min(8, { message: "La contraseña debe contener mínimo 8 carácteres" })
+	})
+
+	const formData = {
+		name,
+		lastName,
+		email,
+		password
+	}
 
 	async function signUpWithEmail() {
+		const validationResults = formSchema.safeParse(formData);
+
+		if(!validationResults.success){
+			const errors = validationResults.error.format()
+			setFormErrors({
+				...formErrors,
+				name: errors.name ? errors.name._errors.join(",") : "",
+				lastName: errors.lastName ? errors.lastName._errors.join(",") : "",
+				email: errors.email ? errors.email._errors.join(",") : "",
+				password: errors.password ? errors.password._errors.join(",") : "",
+			  });
+			return;
+		}else{
+			setFormErrors({
+				...formErrors,
+				name:  "",
+				lastName: "",
+				email: "",
+				password: "",
+			  });
+		}
+
 		setLoading(true)
-		const {
-			data: { session }, error} = await supabase.auth.signUp({
+
+		let { data: users, error:errorUsers } = await supabase
+            .from('users')
+            .select('email')
+            .eq('email', email)
+
+        if(users && users.length > 0){
+            Alert.alert("¡Esta cuenta ya esta registrada!")
+			setLoading(false)
+			return;
+        }
+
+		const {data: { session }, error: errorAuth} = await supabase.auth.signUp({
 			email: email,
 			password: password,
 		})
 
-		if (error) Alert.alert(error.message)
-		else{
-			const { data: userData, error: userError } = await supabase
-            .from('users')
-            .update({ 
-                        name: name,
-                        last_name: lastName
-                    })
-            .eq('email', email)
-            .select()
-		}
+		const { data: userData, error: userError } = await supabase
+		.from('users')
+		.update({ 
+					name: name,
+					last_name: lastName
+				})
+		.eq('email', email)
+		.select()
 
-		if (!session && !error) Alert.alert('Please check your inbox for email verification!')
-			setLoading(false)
+		if (!session) Alert.alert('¡Checa tu correo electrónico para confirmar tu cuenta!')
+		setLoading(false)
+		router.replace('/(auth)/login');
 	}
 
 	return (
@@ -66,6 +119,7 @@ export default function Signup() {
                                     borderWidth={0}
                                     style={styles.input}
                                 />
+								{formErrors.name != "" && <MontserratText style={styles.errorMessage}>{formErrors.name}</MontserratText>}
                             </View>
                             <View style={styles.inputView}>
                                 <Label style={styles.inputLabel} htmlFor="lastnameSignup"><MontserratSemiText>Apellidos</MontserratSemiText></Label>
@@ -77,6 +131,7 @@ export default function Signup() {
                                     borderWidth={0}
                                     style={styles.input}
                                 />
+								{formErrors.lastName != "" && <MontserratText style={styles.errorMessage}>{formErrors.lastName}</MontserratText>}
                             </View>
                             <View style={styles.inputView}>
                                 <Label style={styles.inputLabel} htmlFor="emailSignup"><MontserratSemiText>Correo electrónico</MontserratSemiText></Label>
@@ -88,6 +143,7 @@ export default function Signup() {
                                     borderWidth={0}
                                     style={styles.input}
                                 />
+								{formErrors.email != "" && <MontserratText style={styles.errorMessage}>{formErrors.email}</MontserratText>}
                             </View>
                             <View style={styles.inputView}>
                                 <Label style={styles.inputLabel} htmlFor="passwordSignup"><MontserratSemiText>Contraseña</MontserratSemiText></Label>
@@ -101,6 +157,7 @@ export default function Signup() {
                                     paddingHorizontal={24}
                                     style={styles.input}
                                 />
+								{formErrors.password != "" && <MontserratText style={styles.errorMessage}>{formErrors.password}</MontserratText>}
                             </View>
                         </View>
 
@@ -216,4 +273,10 @@ const styles = StyleSheet.create({
 		paddingTop: 42,
 		backgroundColor: Colors.white
 	},
+	errorMessage: {
+		fontSize: 10,
+		textAlign: "center",
+		marginBottom: 0,
+		paddingBottom: 0
+	}
 })
