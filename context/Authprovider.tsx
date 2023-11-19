@@ -53,7 +53,7 @@ export function AuthProvider({ children }: Props) {
       setIsLoading(false);
     });
 
-    const { data: authListner } = supabase.auth.onAuthStateChange(
+    const { data: authListener } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         setSession(session);
         setAuthInitialized(true);
@@ -66,7 +66,7 @@ export function AuthProvider({ children }: Props) {
     );
 
     return () => {
-      authListner.subscription;
+      authListener.subscription;
     };
   }, []);
 

@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet } from 'react-native'
-import React from 'react'
+import {  Alert,  View, Text, StyleSheet } from 'react-native'
+import React, {useState} from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Avatar, Button, XStack } from 'tamagui'
 import Colors from '@/constants/Colors'
@@ -7,8 +7,31 @@ import { MontserratBoldText, MontserratText } from '../StyledText'
 
 // Resources
 import NotificationIcon from "@/assets/icons/notifications.svg";
+import { supabase } from '@/lib/supabase'
 
 export default function DeviceHeader() {
+    const [userName, setUserName] = useState("")
+
+    const getUser = async() => {
+        const { data: { user } } = await supabase.auth.getUser()
+        
+        if(user){
+            let { data: userData, error } = await supabase
+            .from('users')
+            .select('name, last_name')
+            .eq("id", user.id)
+
+            if (userData && userData.length > 0) {
+                Alert.alert(JSON.stringify(userData[0].name + " " +  userData[0].last_name));
+                if(userData) setUserName(userData[0].name + " " +  userData[0].last_name)
+            } 
+            
+        }
+        
+        
+         
+    }
+
   return (
     <SafeAreaView style={styles.safeAre}>
         <View style={styles.header}>
@@ -23,11 +46,11 @@ export default function DeviceHeader() {
                 
                 <View style={styles.headerTitleView}>
                     <MontserratText style={styles.headerTitleWellcomeText}>Bienvenido 👋</MontserratText>
-                    <MontserratBoldText style={styles.headerTitleNameText}>Jorge Ibarra</MontserratBoldText>
+                    <MontserratBoldText style={styles.headerTitleNameText}>{userName}</MontserratBoldText>
                 </View>
             </View>
 
-            <Button style={styles.notificationButton} alignSelf="center" size="$6" circular>
+            <Button style={styles.notificationButton} alignSelf="center" size="$6" circular onPress={getUser}>
                 <NotificationIcon />
             </Button>
         </View>

@@ -163,7 +163,7 @@ export default function Signup() {
 
                         <View style={styles.loginButtonView}>
                             <Button style={styles.loginButton} borderRadius={32} height={52}  disabled={loading} onPress={() => signUpWithEmail()}>
-                                <MontserratSemiText style={styles.loginText}>Iniciar sesión</MontserratSemiText>
+                                <MontserratSemiText style={styles.loginText}>Crear cuenta</MontserratSemiText>
                             </Button>
                         </View>
 
