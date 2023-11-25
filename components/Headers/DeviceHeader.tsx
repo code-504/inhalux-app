@@ -1,5 +1,5 @@
 import {  Alert,  View, Text, StyleSheet } from 'react-native'
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Avatar, Button, XStack } from 'tamagui'
 import Colors from '@/constants/Colors'
@@ -22,15 +22,15 @@ export default function DeviceHeader() {
             .eq("id", user.id)
 
             if (userData && userData.length > 0) {
-                Alert.alert(JSON.stringify(userData[0].name + " " +  userData[0].last_name));
                 if(userData) setUserName(userData[0].name + " " +  userData[0].last_name)
             } 
             
         }
-        
-        
-         
     }
+
+    useEffect(() => {
+        getUser()
+    }, [])
 
   return (
     <SafeAreaView style={styles.safeAre}>
