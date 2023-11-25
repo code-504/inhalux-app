@@ -12,6 +12,7 @@ import BackgroundImage from "@/assets/images/background.png"
 import Colors from '@/constants/Colors'
 import GoogleIcon from "@/assets/icons/google-icon.svg"
 import FacebookIcon from "@/assets/icons/facebook-icon.svg"
+import GoogleBtn from '@/components/GoogleBtn'
 
 export default function Login() {
 	const [email, setEmail] = useState('')
@@ -112,10 +113,11 @@ export default function Login() {
 					<Separator marginVertical={48} />
 	
 					<View style={styles.buttonThirdView}>
-						<Button style={styles.loginThirdButton} borderRadius={32} height={52}  disabled={loading} onPress={() => signInWithEmail()}>
+						{/* <Button style={styles.loginThirdButton} borderRadius={32} height={52}  disabled={loading} onPress={() => signInWithEmail()}>
 							<GoogleIcon style={styles.buttonIcon} />
 							<MontserratSemiText>Iniciar sesión con Google</MontserratSemiText>
-						</Button>
+						</Button> */}
+						<GoogleBtn />
 
 						<Button style={styles.loginThirdButton} borderRadius={32} height={52}  disabled={loading} onPress={() => signInWithEmail()}>
 							<FacebookIcon style={styles.buttonIcon} />
