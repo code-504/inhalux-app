@@ -8,29 +8,10 @@ import { MontserratBoldText, MontserratText } from '../StyledText'
 // Resources
 import NotificationIcon from "@/assets/icons/notifications.svg";
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/context/Authprovider'
 
 export default function DeviceHeader() {
-    const [userName, setUserName] = useState("")
-
-    const getUser = async() => {
-        const { data: { user } } = await supabase.auth.getUser()
-        
-        if(user){
-            let { data: userData, error } = await supabase
-            .from('users')
-            .select('name, last_name')
-            .eq("id", user.id)
-
-            if (userData && userData.length > 0) {
-                if(userData) setUserName(userData[0].name + " " +  userData[0].last_name)
-            } 
-            
-        }
-    }
-
-    useEffect(() => {
-        getUser()
-    }, [])
+    const {supaUser} = useAuth();
 
   return (
     <SafeAreaView style={styles.safeAre}>
@@ -46,11 +27,11 @@ export default function DeviceHeader() {
                 
                 <View style={styles.headerTitleView}>
                     <MontserratText style={styles.headerTitleWellcomeText}>Bienvenido 👋</MontserratText>
-                    <MontserratBoldText style={styles.headerTitleNameText}>{userName}</MontserratBoldText>
+                    <MontserratBoldText style={styles.headerTitleNameText}>{supaUser?.name || "No detecto"}</MontserratBoldText>
                 </View>
             </View>
 
-            <Button style={styles.notificationButton} alignSelf="center" size="$6" circular onPress={getUser}>
+            <Button style={styles.notificationButton} alignSelf="center" size="$6" circular >
                 <NotificationIcon />
             </Button>
         </View>

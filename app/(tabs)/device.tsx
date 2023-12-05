@@ -30,6 +30,7 @@ import TrackChangesIcon from "@/assets/icons/track_changes.svg"
 import HelpIcon from "@/assets/icons/help.svg"
 import AqIcon from "@/assets/icons/aq.svg"
 import HumIcon from "@/assets/icons/humidity_percentage.svg"
+import { useAuth } from '@/context/Authprovider';
 
 NavigationBar.setBackgroundColorAsync("white");
 NavigationBar.setButtonStyleAsync("dark");
@@ -39,11 +40,40 @@ export default function TabOneScreen() {
 	const [pagination, setPagination] = useState(0);
 	const scrollX = useRef(new Animated.Value(0)).current
 
-	const data = [
-		{ id: '1', title: 'Inhalador casa', connection: "Hace 2 días", battery: 50, dose: 20 },
-		{ id: '2', title: 'Inhalador Jorge', connection: "Hace 5 días", battery: 35, dose: 80 },
-		{ id: '3', title: 'Inhalador cajón', connection: "Hace 3 días", battery: 95, dose: 35 },
-	];
+	// const data = [
+	// 	{ id: '1', title: 'Inhalador casa', connection: "Hace 2 días", battery: 500, dose: 200 },
+	// 	{ id: '2', title: 'Inhalador Jorge', connection: "Hace 5 días", battery: 35, dose: 80 },
+	// 	{ id: '3', title: 'Inhalador cajón', connection: "Hace 3 días", battery: 95, dose: 35 },
+	// ];
+
+	let data: any[] = []
+
+	const {supaInhalers: inhalers} = useAuth();
+	//console.log(inhalers[0].id);
+
+	const calculateDaysAgo = (lastSeen: string): string => {
+		const today = new Date();
+		const lastSeenDate = new Date(lastSeen);
+		const differenceInMilliseconds = today.getTime() - lastSeenDate.getTime();
+		const differenceInDays = Math.floor(differenceInMilliseconds / (1000 * 60 * 60 * 24));
+		return `${differenceInDays} días`;
+	};
+
+	if (inhalers) {
+		const transformedData = inhalers.map((inhaler: any) => ({
+		  id: inhaler.id,
+		  title: inhaler.name,
+		  connection: `Hace ${calculateDaysAgo(inhaler.inhaler_ubication.last_seen)}`,
+		  battery: inhaler.inhaler_state.battery,
+		  dose: inhaler.inhaler_state.dosis,
+		}));
+	  
+		// Ahora 'transformedData' contiene la estructura que deseas
+	 	console.log(transformedData);
+		data = transformedData;
+	}
+
+	//console.log(pruebasData);
 
 	const { width: screenWidth } = Dimensions.get('window');
 	const SPACING = 12;
@@ -126,7 +156,7 @@ export default function TabOneScreen() {
 
 						<FlashList 
 							data={data}
-							keyExtractor={(item) => item.id}
+							keyExtractor={(item: any) => item.id}
 							horizontal
 							showsHorizontalScrollIndicator={false}
 							pagingEnabled
