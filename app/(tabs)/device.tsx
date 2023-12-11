@@ -48,7 +48,63 @@ export default function TabOneScreen() {
 
 	let data: any[] = []
 
-	const {supaInhalers: inhalers} = useAuth();
+	const {supaInhalers: inhalers, setSupaInhalers, supaUser} = useAuth();
+
+	// const searchForElement = async( payloadId: any ) => {
+	// 	let { data, error } = await supabase
+	// 	.from('inhalers')
+	// 	.select("fk_user_id")
+	// 	.eq('id', payloadId)
+	// 	console.log("data", data);
+	// 	if( data != null && data[0].fk_user_id === supaUser?.id ) setBelongsTo(true);
+	// 	else setBelongsTo(false);
+	// }
+
+	supabase.channel('room1')
+	.on('postgres_changes', { event: '*', schema: 'public', table: 'inhalers' }, payload => {
+	  
+	  console.log("payload: ", payload)
+
+	  if(payload.eventType === "UPDATE" && (payload.new.fk_user_id === supaUser?.id) ){
+		const updatedInhaler: any = inhalers?.find((inhaler: { id: string }) => inhaler.id === payload.new.id);
+		updatedInhaler.name = payload.new.name;
+		setSupaInhalers([...inhalers]);
+		console.log("supaInhalers: ", inhalers)
+	  }
+
+	  if(payload.eventType === "INSERT" && (payload.new.fk_user_id === supaUser?.id) ){
+		let inhalerObject = payload.new;
+
+		const fechaDeHoy = new Date();
+		const año = fechaDeHoy.getFullYear();
+		const mes = fechaDeHoy.getMonth() + 1;
+		const día = fechaDeHoy.getDate();
+		const fechaFormateada = `${año}-${mes < 10 ? '0' : ''}${mes}-${día < 10 ? '0' : ''}${día}T00:00:00`;
+
+		let ubicationObject = {"altitude": 0, "last_seen": fechaFormateada, "latitude": 0, "longitude": 0};
+
+		let stateObject = {"battery": 100, "dosis": 200};
+
+		inhalerObject = { ...inhalerObject, inhaler_ubication: ubicationObject, inhaler_state: stateObject }
+
+		setSupaInhalers(prevArreglo => [...prevArreglo, inhalerObject]);
+		console.log("supaInhalers: ", inhalers)
+	}
+
+	  if(payload.eventType === "DELETE" ){
+		const userExistsInInhalers = inhalers?.some(inhaler => inhaler.id === payload.old.id);
+		
+		if(userExistsInInhalers){
+			const updatedInhalers: any = inhalers?.filter((inhaler: { id: string }) => inhaler.id !== payload.old.id);
+			setSupaInhalers(updatedInhalers);
+			console.log("supaInhalers: ", inhalers)
+		}
+		
+	  }
+
+	})
+	.subscribe()
+
 	//console.log(inhalers[0].id);
 
 	const calculateDaysAgo = (lastSeen: string): string => {
@@ -56,7 +112,9 @@ export default function TabOneScreen() {
 		const lastSeenDate = new Date(lastSeen);
 		const differenceInMilliseconds = today.getTime() - lastSeenDate.getTime();
 		const differenceInDays = Math.floor(differenceInMilliseconds / (1000 * 60 * 60 * 24));
-		return `${differenceInDays} días`;
+
+		if(differenceInDays === -1) return "un momento"; 
+		else return `${differenceInDays} días`;
 	};
 
 	if (inhalers) {
@@ -69,7 +127,7 @@ export default function TabOneScreen() {
 		}));
 	  
 		// Ahora 'transformedData' contiene la estructura que deseas
-	 	console.log(transformedData);
+	 	console.log("transformed data",transformedData);
 		data = transformedData;
 	}
 
@@ -151,7 +209,13 @@ export default function TabOneScreen() {
 						action={doLogout}
 					/>
 				</View>
-					
+					{/* Inicio */}
+					{ inhalers == null 
+					? 
+						<View style={styles.noInhalersView}>
+							<MontserratText style={styles.timeText}>No tienes Inhaladores!</MontserratText>
+						</View>
+					: 
 					<View style={styles.carouselView}>
 
 						<FlashList 
@@ -163,7 +227,7 @@ export default function TabOneScreen() {
 							decelerationRate={0}
 							snapToInterval={ITEM_WIDTH}
 							snapToAlignment={"center"}
-        					scrollEventThrottle={16}
+							scrollEventThrottle={16}
 							estimatedItemSize={ITEM_WIDTH}
 							onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } }}], {
 								useNativeDriver: false
@@ -191,11 +255,14 @@ export default function TabOneScreen() {
 										marginHorizontal: 5
 									}}
 									inActiveDotColor={Colors.dotsGray}
-            						activeDotColor={Colors.tint}
+									activeDotColor={Colors.tint}
 									containerStyle={styles.dotsView}
 								/>
 						</View>
 					</View>
+				}
+					
+				{/* Final */}
 				<View style={styles.content}>
 					<View style={styles.timeView}>
 						<View style={styles.timeTitleView}>
@@ -242,6 +309,15 @@ const styles = StyleSheet.create({
 		marginBottom: 12,
         paddingHorizontal: 24,
     },
+	noInhalersView: {
+		width: "100%",
+		minHeight: 25,
+		backgroundColor: "#FFF",
+		textAlign: "center",
+		paddingVertical: 40,
+		paddingHorizontal: 60,
+		borderRadius: 10
+	},
 	carouselView: {
 		width: "100%",
 	},

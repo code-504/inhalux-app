@@ -27,7 +27,7 @@ export default function DeviceHeader() {
                 
                 <View style={styles.headerTitleView}>
                     <MontserratText style={styles.headerTitleWellcomeText}>Bienvenido 👋</MontserratText>
-                    <MontserratBoldText style={styles.headerTitleNameText}>{supaUser?.name || "No detecto"}</MontserratBoldText>
+                    <MontserratBoldText style={styles.headerTitleNameText}>{supaUser?.name || "Conectando..."}</MontserratBoldText>
                 </View>
             </View>
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import { useContext, useEffect, useState, createContext } from 'react';
 import { Session } from '@supabase/supabase-js'
 import { useRouter, useSegments, useRootNavigationState } from 'expo-router';
@@ -19,7 +19,8 @@ export interface AuthContextType {
   authInitialized: boolean;
   isLoading: boolean;
   supaUser: InitializedUser | null | undefined;
-  supaInhalers: any | null;
+  supaInhalers: any[] | null;
+  setSupaInhalers: Dispatch<SetStateAction<any[] | null>>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
@@ -119,10 +120,11 @@ export function AuthProvider({ children }: Props) {
                 name,
                 inhaler_state ( dosis, battery ),
                 inhaler_ubication ( latitude, longitude, altitude, last_seen )
-                `).eq('fk_user_id', user.id)    
-  
+                `).eq('fk_user_id', user.id)
+              
         setSupaInhalers(inhalersData);
-        console.log("inhalers: ", inhalersData)
+        console.log("inhalers: ", supaInhalers)
+  
     };
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
@@ -145,7 +147,7 @@ export function AuthProvider({ children }: Props) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ session, authInitialized, isLoading, supaUser, supaInhalers }}>
+    <AuthContext.Provider value={{ session, authInitialized, isLoading, supaUser, supaInhalers, setSupaInhalers }}>
       {children}
     </AuthContext.Provider>
   );
