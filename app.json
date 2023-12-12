@@ -17,7 +17,10 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.inhalabs.inhalux"
+      "bundleIdentifier": "com.inhalabs.inhalux",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Necesitamos acceder a tu ubicación para mostrar el mapa."
+      }
     },
     "androidStatusBar": {
       "backgroundColor": "#F6F7FB",
@@ -27,6 +30,7 @@
       "backgroundColor": "#ffffff"
     },
     "android": {
+      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"],
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"

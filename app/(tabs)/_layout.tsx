@@ -62,6 +62,7 @@ export default function TabLayout() {
                 <Tabs.Screen
                     name="location"
                     options={{
+                        header: () => null,
                         tabBarIcon: ({ color }) => <LocationIcon name="code" color={color} />,
                     }}
                 />
