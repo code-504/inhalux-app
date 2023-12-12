@@ -117,7 +117,7 @@ export default function Login() {
 							<GoogleIcon style={styles.buttonIcon} />
 							<MontserratSemiText>Iniciar sesión con Google</MontserratSemiText>
 						</Button> */}
-						<GoogleBtn />
+						{ /*<GoogleBtn /> */}
 
 						<Button style={styles.loginThirdButton} borderRadius={32} height={52}  disabled={loading} onPress={() => signInWithEmail()}>
 							<FacebookIcon style={styles.buttonIcon} />
