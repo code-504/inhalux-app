@@ -7,7 +7,7 @@ import { MontserratBoldText, MontserratText } from '../StyledText'
 
 // Resources
 import NotificationIcon from "@/assets/icons/notifications.svg";
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/services/supabase'
 import { useAuth } from '@/context/Authprovider'
 
 export default function DeviceHeader() {

@@ -2,7 +2,7 @@ import React, { Dispatch, SetStateAction } from 'react';
 import { useContext, useEffect, useState, createContext } from 'react';
 import { Session } from '@supabase/supabase-js'
 import { useRouter, useSegments, useRootNavigationState } from 'expo-router';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/services/supabase';
 import { Alert } from 'react-native';
 
 interface Props {

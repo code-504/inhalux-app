@@ -11,7 +11,7 @@ import SimpleWeatherCard from '@/components/Card/SimpleWeatherCard'
 import { StatusBar } from 'expo-status-bar';
 import * as NavigationBar from 'expo-navigation-bar';
 import {ExpandingDot} from "react-native-animated-pagination-dots";
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/services/supabase'
 import HeaderAction from '@/components/HeaderAction'
 
 // Recursos
@@ -31,105 +31,30 @@ import HelpIcon from "@/assets/icons/help.svg"
 import AqIcon from "@/assets/icons/aq.svg"
 import HumIcon from "@/assets/icons/humidity_percentage.svg"
 import { useAuth } from '@/context/Authprovider';
+import { getInhalers } from '@/services/api/device';
 
 NavigationBar.setBackgroundColorAsync("white");
 NavigationBar.setButtonStyleAsync("dark");
 
 export default function TabOneScreen() {
 
-	const [pagination, setPagination] = useState(0);
 	const scrollX = useRef(new Animated.Value(0)).current
+	const [ data, setData ] = useState<any[]>([]);
 
-	// const data = [
-	// 	{ id: '1', title: 'Inhalador casa', connection: "Hace 2 días", battery: 500, dose: 200 },
-	// 	{ id: '2', title: 'Inhalador Jorge', connection: "Hace 5 días", battery: 35, dose: 80 },
-	// 	{ id: '3', title: 'Inhalador cajón', connection: "Hace 3 días", battery: 95, dose: 35 },
-	// ];
+	const { session } = useAuth();
 
-	let data: any[] = []
-
-	const {supaInhalers: inhalers, setSupaInhalers, supaUser} = useAuth();
-
-	// const searchForElement = async( payloadId: any ) => {
-	// 	let { data, error } = await supabase
-	// 	.from('inhalers')
-	// 	.select("fk_user_id")
-	// 	.eq('id', payloadId)
-	// 	console.log("data", data);
-	// 	if( data != null && data[0].fk_user_id === supaUser?.id ) setBelongsTo(true);
-	// 	else setBelongsTo(false);
-	// }
-
-	supabase.channel('room1')
-	.on('postgres_changes', { event: '*', schema: 'public', table: 'inhalers' }, payload => {
-	  
-	  console.log("payload: ", payload)
-
-	  if(payload.eventType === "UPDATE" && (payload.new.fk_user_id === supaUser?.id) ){
-		const updatedInhaler: any = inhalers?.find((inhaler: { id: string }) => inhaler.id === payload.new.id);
-		updatedInhaler.name = payload.new.name;
-		setSupaInhalers([...inhalers]);
-		console.log("supaInhalers: ", inhalers)
-	  }
-
-	  if(payload.eventType === "INSERT" && (payload.new.fk_user_id === supaUser?.id) ){
-		let inhalerObject = payload.new;
-
-		const fechaDeHoy = new Date();
-		const año = fechaDeHoy.getFullYear();
-		const mes = fechaDeHoy.getMonth() + 1;
-		const día = fechaDeHoy.getDate();
-		const fechaFormateada = `${año}-${mes < 10 ? '0' : ''}${mes}-${día < 10 ? '0' : ''}${día}T00:00:00`;
-
-		let ubicationObject = {"altitude": 0, "last_seen": fechaFormateada, "latitude": 0, "longitude": 0};
-
-		let stateObject = {"battery": 100, "dosis": 200};
-
-		inhalerObject = { ...inhalerObject, inhaler_ubication: ubicationObject, inhaler_state: stateObject }
-
-		setSupaInhalers(prevArreglo => [...prevArreglo, inhalerObject]);
-		console.log("supaInhalers: ", inhalers)
+	const inhalerlist = async () => {
+		const inhalers = await getInhalers(session?.user.id);
+		
+		if (inhalers)
+			setData(inhalers)
+		else
+			setData([])
 	}
 
-	  if(payload.eventType === "DELETE" ){
-		const userExistsInInhalers = inhalers?.some(inhaler => inhaler.id === payload.old.id);
-		
-		if(userExistsInInhalers){
-			const updatedInhalers: any = inhalers?.filter((inhaler: { id: string }) => inhaler.id !== payload.old.id);
-			setSupaInhalers(updatedInhalers);
-			console.log("supaInhalers: ", inhalers)
-		}
-		
-	  }
-
-	})
-	.subscribe()
-
-	//console.log(inhalers[0].id);
-
-	const calculateDaysAgo = (lastSeen: string): string => {
-		const today = new Date();
-		const lastSeenDate = new Date(lastSeen);
-		const differenceInMilliseconds = today.getTime() - lastSeenDate.getTime();
-		const differenceInDays = Math.floor(differenceInMilliseconds / (1000 * 60 * 60 * 24));
-
-		if(differenceInDays === -1) return "un momento"; 
-		else return `${differenceInDays} días`;
-	};
-
-	if (inhalers) {
-		const transformedData = inhalers.map((inhaler: any) => ({
-		  id: inhaler.id,
-		  title: inhaler.name,
-		  connection: `Hace ${calculateDaysAgo(inhaler.inhaler_ubication.last_seen)}`,
-		  battery: inhaler.inhaler_state.battery,
-		  dose: inhaler.inhaler_state.dosis,
-		}));
-	  
-		// Ahora 'transformedData' contiene la estructura que deseas
-	 	console.log("transformed data",transformedData);
-		data = transformedData;
-	}
+	useEffect(() => {
+		inhalerlist()
+	}, [])
 
 	//console.log(pruebasData);
 
@@ -200,7 +125,7 @@ export default function TabOneScreen() {
 		<>
 		<View style={styles.safeAre}>
 			<ImageBackground source={BackgroundImage} style={styles.imageBackground}>
-			<ScrollView>
+			<ScrollView style={styles.scrollView}>
 				<View style={styles.content}>
 					<HeaderAction 
 						title="Dispositivos"
@@ -210,57 +135,56 @@ export default function TabOneScreen() {
 					/>
 				</View>
 					{/* Inicio */}
-					{ inhalers == null 
-					? 
-						<View style={styles.noInhalersView}>
-							<MontserratText style={styles.timeText}>No tienes Inhaladores!</MontserratText>
-						</View>
-					: 
-					<View style={styles.carouselView}>
 
-						<FlashList 
-							data={data}
-							keyExtractor={(item: any) => item.id}
-							horizontal
-							showsHorizontalScrollIndicator={false}
-							pagingEnabled
-							decelerationRate={0}
-							snapToInterval={ITEM_WIDTH}
-							snapToAlignment={"center"}
-							scrollEventThrottle={16}
-							estimatedItemSize={ITEM_WIDTH}
-							onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } }}], {
-								useNativeDriver: false
-							})}
-							renderItem={({ item, index }) => {
-								return (
-									<View style={{ width: ITEM_WIDTH, marginTop: 20 }}>
-										<View style={ index === 0 ? { marginLeft: SPACING * 2 } : index === data.length - 1 ? { marginRight: SPACING * 2 } : { marginHorizontal: SPACING }}>
-											<RenderItem item={ item } />
-										</View>
-									</View>
-								);
-							}}
-						/>
-						<View style={styles.dotContainer}>
-							<ExpandingDot
+					{
+						data && data.length > 0 &&
+							<>
+							<View style={styles.carouselView}>
+
+								<FlashList 
 									data={data}
-									expandingDotWidth={30}
-									scrollX={scrollX}
-									inActiveDotOpacity={0.6}
-									dotStyle={{
-										width: 10,
-										height: 10,
-										borderRadius: 5,
-										marginHorizontal: 5
+									keyExtractor={(item: any) => item.id}
+									horizontal
+									showsHorizontalScrollIndicator={false}
+									pagingEnabled
+									decelerationRate={0}
+									snapToInterval={ITEM_WIDTH}
+									snapToAlignment={"center"}
+									scrollEventThrottle={16}
+									estimatedItemSize={ITEM_WIDTH}
+									onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } }}], {
+										useNativeDriver: false
+									})}
+									renderItem={({ item, index }) => {
+										return (
+											<View style={{ width: ITEM_WIDTH, marginTop: 20 }}>
+												<View style={ index === 0 ? { marginLeft: SPACING * 2 } : index === data.length - 1 ? { marginRight: SPACING * 2 } : { marginHorizontal: SPACING }}>
+													<RenderItem item={ item } />
+												</View>
+											</View>
+										);
 									}}
-									inActiveDotColor={Colors.dotsGray}
-									activeDotColor={Colors.tint}
-									containerStyle={styles.dotsView}
 								/>
-						</View>
-					</View>
-				}
+								<View style={styles.dotContainer}>
+									<ExpandingDot
+											data={data}
+											expandingDotWidth={30}
+											scrollX={scrollX}
+											inActiveDotOpacity={0.6}
+											dotStyle={{
+												width: 10,
+												height: 10,
+												borderRadius: 5,
+												marginHorizontal: 5
+											}}
+											inActiveDotColor={Colors.dotsGray}
+											activeDotColor={Colors.tint}
+											containerStyle={styles.dotsView}
+										/>
+								</View>
+							</View>
+							</>
+				}	
 					
 				{/* Final */}
 				<View style={styles.content}>
@@ -294,6 +218,7 @@ export default function TabOneScreen() {
 const styles = StyleSheet.create({
     safeAre: {
         flex: 1,
+		width: "100%",
         backgroundColor: Colors.lightGrey,
     },
 	imageBackground: {
@@ -301,6 +226,9 @@ const styles = StyleSheet.create({
 		resizeMode: 'cover',
 		justifyContent: 'center',
     	alignItems: 'center'
+	},
+	scrollView: {
+		width: "100%"
 	},
     content: {
         display: 'flex',

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Alert, ImageBackground, StyleSheet, View } from 'react-native'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/services/supabase'
 import { Button, Input, Label, ScrollView, Separator } from 'tamagui'
 import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/components/StyledText'
 import { Link, Redirect, Stack, useRouter } from 'expo-router'

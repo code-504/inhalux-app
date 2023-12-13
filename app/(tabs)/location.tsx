@@ -6,7 +6,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet, Dimensions, Platform, PermissionsAndroid } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import {
   useSharedValue,
@@ -27,17 +27,21 @@ import BottomSheetView from '@/components/BottomSheetView';
 import * as NavigationBar from 'expo-navigation-bar';
 
 import * as Location from 'expo-location';
-import { MontserratSemiText, MontserratText } from '@/components/StyledText';
+import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/components/StyledText';
 import axios from 'axios';
 import { StatusBar } from 'expo-status-bar';
 import BlurredBackground from '@/components/blurredBackground/BlurredBackground';
 import HeaderAction from '@/components/HeaderAction';
-import { Avatar } from 'tamagui';
+import { Avatar, Button } from 'tamagui';
+import Colors from '@/constants/Colors';
 
 // Resources
 import AddIcon from "@/assets/icons/add.svg"
 import inhalerList from "@/assets/images/inhaler-list.png"
-import Colors from '@/constants/Colors';
+import StoreIcon from "@/assets/icons/store.svg"
+import LocationUnknowIcon from "@/assets/icons/location_searching.svg"
+import LocationCurrentIcon from "@/assets/icons/my_location.svg"
+import LocationDisabledIcon from "@/assets/icons/location_disabled.svg"
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 NavigationBar.setBackgroundColorAsync("white");
@@ -50,6 +54,8 @@ const TabTwoScreen = () => {
 
   const [location, setLocation] = useState(null);
   const [pharmacies, setPharmacies] = useState([]);
+  const [buttonState, setButtonState] = useState<number>(0);
+  const buttonStateRef = useRef<number>(0);
 
   const data:any[] = [
     {
@@ -74,14 +80,24 @@ const TabTwoScreen = () => {
 
   useEffect(() => {
     (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
+      /*let { status } = await Location.requestForegroundPermissionsAsync();
+
       if (status !== 'granted') {
         console.error('Permiso de ubicación denegado');
         return;
-      }
+      }*/
 
-      let location = await Location.getCurrentPositionAsync({});
-      setLocation(location.coords);
+      const granted = await Location.hasServicesEnabledAsync();
+
+      if (granted) {
+        let location = await Location.getCurrentPositionAsync({});
+        setLocation(location.coords);
+        buttonStateRef.current = 1;
+      } else {
+        let location = await Location.getLastKnownPositionAsync({});
+        setLocation(location?.coords);
+        buttonStateRef.current = 0;
+      }
     })();
   }, []);
 
@@ -91,10 +107,11 @@ const TabTwoScreen = () => {
       const response = await axios.get(
         `https://maps.googleapis.com/maps/api/place/nearbysearch/json?` +
           `location=${location.latitude},${location.longitude}` +
-          `&radius=1000&type=pharmacy&key=AIzaSyBYg_fWh5VFkhwufRkTJEjucgwGMQLJRs4`
+          `&radius=1000&type=pharmacy&key=process.env.EXPO_PUBLIC_GOOGLE_MAPS_KEY`
       );
 
       if (response.data && response.data.results) {
+        console.log(response.data)
         setPharmacies(response.data.results);
       }
     } catch (error) {
@@ -102,13 +119,45 @@ const TabTwoScreen = () => {
     }
   };
 
+  /*const getNearbyPharmacies = async () => {
+    try {
+      const response = await axios.get(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/pharmacy.json?access_token=${process.env.EXPO_PUBLIC_MAPBOX_KEY}` +
+          `&proximity=${location.longitude},${location.latitude}`
+      );
+
+      if (response.data && response.data.features) {
+        const pharmaciesData = response.data.features.map((feature) => {
+          return {
+            name: feature.text,
+            location: {
+              latitude: feature.center[1],
+              longitude: feature.center[0],
+            },
+          };
+        });
+        setPharmacies(pharmaciesData);
+      }
+    } catch (error) {
+      console.error('Error al obtener farmacias:', error);
+    }
+  };*/
+
   const handleGetLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
+
     if (status !== 'granted') {
       console.error('Permiso de ubicación denegado');
       return;
     }
-  
+
+    const granted = await Location.hasServicesEnabledAsync();
+
+    if (granted) {
+      if (buttonStateRef.current === 0 || buttonStateRef.current === 1)
+      buttonStateRef.current = 2
+    }
+
     let location = await Location.getCurrentPositionAsync({});
     setLocation(location.coords);
   
@@ -120,6 +169,46 @@ const TabTwoScreen = () => {
       longitudeDelta: 0.02, // Ajusta según tus necesidades
     });
   };
+
+  /*  useEffect(() => {
+    console.log(permissionStatus)
+    if (!permissionStatus)
+      setIsLocated(0);
+
+  }, [permissionStatus])*/
+
+  const checkLocationPermission = async () => {
+    console.log("activado")
+    try {
+      if (Platform.OS === 'android') {
+        const granted = await Location.hasServicesEnabledAsync();
+        console.log( buttonStateRef.current)
+        if (!granted) {
+          buttonStateRef.current = 0;
+        } else {
+          if (buttonStateRef.current === 0)
+            buttonStateRef.current = 1;
+        }
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  };
+
+  useEffect(() => {
+    // Establece un temporizador para realizar la verificación cada 10 segundos (ajusta según tus necesidades)
+    const intervalId = setInterval(checkLocationPermission, 10000);
+
+    // Limpia el temporizador al desmontar el componente
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, []);
+
+  useEffect(() => {
+    console.log(buttonStateRef.current)
+    setButtonState(buttonStateRef.current)
+  }, [buttonStateRef.current])
 
   // hooks
   //const headerHeight = useHeaderHeight();
@@ -149,8 +238,15 @@ const TabTwoScreen = () => {
   //#endregion
 
   //#region callbacks
-  const handleTouchStart = useCallback(() => {
+  const handleTouchStart = useCallback(async () => {
     poiListModalRef.current?.collapse();
+
+    const granted = await Location.hasServicesEnabledAsync();
+
+    if (granted) {
+      if (buttonState === 2)
+        setButtonState(1)
+    }
   }, []);
   //#endregion
 
@@ -222,13 +318,14 @@ const TabTwoScreen = () => {
         animatedPosition={weatherAnimatedPosition}
       >
         <View style={styles.buttonView}>
-          <TouchableOpacity style={styles.locationButton} onPress={handleGetLocation}>
-            <MontserratText style={styles.locationButtonText}>Mi Ubicación</MontserratText>
-          </TouchableOpacity>
+          <Button style={styles.ubicationButton} onPress={handleGetLocation} alignSelf="center" size="$6" circular>
+            { buttonState === 0 ? <LocationDisabledIcon /> : buttonState === 1 ? <LocationUnknowIcon /> : buttonState === 2 && <LocationCurrentIcon /> }
+          </Button>
 
-          <TouchableOpacity style={styles.locationButton} onPress={getNearbyPharmacies}>
-            <MontserratText style={styles.locationButtonText}>tiendas</MontserratText>
-          </TouchableOpacity>
+          <Button style={styles.storeButton} onPress={getNearbyPharmacies} size="$6" borderRadius={1000}>
+            <StoreIcon />
+            <MontserratBoldText>Buscar tiendas</MontserratBoldText>
+          </Button>
         </View>
       </BottomSheetView>
       
@@ -286,12 +383,22 @@ const styles = StyleSheet.create({
   buttonView: {
     display: "flex",
     flexDirection: "column",
-    gap: 4
+    justifyContent: 'flex-end',
+    gap: 16,
+
   },
   locationButton: {
     backgroundColor: 'blue',
     padding: 10,
     borderRadius: 5,
+  },
+  ubicationButton: {
+    alignSelf: 'flex-end',
+    backgroundColor: Colors.white
+  },
+  storeButton: {
+    alignSelf: 'flex-end',
+    backgroundColor: Colors.white
   },
   locationButtonText: {
     color: 'white',
