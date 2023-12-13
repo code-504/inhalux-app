@@ -32,6 +32,7 @@ import AqIcon from "@/assets/icons/aq.svg"
 import HumIcon from "@/assets/icons/humidity_percentage.svg"
 import { useAuth } from '@/context/Authprovider';
 import { getInhalers } from '@/services/api/device';
+import { RefreshControl } from 'react-native-gesture-handler';
 
 NavigationBar.setBackgroundColorAsync("white");
 NavigationBar.setButtonStyleAsync("dark");
@@ -39,6 +40,7 @@ NavigationBar.setButtonStyleAsync("dark");
 export default function TabOneScreen() {
 
 	const scrollX = useRef(new Animated.Value(0)).current
+	const [ refresh, setRefresh ] = useState<boolean>(false);
 	const [ data, setData ] = useState<any[]>([]);
 
 	const { session } = useAuth();
@@ -67,6 +69,16 @@ export default function TabOneScreen() {
 
 		if (error)
 			Alert.alert("Error", error.message)
+	}
+
+	const pullRequest = () => {
+		setRefresh(true);
+
+		const interval = setTimeout(() => {
+			setRefresh(false)
+		}, 400)
+
+		return () => clearInterval(interval);
 	}
 
 	const RenderItem = ({ item }: any) => (
@@ -125,7 +137,11 @@ export default function TabOneScreen() {
 		<>
 		<View style={styles.safeAre}>
 			<ImageBackground source={BackgroundImage} style={styles.imageBackground}>
-			<ScrollView style={styles.scrollView}>
+			<ScrollView style={styles.scrollView}
+				refreshControl={
+					<RefreshControl refreshing={refresh} onRefresh={pullRequest}></RefreshControl>
+				}
+			>
 				<View style={styles.content}>
 					<HeaderAction 
 						title="Dispositivos"
