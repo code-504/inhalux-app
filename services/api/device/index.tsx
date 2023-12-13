@@ -22,7 +22,8 @@ export const getInhalers = async (user_id:string | undefined): Promise<any[]> =>
             id: index,
             title: item.name,
             connection: calculateDaysAgo(item.inhaler_ubication.last_seen),
-            battery: item.inhaler_state.battery
+            battery: item.inhaler_state.battery,
+            dose: item.inhaler_state.dosis
         }));
 
         return transformedData;

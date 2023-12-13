@@ -43,7 +43,7 @@ export default function TabOneScreen() {
 	const [ refresh, setRefresh ] = useState<boolean>(false);
 	const [ data, setData ] = useState<any[]>([]);
 
-	const { session } = useAuth();
+	const { session, } = useAuth();
 
 	const inhalerlist = async () => {
 		const inhalers = await getInhalers(session?.user.id);
@@ -71,14 +71,14 @@ export default function TabOneScreen() {
 			Alert.alert("Error", error.message)
 	}
 
-	const pullRequest = () => {
+	const pullRequest = async () => {
 		setRefresh(true);
 
-		const interval = setTimeout(() => {
-			setRefresh(false)
-		}, 400)
+		await inhalerlist();
 
-		return () => clearInterval(interval);
+		setRefresh(false)
+
+		//return () => clearInterval(interval);
 	}
 
 	const RenderItem = ({ item }: any) => (
