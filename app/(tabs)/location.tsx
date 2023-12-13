@@ -21,14 +21,27 @@ import {
   TouchableOpacity,
   BottomSheetBackdropProps,
   BottomSheetModalProvider,
+  BottomSheetFlatList,
 } from '@gorhom/bottom-sheet';
 import BottomSheetView from '@/components/BottomSheetView';
+import * as NavigationBar from 'expo-navigation-bar';
 
 import * as Location from 'expo-location';
-import { MontserratText } from '@/components/StyledText';
+import { MontserratSemiText, MontserratText } from '@/components/StyledText';
 import axios from 'axios';
+import { StatusBar } from 'expo-status-bar';
+import BlurredBackground from '@/components/blurredBackground/BlurredBackground';
+import HeaderAction from '@/components/HeaderAction';
+import { Avatar } from 'tamagui';
+
+// Resources
+import AddIcon from "@/assets/icons/add.svg"
+import inhalerList from "@/assets/images/inhaler-list.png"
+import Colors from '@/constants/Colors';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+NavigationBar.setBackgroundColorAsync("white");
+NavigationBar.setButtonStyleAsync("dark");
 
 const TabTwoScreen = () => {
   // refs
@@ -37,6 +50,27 @@ const TabTwoScreen = () => {
 
   const [location, setLocation] = useState(null);
   const [pharmacies, setPharmacies] = useState([]);
+
+  const data:any[] = [
+    {
+      id: 1,
+      title: "Inhalador casa",
+      where: "casa",
+      when: "Hace tres minutos"
+    },
+    {
+      id: 2,
+      title: "Inhalador casa",
+      where: "casa",
+      when: "Hace tres minutos"
+    },
+    {
+      id: 3,
+      title: "Inhalador casa",
+      where: "casa",
+      when: "Hace tres minutos"
+    }
+  ]
 
   useEffect(() => {
     (async () => {
@@ -94,9 +128,9 @@ const TabTwoScreen = () => {
   //#region variables
   const poiListSnapPoints = useMemo(
     () => [
-      "20%",
-      "35%",
-      '100%',
+      "14%",
+      "40%",
+      '90%',
     ],
     [bottomSafeArea]
   );
@@ -126,7 +160,35 @@ const TabTwoScreen = () => {
   }, []);
   //#endregion
 
+  const renderItem = useCallback(
+    ({ item }: any) => (
+      <View style={stylesItem.container}>
+        <View style={stylesItem.infoView}>
+          <Avatar size="$6" circular>
+              <Avatar.Image
+                  accessibilityLabel="Inhaler"
+                  src={inhalerList}
+              />
+              <Avatar.Fallback backgroundColor="white" />
+          </Avatar>
+  
+          <View style={stylesItem.textView}>
+              <MontserratSemiText style={stylesItem.textTitle}>{ item.title }</MontserratSemiText>
+
+              <View style={stylesItem.textDescription}>
+                  <MontserratText>{ item.where }</MontserratText>
+                  <View style={stylesItem.dot}></View>
+                  <MontserratText>{ item.when }</MontserratText>
+              </View>
+          </View>
+        </View>
+      </View>
+    ),
+    []
+);
+
   return (
+    <>
     <BottomSheetModalProvider>
     <View style={styles.container}>
       <MapView
@@ -137,7 +199,6 @@ const TabTwoScreen = () => {
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
         }}
-        zoomEnabled={false}
         style={styles.mapContainer}
         onTouchStart={handleTouchStart}
         showsUserLocation={true}
@@ -181,11 +242,30 @@ const TabTwoScreen = () => {
         enablePanDownToClose={false}
         animatedPosition={animatedPOIListPosition}
         animatedIndex={animatedPOIListIndex}
+        backdropComponent={BlurredBackground}
       >
-        <View><MontserratText>Hola</MontserratText></View>
+        <View style={styles.bottomSheetContainer}>
+          <View style={styles.headerContent}>
+            <HeaderAction 
+              title="Ubicación"
+              subtitle="Encuentra tu inhaLux facilmente"
+              Icon={AddIcon}
+              action={() => null}
+            />
+          </View>
+            <BottomSheetFlatList
+            data={data}
+            keyExtractor={(i) => i}
+            renderItem={renderItem}
+            contentContainerStyle={styles.contentContainer}
+          />
+        </View>
       </BottomSheetModal>
     </View>
     </BottomSheetModalProvider>
+
+    <StatusBar style="auto" backgroundColor="transparent" />
+    </>
   );
 };
 
@@ -216,7 +296,54 @@ const styles = StyleSheet.create({
   locationButtonText: {
     color: 'white',
   },
+  bottomSheetContainer: {
+    flex: 1,
+  },
+  headerContent: {
+    paddingHorizontal: 24
+  },
+  contentContainer: {
+    marginTop: 4
+  }
 });
+
+const stylesItem = StyleSheet.create({
+  container: {
+      display: "flex",
+      flexDirection: "row",
+      width: "100%",
+      paddingVertical: 18,
+      paddingHorizontal: 24,
+      borderBottomWidth: 1,
+      borderBottomColor: Colors.bottomBarGray
+  },
+  infoView: {
+      display: "flex",
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 16
+  },
+  textView: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 2
+  },
+  textTitle: {
+    fontSize: 16
+  },
+  textDescription: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4
+  },
+  dot: {
+    width: 4,
+    height: 4,
+    borderRadius: 1000,
+    backgroundColor: Colors.dotsGray
+  }
+})
 
 //export default withModalProvider(TabTwoScreen);
 export default TabTwoScreen;

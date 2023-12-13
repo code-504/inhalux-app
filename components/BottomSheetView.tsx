@@ -10,6 +10,8 @@ import { MontserratSemiText } from './StyledText';
 //import { SEARCH_HANDLE_HEIGHT } from '@gorhom/bottom-sheet-example-app';
 //import { LOCATION_DETAILS_HEIGHT } from '../locationDetails';
 
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+
 interface BottomSheetViewPorps {
   animatedPosition: Animated.SharedValue<number>;
   animatedIndex: Animated.SharedValue<number>;
@@ -23,7 +25,8 @@ const BottomSheetView = ({ animatedIndex, animatedPosition, children }: BottomSh
   // styles
   const lockedYPosition = useMemo(
     () =>
-    bottomSafeArea,
+    SCREEN_HEIGHT -
+    bottomSafeArea - 330,
     [bottomSafeArea]
   );
   const containerAnimatedStyle = useAnimatedStyle(
