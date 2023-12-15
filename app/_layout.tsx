@@ -18,6 +18,9 @@ import { TamaguiProvider } from 'tamagui'
 import appConfig from "@/tamagui.config"
 import SimpleHeader from '@/components/Headers/SimpleHeader';
 import { MonitorProvider } from '@/context/MonitorProvider';
+import { InhalerProvider } from '@/context/InhalerProvider';
+import { TreatmentProvider } from '@/context/TreatmentProvider';
+import { RelationProvider } from '@/context/RelationsProvider';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -57,7 +60,13 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-        <RootLayoutNav />
+      <InhalerProvider>
+        <TreatmentProvider>
+          <RelationProvider>
+            <RootLayoutNav />
+          </RelationProvider>
+        </TreatmentProvider>
+      </InhalerProvider>
     </AuthProvider>
   );
 }

@@ -4,38 +4,37 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { Avatar, Button, XStack } from 'tamagui'
 import Colors from '@/constants/Colors'
 import { MontserratBoldText, MontserratText } from '../StyledText'
-import { useMonitor } from '@/context/MonitorProvider'
 
 // Resources
 import MoreIcon from "@/assets/icons/more_vert.svg";
+import { useAuth } from '@/context/Authprovider'
 
 export default function MonitorHeader() {
+    const {supaUser} = useAuth();
 
-    const { optionsOpen, setOptionsOpen } = useMonitor()
+  return (
+    <SafeAreaView style={styles.safeAre}>
+        <View style={styles.header}>
+            <View style={styles.containerView}>
+                <Avatar size="$6" circular>
+                    <Avatar.Image
+                        accessibilityLabel="Cam"
+                        src="https://images.unsplash.com/photo-1548142813-c348350df52b?&w=150&h=150&dpr=2&q=80"
+                    />
+                    <Avatar.Fallback backgroundColor="$blue10" />
+                </Avatar>
 
-    return (
-        <SafeAreaView style={styles.safeAre}>
-            <View style={styles.header}>
-                <View style={styles.containerView}>
-                    <Avatar size="$6" circular>
-                        <Avatar.Image
-                            accessibilityLabel="Cam"
-                            src="https://images.unsplash.com/photo-1548142813-c348350df52b?&w=150&h=150&dpr=2&q=80"
-                        />
-                        <Avatar.Fallback backgroundColor="$blue10" />
-                    </Avatar>
-
-                    <View style={styles.headerTitleView}>
-                        <MontserratText style={styles.headerTitleWellcomeText}>Bienvenido 👋</MontserratText>
-                        <MontserratBoldText style={styles.headerTitleNameText}>Jorge Ibarra</MontserratBoldText>
-                    </View>
+                <View style={styles.headerTitleView}>
+                <MontserratText style={styles.headerTitleWellcomeText}>Bienvenido 👋</MontserratText>
+                    <MontserratBoldText style={styles.headerTitleNameText}>{supaUser?.name || "Conectando..."}</MontserratBoldText>
                 </View>
-
-                <Button style={styles.notificationButton} alignSelf="center" size="$6" circular onPress={() => setOptionsOpen(true)}>
-                    <MoreIcon />
-                </Button>
             </View>
-        </SafeAreaView>
+
+            <Button style={styles.notificationButton} alignSelf="center" size="$6" circular>
+                <MoreIcon />
+            </Button>
+        </View>
+    </SafeAreaView>
   )
 }
 
