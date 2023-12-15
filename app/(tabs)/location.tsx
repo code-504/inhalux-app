@@ -6,7 +6,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { View, StyleSheet, Dimensions, Platform, PermissionsAndroid } from 'react-native';
+import { View, StyleSheet, Dimensions, Platform, PermissionsAndroid, BackHandler } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import {
   useSharedValue,
@@ -34,6 +34,7 @@ import BlurredBackground from '@/components/blurredBackground/BlurredBackground'
 import HeaderAction from '@/components/HeaderAction';
 import { Avatar, Button } from 'tamagui';
 import Colors from '@/constants/Colors';
+import Ripple from 'react-native-material-ripple';
 
 // Resources
 import AddIcon from "@/assets/icons/add.svg"
@@ -42,6 +43,9 @@ import StoreIcon from "@/assets/icons/store.svg"
 import LocationUnknowIcon from "@/assets/icons/location_searching.svg"
 import LocationCurrentIcon from "@/assets/icons/my_location.svg"
 import LocationDisabledIcon from "@/assets/icons/location_disabled.svg"
+import { FlashList } from '@shopify/flash-list';
+import BlurredStoresBackground from '@/components/blurredBackground/BlurredStoresBackground';
+import { useFocusEffect, useNavigation } from 'expo-router';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 NavigationBar.setBackgroundColorAsync("white");
@@ -51,11 +55,18 @@ const TabTwoScreen = () => {
   // refs
   const mapRef = useRef<MapView>(null);
   const poiListModalRef = useRef<BottomSheetModal>(null);
+  const storesModalRef  = useRef<BottomSheetModal>(null);
+  const locateModalRef  = useRef<BottomSheetModal>(null);
+  const buttonStateRef = useRef<number>(0);
+
+  const navigator = useNavigation()
 
   const [location, setLocation] = useState(null);
   const [pharmacies, setPharmacies] = useState([]);
+  const [bottoSheetView, setBottomSheetView ] = useState<boolean>(false);
   const [buttonState, setButtonState] = useState<number>(0);
-  const buttonStateRef = useRef<number>(0);
+  const [storeSheet, setStoreSheet ] = useState<number>(-1);
+  const [locateSheet, setLocateSheet ] = useState<number>(-1);
 
   const data:any[] = [
     {
@@ -102,7 +113,9 @@ const TabTwoScreen = () => {
   }, []);
 
   const getNearbyPharmacies = async () => {
-    try {
+    handleOpenPressStores()
+    poiListModalRef.current?.close()
+    /*try {
       console.log(location)
       const response = await axios.get(
         `https://maps.googleapis.com/maps/api/place/nearbysearch/json?` +
@@ -116,7 +129,7 @@ const TabTwoScreen = () => {
       }
     } catch (error) {
       console.error('Error al obtener farmacias:', error);
-    }
+    }*/
   };
 
   /*const getNearbyPharmacies = async () => {
@@ -223,6 +236,15 @@ const TabTwoScreen = () => {
     ],
     [bottomSafeArea]
   );
+
+  const storesListSnapPoints = useMemo(
+    () => [
+      "14%",
+      "67%",
+      '90%',
+    ],
+    [bottomSafeArea]
+  );
   //#endregion
 
   //#region animated variables
@@ -248,6 +270,15 @@ const TabTwoScreen = () => {
         setButtonState(1)
     }
   }, []);
+  
+  const handleOpenPressStores = useCallback(() => {
+		storesModalRef.current?.present();
+	}, []);
+
+  const handleOpenPressLocate = useCallback(() => {
+		locateModalRef.current?.present();
+    poiListModalRef.current?.close();
+	}, []);
   //#endregion
 
   //#region effects
@@ -256,29 +287,70 @@ const TabTwoScreen = () => {
   }, []);
   //#endregion
 
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        if (storeSheet !== -1) {
+          poiListModalRef.current?.present();
+          storesModalRef.current?.close();
+          setBottomSheetView(false);
+        } else if (locateSheet !== -1) {
+          poiListModalRef.current?.present();
+          locateModalRef.current?.close();
+          setBottomSheetView(false);
+        } else {
+          if (navigator.canGoBack())
+            navigator.goBack()
+        }
+        return true;
+      };
+  
+      BackHandler.addEventListener(
+        'hardwareBackPress', onBackPress
+      );
+  
+      return () =>
+        BackHandler.removeEventListener(
+          'hardwareBackPress', onBackPress
+        );
+    }, [storeSheet, locateSheet])
+  );
+
+  const handleStoreSheetChanges = useCallback((index: number) => {
+    setStoreSheet(index)
+    setBottomSheetView(true)
+  }, []);
+
+  const handleLocateSheetChanges = useCallback((index: number) => {
+    setLocateSheet(index)
+    setBottomSheetView(true)
+  }, []);
+  
   const renderItem = useCallback(
     ({ item }: any) => (
-      <View style={stylesItem.container}>
-        <View style={stylesItem.infoView}>
-          <Avatar size="$6" circular>
-              <Avatar.Image
-                  accessibilityLabel="Inhaler"
-                  src={inhalerList}
-              />
-              <Avatar.Fallback backgroundColor="white" />
-          </Avatar>
-  
-          <View style={stylesItem.textView}>
-              <MontserratSemiText style={stylesItem.textTitle}>{ item.title }</MontserratSemiText>
+      <Ripple onPress={handleOpenPressLocate}>
+        <View style={stylesItem.container}>
+          <View style={stylesItem.infoView}>
+            <Avatar size="$6" circular>
+                <Avatar.Image
+                    accessibilityLabel="Inhaler"
+                    src={inhalerList}
+                />
+                <Avatar.Fallback backgroundColor="white" />
+            </Avatar>
+    
+            <View style={stylesItem.textView}>
+                <MontserratSemiText style={stylesItem.textTitle}>{ item.title }</MontserratSemiText>
 
-              <View style={stylesItem.textDescription}>
-                  <MontserratText>{ item.where }</MontserratText>
-                  <View style={stylesItem.dot}></View>
-                  <MontserratText>{ item.when }</MontserratText>
-              </View>
+                <View style={stylesItem.textDescription}>
+                    <MontserratText>{ item.where }</MontserratText>
+                    <View style={stylesItem.dot}></View>
+                    <MontserratText>{ item.when }</MontserratText>
+                </View>
+            </View>
           </View>
         </View>
-      </View>
+      </Ripple>
     ),
     []
 );
@@ -316,13 +388,15 @@ const TabTwoScreen = () => {
       <BottomSheetView
         animatedIndex={weatherAnimatedIndex}
         animatedPosition={weatherAnimatedPosition}
+        topPosition={ bottoSheetView ? 82 : 162 }
+        topState={ !bottoSheetView }
       >
         <View style={styles.buttonView}>
           <Button style={styles.ubicationButton} onPress={handleGetLocation} alignSelf="center" size="$6" circular>
             { buttonState === 0 ? <LocationDisabledIcon /> : buttonState === 1 ? <LocationUnknowIcon /> : buttonState === 2 && <LocationCurrentIcon /> }
           </Button>
 
-          <Button style={styles.storeButton} onPress={getNearbyPharmacies} size="$6" borderRadius={1000}>
+          <Button style={[ styles.storeButton, { opacity: bottoSheetView ? 0 : 1, transition: "opacity 0.2s eas-in-out" }]} onPress={getNearbyPharmacies} size="$6" borderRadius={1000}>
             <StoreIcon />
             <MontserratBoldText>Buscar tiendas</MontserratBoldText>
           </Button>
@@ -350,16 +424,58 @@ const TabTwoScreen = () => {
               action={() => null}
             />
           </View>
-            <BottomSheetFlatList
-            data={data}
-            keyExtractor={(i) => i}
-            renderItem={renderItem}
-            contentContainerStyle={styles.contentContainer}
-          />
+            <FlashList
+              data={data}
+              keyExtractor={(item: any) => item.id}
+              renderItem={renderItem}
+              estimatedItemSize={96}
+            />
         </View>
       </BottomSheetModal>
     </View>
     </BottomSheetModalProvider>
+    
+    <BottomSheetModal
+        ref={storesModalRef}
+        key="StoresListSheet"
+        name="StoresListSheet"
+        onChange={handleStoreSheetChanges}
+        index={1}
+        topInset={topSafeArea}
+        snapPoints={storesListSnapPoints}
+        enablePanDownToClose={false}
+        animatedPosition={animatedPOIListPosition}
+        animatedIndex={animatedPOIListIndex}
+        backdropComponent={BlurredBackground}
+      >
+        <View style={styles.bottomSheetContainer}>
+          <View style={styles.headerContent}>
+            <MontserratBoldText>lista de tiendas</MontserratBoldText>
+          </View>
+
+        </View>
+    </BottomSheetModal>
+
+    <BottomSheetModal
+        ref={locateModalRef}
+        key="LocateListSheet"
+        name="LocateListSheet"
+        onChange={handleLocateSheetChanges}
+        index={1}
+        topInset={topSafeArea}
+        snapPoints={storesListSnapPoints}
+        enablePanDownToClose={false}
+        animatedPosition={animatedPOIListPosition}
+        animatedIndex={animatedPOIListIndex}
+        backdropComponent={BlurredBackground}
+      >
+        <View style={styles.bottomSheetContainer}>
+          <View style={styles.headerContent}>
+            <MontserratBoldText>inhaladores</MontserratBoldText>
+          </View>
+
+        </View>
+    </BottomSheetModal>
 
     <StatusBar style="auto" backgroundColor="transparent" />
     </>
@@ -408,9 +524,6 @@ const styles = StyleSheet.create({
   },
   headerContent: {
     paddingHorizontal: 24
-  },
-  contentContainer: {
-    marginTop: 4
   }
 });
 

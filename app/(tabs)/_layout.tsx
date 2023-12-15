@@ -1,6 +1,6 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Link, Stack, Tabs } from 'expo-router';
-import { useColorScheme, StyleSheet } from 'react-native';
+import { useColorScheme, StyleSheet, View } from 'react-native';
 
 import Colors from '@/constants/Colors'
 
@@ -10,25 +10,61 @@ import TreatmentIcon from "@/assets/icons/treatment.svg";
 import MonitorIcon from "@/assets/icons/monitor.svg";
 import LocationIcon from "@/assets/icons/location.svg";
 import DeviceHeader from '@/components/Headers/DeviceHeader';
-import { useAuth } from '@/context/Authprovider';
-import { MontserratText } from '@/components/StyledText';
 import MonitorHeader from '@/components/Headers/MonitorHeader';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/components/StyledText';
 
 /**
  * You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
  */
+
+/*
 function TabBarIcon(props: {
-    name: React.ComponentProps<typeof FontAwesome>['name'];
+    Icon: React.FunctionComponent<React.SVGAttributes<SVGElement>>;
     color: string;
+    focused: boolean;
+    title: string;
 }) {
-    return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
+    const Icon = props.Icon;
+    const focused = props.focused;
+
+    return (
+        <View style={styles.tabBarIcon}>
+            <Icon />
+            {
+                focused && <View style={styles.tabBarDot}></View>
+            }
+        </View>
+    )
+}*/
+
+function TabBarIcon(props: {
+    Icon: React.FunctionComponent<React.SVGAttributes<SVGElement>>;
+    color: string;
+    focused: boolean;
+    title: string;
+}) {
+    const Icon = props.Icon;
+    const focused = props.focused;
+    const title = props.title;
+
+    return (
+        <View style={styles.tabBarIcon}>
+            <View>
+                <Icon fill={ focused ? Colors.tint : '#272727' } />
+            </View>
+
+            <View style={[ styles.tabBarDot, { opacity: focused ? 1 : 0 }]}></View>
+        </View>
+    )
 }
 
 export default function TabLayout() {
     const colorScheme = useColorScheme();
-
+    
     return (
         <>
+            <BottomSheetModalProvider>
             <Tabs
                 screenOptions={{
                     tabBarStyle: {
@@ -43,39 +79,74 @@ export default function TabLayout() {
                     name="device"
                     options={{
                         header: () => <DeviceHeader />,
-                        tabBarIcon: ({ color }) => <InhalerIcon name="code" fill={color}/>
+                        tabBarIcon: ({ color, focused }) => <TabBarIcon Icon={InhalerIcon} color={color} focused={focused} title='Dispositivo' />
                     }}
                 />
                 <Tabs.Screen
                     name="treatment"
                     options={{
-                        tabBarIcon: ({ color }) => <TreatmentIcon name="code" color={color} />,
+                        tabBarIcon: ({ color, focused }) => <TabBarIcon Icon={TreatmentIcon} color={color} focused={focused} title='Tratamiento' />,
                     }}
                 />
                 <Tabs.Screen
                     name="monitor"
                     options={{
                         header: () => <MonitorHeader />,
-                        tabBarIcon: ({ color }) => <MonitorIcon name="code" color={color} />,
+                        tabBarIcon: ({ color, focused }) => <TabBarIcon Icon={MonitorIcon} color={color} focused={focused} title='Monitoreo' />,
+                        tabBarHideOnKeyboard: true
                     }}
                 />
                 <Tabs.Screen
                     name="location"
                     options={{
                         header: () => null,
-                        tabBarIcon: ({ color }) => <LocationIcon name="code" color={color} />,
+                        tabBarIcon: ({ color, focused }) => <TabBarIcon Icon={LocationIcon} color={color} focused={focused} title='Ubicación' />,
                     }}
                 />
             </Tabs>
+            </BottomSheetModalProvider>
         </>
     );
 }
 
 const styles = StyleSheet.create({
     navigationStyle: {
-        height: 64,
-        backgroundColor: "#fff",
+        height: 74,
+        backgroundColor: Colors.white,
         borderTopWidth: 0,
         elevation: 0
+    },
+    tabBarIcon: {
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        gap: 6
+    },
+    iconFocused: {
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "center",
+        width: 50,
+        paddingVertical: 4,
+        borderRadius: 100,
+        backgroundColor: Colors.primary
+    },
+    iconNotFocused: {
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "center",
+        width: 50,
+        paddingVertical: 4,
+        backgroundColor: Colors.white
+    },
+    bottomText: {
+        fontSize: 12
+    },
+    tabBarDot: {
+        width: 4,
+        height: 4,
+        borderRadius: 10,
+        backgroundColor: Colors.tint
     }
 })

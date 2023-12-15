@@ -1,7 +1,7 @@
 import { ImageBackground, View, StyleSheet, Dimensions, Alert, NativeSyntheticEvent, NativeScrollEvent, Animated, ViewToken } from 'react-native'
 import { FlashList } from "@shopify/flash-list";
 import { Button, ScrollView, Switch } from 'tamagui'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Colors from '@/constants/Colors'
 import Card from '@/components/Card/Card'
@@ -33,8 +33,13 @@ import HumIcon from "@/assets/icons/humidity_percentage.svg"
 import { useAuth } from '@/context/Authprovider';
 import { getInhalers } from '@/services/api/device';
 import { RefreshControl } from 'react-native-gesture-handler';
+import BottomSheet, { BottomSheetBackdrop, BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import BlurredBackground from '@/components/blurredBackground/BlurredBackground';
+import BlurredDeviceBackground from '@/components/blurredBackground/BlurredDeviceBackground';
+import { useHeaderHeight } from '@react-navigation/elements';
+import DeviceHeader from '@/components/Headers/DeviceHeader';
 
-NavigationBar.setBackgroundColorAsync("white");
+NavigationBar.setBackgroundColorAsync(Colors.lightGrey);
 NavigationBar.setButtonStyleAsync("dark");
 
 export default function TabOneScreen() {
@@ -42,6 +47,7 @@ export default function TabOneScreen() {
 	const scrollX = useRef(new Animated.Value(0)).current
 	const [ refresh, setRefresh ] = useState<boolean>(false);
 	const [ data, setData ] = useState<any[]>([]);
+	const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 	const { session, } = useAuth();
 
@@ -58,11 +64,19 @@ export default function TabOneScreen() {
 		inhalerlist()
 	}, [])
 
+	const pullRequest = async () => {
+		setRefresh(true);
+
+		await inhalerlist();
+
+		setRefresh(false)
+	}
+
 	//console.log(pruebasData);
 
 	const { width: screenWidth } = Dimensions.get('window');
 	const SPACING = 12;
-	const ITEM_WIDTH = screenWidth - 24;
+	const ITEM_WIDTH = screenWidth;
 
 	const doLogout = async () => {
 		const { error } = await supabase.auth.signOut();
@@ -71,15 +85,18 @@ export default function TabOneScreen() {
 			Alert.alert("Error", error.message)
 	}
 
-	const pullRequest = async () => {
-		setRefresh(true);
+	// ref
+	const bottomSheetRef = useRef<BottomSheetModal>(null);
 
-		await inhalerlist();
+	// variables
+	const snapPoints = useMemo(() => ['50%', '80%'], []);
+  
+	// callbacks
+	const handleOpenPress = useCallback(() => {
+		bottomSheetRef.current?.present();
+	}, []);
 
-		setRefresh(false)
-
-		//return () => clearInterval(interval);
-	}
+	const headerHeight = useHeaderHeight();
 
 	const RenderItem = ({ item }: any) => (
 		<Card style={styles.inahlerCard} radius={44}>
@@ -136,6 +153,7 @@ export default function TabOneScreen() {
 	return (
 		<>
 		<View style={styles.safeAre}>
+			
 			<ImageBackground source={BackgroundImage} style={styles.imageBackground}>
 			<ScrollView style={styles.scrollView}
 				refreshControl={
@@ -174,7 +192,7 @@ export default function TabOneScreen() {
 									renderItem={({ item, index }) => {
 										return (
 											<View style={{ width: ITEM_WIDTH, marginTop: 20 }}>
-												<View style={ index === 0 ? { marginLeft: SPACING * 2 } : index === data.length - 1 ? { marginRight: SPACING * 2 } : { marginHorizontal: SPACING }}>
+												<View style={{ marginHorizontal: SPACING * 2 }}>
 													<RenderItem item={ item } />
 												</View>
 											</View>
@@ -212,7 +230,7 @@ export default function TabOneScreen() {
 								<MontserratBoldText style={styles.timeLocationText}>En Guadalajara</MontserratBoldText>
 							</View>
 
-							<Button style={styles.whiteButton} alignSelf="center" size="$6" circular>
+							<Button style={styles.whiteButton} alignSelf="center" size="$6" circular onPress={handleOpenPress}>
 								<HelpIcon />
 							</Button>
 						</View>
@@ -224,12 +242,47 @@ export default function TabOneScreen() {
 					</View>
 				</View>
 			</ScrollView>
+
+			<BottomSheetModal
+				ref={bottomSheetRef}
+				key="PoiListSheet"
+				name="PoiListSheet"
+				index={0}
+				snapPoints={snapPoints}
+				enablePanDownToClose
+				backdropComponent={BlurredDeviceBackground}
+			>
+				<View style={stylesBottom.container}>
+					<View>
+						<MontserratBoldText style={stylesBottom.title}>Información sobre la calidad del aire</MontserratBoldText>
+						<MontserratText style={stylesBottom.infoText}>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do.</MontserratText>
+					</View>
+				</View>
+			</BottomSheetModal>
+
 			</ImageBackground>
 		</View>
-		<StatusBar style="auto" backgroundColor={Colors.lightGrey} />
+		<StatusBar style="auto" backgroundColor="transparent" />
 		</>
 	)
 }
+
+const stylesBottom = StyleSheet.create({
+	container: {
+		paddingTop: 16,
+		paddingHorizontal: 24
+	},
+	title: {
+		fontSize: 26,
+		lineHeight: 36,
+		marginBottom: 16
+	},
+	infoText: {
+		fontSize: 16,
+		lineHeight: 22,
+		color: Colors.darkGray
+	}
+})
 
 const styles = StyleSheet.create({
     safeAre: {

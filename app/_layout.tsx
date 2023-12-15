@@ -16,6 +16,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import '@tamagui/core/reset.css'
 import { TamaguiProvider } from 'tamagui'
 import appConfig from "@/tamagui.config"
+import SimpleHeader from '@/components/Headers/SimpleHeader';
+import { MonitorProvider } from '@/context/MonitorProvider';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -55,7 +57,6 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-        
         <RootLayoutNav />
     </AuthProvider>
   );
@@ -71,7 +72,15 @@ function RootLayoutNav() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <TamaguiProvider config={appConfig}>
         <SafeAreaProvider>
-          <Slot />
+          <MonitorProvider>
+          <Stack initialRouteName='(auth)'>
+            <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
+            <Stack.Screen name="(auth)/signup" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="configuration/index" options={{ header: () => <SimpleHeader title="Configuración" /> }} />
+            <Stack.Screen name="notification/index" options={{ header: () => <SimpleHeader title="Notificaciones" /> }}  />
+          </Stack>
+          </MonitorProvider>
         </SafeAreaProvider>
       </TamaguiProvider>
     </ThemeProvider>

@@ -1,10 +1,12 @@
 import Colors from '@/constants/Colors';
-import React, { useState } from 'react';
-import { View, StyleSheet, LayoutChangeEvent, TouchableHighlightBase } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { View, StyleSheet, LayoutChangeEvent, TouchableHighlightBase, Dimensions } from 'react-native';
 import Animated, { useSharedValue, withSpring } from 'react-native-reanimated';
 import { MontserratSemiText } from './StyledText';
 import { Button } from 'tamagui';
 import { FlatList } from 'react-native-gesture-handler';
+import Ripple from 'react-native-material-ripple';
+import { FlashList } from '@shopify/flash-list';
 
 interface Tab {
 	name: string
@@ -16,13 +18,20 @@ interface TabBarProps {
   tabs: Tab[]
 }
 
-function TabBar({ tabs }:TabBarProps) {
+const { width: screenWidth } = Dimensions.get('window');
+const SPACING = 12;
+const ITEM_WIDTH = screenWidth;
+
+function TabBar({ tabs }: TabBarProps) {
 	const [activeTab, setActiveTab] = useState(0);
 	const [ width, setWidth ] = useState<number>(0);
 	const translateX = useSharedValue(2);
+	const flashListRef = useRef<FlashList<any>>(null);
 
 	const handleTabPress = (index: number) => {
 		setActiveTab(index);
+
+		scrollToIndex(index)
 		
 		translateX.value = withSpring(index * width + (index === 0 ? + 2 : 1), {
 			duration: 1800,
@@ -41,19 +50,25 @@ function TabBar({ tabs }:TabBarProps) {
 
 	const tabComponents = tabs.map((tab) => tab.Component);
 
+	const scrollToIndex = (index:number) => {
+		flashListRef.current?.scrollToIndex({ index: index, animated: true })
+	};
+
 	return (
 		<View>
+			<View style={styles.tabView}>
 			<View style={styles.container}>
 				<View style={styles.tabsContainer}>
 					{tabs.map((tab, index) => (
-					<View
-						key={index}
-						onTouchStart={() => handleTabPress(index)}
-						style={[styles.tab, { opacity: index !== activeTab ? 0.7 : 1 }]}
-					>
-							<tab.Icon />
-							<MontserratSemiText>{tab.name}</MontserratSemiText>
-					</View>
+	
+						<Ripple
+							key={index}
+							onTouchStart={() => handleTabPress(index)}
+							style={[styles.tab]}
+						>
+								<tab.Icon />
+								<MontserratSemiText>{tab.name}</MontserratSemiText>
+						</Ripple>
 					))}
 				</View>
 
@@ -70,11 +85,40 @@ function TabBar({ tabs }:TabBarProps) {
 					}}
 				/>
 			</View>
-
-			{tabComponents[activeTab] && tabComponents[activeTab] }
+			</View>
+			
+			<FlashList 
+				ref={flashListRef}
+				data={tabs}
+				keyExtractor={(item: any) => item.id}
+				horizontal
+				showsHorizontalScrollIndicator={false}
+				scrollEnabled={false}
+				pagingEnabled
+				decelerationRate={0}
+				snapToInterval={ITEM_WIDTH}
+				snapToAlignment={"center"}
+				scrollEventThrottle={16}
+				estimatedItemSize={ITEM_WIDTH}
+				renderItem={( { item, index } ) => {
+					return (
+						<View style={{ width: ITEM_WIDTH, marginTop: 20, height: "100%"}}>
+							<View style={{ marginHorizontal: SPACING * 2 }}>
+								<RenderItem item={ item } />
+							</View>
+						</View>
+					);
+				}}
+			/>
+		
+			{ /*tabComponents[activeTab] && tabComponents[activeTab]*/ }
 		</View>
 	);
 };
+
+const RenderItem = ({ item }: any) => {
+	return item.Component
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -84,9 +128,13 @@ const styles = StyleSheet.create({
 	height: 64,
 	padding: 2,
 	marginTop: 16,
-    marginBottom: 32,
+    marginBottom: 16,
 	borderRadius: 100,
 	backgroundColor: Colors.white
+  },
+  tabView: {
+	paddingHorizontal: 24, 
+	width: "100%"
   },
   tabsContainer: {
 	display: "flex",
@@ -99,6 +147,9 @@ const styles = StyleSheet.create({
 	flexDirection: "row",
 	justifyContent: "center",
 	alignItems: "center",
+	height: 62,
+	borderRadius: 100,
+	overflow: "hidden",
 	gap: 8
   },
   activeTab: {

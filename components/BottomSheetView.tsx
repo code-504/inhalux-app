@@ -15,10 +15,12 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 interface BottomSheetViewPorps {
   animatedPosition: Animated.SharedValue<number>;
   animatedIndex: Animated.SharedValue<number>;
-  children: JSX.Element | ReactElement | JSX.Element[] | ReactElement[] | null
+  children: JSX.Element | ReactElement | JSX.Element[] | ReactElement[] | null;
+  topPosition: number;
+  topState: boolean;
 }
 
-const BottomSheetView = ({ animatedIndex, animatedPosition, children }: BottomSheetViewPorps) => {
+const BottomSheetView = ({ animatedIndex, animatedPosition, children, topPosition, topState }: BottomSheetViewPorps) => {
   // hooks
   const { bottom: bottomSafeArea } = useSafeAreaInsets();
 
@@ -26,8 +28,8 @@ const BottomSheetView = ({ animatedIndex, animatedPosition, children }: BottomSh
   const lockedYPosition = useMemo(
     () =>
     SCREEN_HEIGHT -
-    bottomSafeArea - 330,
-    [bottomSafeArea]
+    bottomSafeArea - (topState ? 430 : 540),
+    [bottomSafeArea, topState]
   );
   const containerAnimatedStyle = useAnimatedStyle(
     () => ({
@@ -35,8 +37,8 @@ const BottomSheetView = ({ animatedIndex, animatedPosition, children }: BottomSh
         {
           translateY:
             animatedPosition.value > lockedYPosition
-              ? animatedPosition.value - 24
-              : lockedYPosition - 24,
+              ? animatedPosition.value - topPosition
+              : lockedYPosition - topPosition,
         },
       ],
     }),
@@ -48,7 +50,7 @@ const BottomSheetView = ({ animatedIndex, animatedPosition, children }: BottomSh
       styles.container,
       containerAnimatedStyle,
     ],
-    [containerAnimatedStyle]
+    [containerAnimatedStyle, topPosition]
   );
 
   return (
@@ -62,7 +64,6 @@ const styles = StyleSheet.create({
   container: {
     position: 'absolute',
     right: 12,
-    top: -138,
     padding: 2,
     marginTop: 0,
   },

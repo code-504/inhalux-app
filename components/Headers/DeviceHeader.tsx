@@ -4,46 +4,53 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { Avatar, Button, XStack } from 'tamagui'
 import Colors from '@/constants/Colors'
 import { MontserratBoldText, MontserratText } from '../StyledText'
+import { supabase } from '@/services/supabase'
+import { useAuth } from '@/context/Authprovider'
+import { Link, router } from 'expo-router'
 
 // Resources
 import NotificationIcon from "@/assets/icons/notifications.svg";
-import { supabase } from '@/services/supabase'
-import { useAuth } from '@/context/Authprovider'
 
 export default function DeviceHeader() {
     const {supaUser} = useAuth();
 
-  return (
-    <SafeAreaView style={styles.safeAre}>
-        <View style={styles.header}>
-            <View style={styles.containerView}>
-                <Avatar size="$6" circular>
-                    <Avatar.Image
-                        accessibilityLabel="Cam"
-                        src="https://images.unsplash.com/photo-1548142813-c348350df52b?&w=150&h=150&dpr=2&q=80"
-                    />
-                    <Avatar.Fallback backgroundColor="$blue10" />
-                </Avatar>
-                
-                <View style={styles.headerTitleView}>
-                    <MontserratText style={styles.headerTitleWellcomeText}>Bienvenido 👋</MontserratText>
-                    <MontserratBoldText style={styles.headerTitleNameText}>{supaUser?.name || "Conectando..."}</MontserratBoldText>
-                </View>
-            </View>
+    const handleNotificationPress = () => {
+        router.push("/notification/")
+    };
 
-            <Button style={styles.notificationButton} alignSelf="center" size="$6" circular >
-                <NotificationIcon />
-            </Button>
-        </View>
-    </SafeAreaView>
-  )
+    return (
+        <SafeAreaView style={styles.safeAre}>
+            <View style={styles.header}>
+                <View style={styles.containerView}>
+                    <Link href="/configuration/">
+                        <Avatar size="$6" circular>
+                            <Avatar.Image
+                                accessibilityLabel="Cam"
+                                src="https://images.unsplash.com/photo-1548142813-c348350df52b?&w=150&h=150&dpr=2&q=80"
+                            />
+                            <Avatar.Fallback backgroundColor="$blue10" />
+                        </Avatar>
+                    </Link>
+                    
+                    <View style={styles.headerTitleView}>
+                        <MontserratText style={styles.headerTitleWellcomeText}>Bienvenido 👋</MontserratText>
+                        <MontserratBoldText style={styles.headerTitleNameText}>{supaUser?.name || "Conectando..."}</MontserratBoldText>
+                    </View>
+                </View>
+                
+                <Button style={styles.notificationButton} alignSelf="center" size="$6" circular onPress={handleNotificationPress}>
+                    <NotificationIcon />
+                </Button>
+            </View>
+        </SafeAreaView>
+    )
 }
 
 const styles = StyleSheet.create({
     safeAre: {
         paddingVertical: 8,
         paddingHorizontal: 24,
-        backgroundColor: Colors.lightGrey
+        backgroundColor: Colors.lightGrey,
     },
     containerView: {
         display: "flex",
