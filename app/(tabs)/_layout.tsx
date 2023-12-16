@@ -64,7 +64,6 @@ export default function TabLayout() {
     
     return (
         <>
-            <BottomSheetModalProvider>
             <Tabs
                 screenOptions={{
                     tabBarStyle: {
@@ -72,13 +71,13 @@ export default function TabLayout() {
                     },
                     tabBarShowLabel:false,
                     tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+                    
                 }}
                 initialRouteName='device'
             >
                 <Tabs.Screen
                     name="device"
                     options={{
-                        header: () => <DeviceHeader />,
                         tabBarIcon: ({ color, focused }) => <TabBarIcon Icon={InhalerIcon} color={color} focused={focused} title='Dispositivo' />
                     }}
                 />
@@ -86,6 +85,7 @@ export default function TabLayout() {
                     name="treatment"
                     options={{
                         tabBarIcon: ({ color, focused }) => <TabBarIcon Icon={TreatmentIcon} color={color} focused={focused} title='Tratamiento' />,
+                        
                     }}
                 />
                 <Tabs.Screen
@@ -104,7 +104,6 @@ export default function TabLayout() {
                     }}
                 />
             </Tabs>
-            </BottomSheetModalProvider>
         </>
     );
 }

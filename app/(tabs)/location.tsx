@@ -46,6 +46,11 @@ import LocationDisabledIcon from "@/assets/icons/location_disabled.svg"
 import { FlashList } from '@shopify/flash-list';
 import BlurredStoresBackground from '@/components/blurredBackground/BlurredStoresBackground';
 import { useFocusEffect, useNavigation } from 'expo-router';
+import { BottomSheetState } from '../../interfaces/location';
+import BlurredBackgroundNew from '@/components/blurredBackground/BlurredBackgroundNew';
+import BatteryIcon from "@/assets/icons/battery.svg"
+import SoundIcon from "@/assets/icons/volume_up.svg"
+import RouteIcon from "@/assets/icons/alt_route.svg"
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 NavigationBar.setBackgroundColorAsync("white");
@@ -54,67 +59,135 @@ NavigationBar.setButtonStyleAsync("dark");
 const TabTwoScreen = () => {
   // refs
   const mapRef = useRef<MapView>(null);
-  const poiListModalRef = useRef<BottomSheetModal>(null);
+  const inhalerListModalRef = useRef<BottomSheetModal>(null);
   const storesModalRef  = useRef<BottomSheetModal>(null);
-  const locateModalRef  = useRef<BottomSheetModal>(null);
+  const inhalerModalRef  = useRef<BottomSheetModal>(null);
   const buttonStateRef = useRef<number>(0);
 
   const navigator = useNavigation()
 
   const [location, setLocation] = useState(null);
   const [pharmacies, setPharmacies] = useState([]);
-  const [bottoSheetView, setBottomSheetView ] = useState<boolean>(false);
   const [buttonState, setButtonState] = useState<number>(0);
-  const [storeSheet, setStoreSheet ] = useState<number>(-1);
-  const [locateSheet, setLocateSheet ] = useState<number>(-1);
+  const [isMapLoading, setIsMapLoading] = useState<boolean>(true);
+  const [inhaler, setInhaler] = useState(null)
+
+  const [bottomSheetState, setBottomSheetState] = useState<BottomSheetState>({
+    position: 162,
+    lockPosition: 540,
+    storeButtonVisible: true,
+    secondSheetActive: false
+  });
 
   const data:any[] = [
     {
       id: 1,
       title: "Inhalador casa",
       where: "casa",
-      when: "Hace tres minutos"
+      when: "Hace tres minutos",
+      latitude: 20.608629422133586,
+      longitude: -103.28179174462451,
+      battery: 80
     },
     {
       id: 2,
       title: "Inhalador casa",
       where: "casa",
-      when: "Hace tres minutos"
+      when: "Hace tres minutos",
+      latitude: 20.608629422133586,
+      longitude: -103.28179174462451,
+      battery: 45
     },
     {
       id: 3,
       title: "Inhalador casa",
       where: "casa",
-      when: "Hace tres minutos"
+      when: "Hace tres minutos",
+      latitude: 20.609493054084997,
+      longitude: -103.28020924139345,
+      battery: 32
     }
   ]
 
-  useEffect(() => {
-    (async () => {
-      /*let { status } = await Location.requestForegroundPermissionsAsync();
+  const getLocation = async () => {
+    try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
 
-      if (status !== 'granted') {
-        console.error('Permiso de ubicación denegado');
-        return;
-      }*/
+      if (status !== 'granted') return;
+      
+      setIsMapLoading(true)
 
-      const granted = await Location.hasServicesEnabledAsync();
+      const last = await Location.getLastKnownPositionAsync();
+      console.log("the last", last)
 
-      if (granted) {
-        let location = await Location.getCurrentPositionAsync({});
-        setLocation(location.coords);
+
+      if (last) {
+        setLocation(last.coords);
         buttonStateRef.current = 1;
       } else {
-        let location = await Location.getLastKnownPositionAsync({});
-        setLocation(location?.coords);
+        const current = await Location.getCurrentPositionAsync();
+        setLocation(current.coords);
         buttonStateRef.current = 0;
       }
-    })();
+      setIsMapLoading(false)
+    } catch (error) {
+      console.log(error);
+      setIsMapLoading(false)
+    }
+  };
+
+  useEffect(() => {
+    getLocation();
   }, []);
 
+  const ubicateInhaler = async (id:number) => {
+
+    console.log(data[id])
+
+    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${data[id].latitude}&lon=${data[id].longitude}`;
+    
+    await fetch(url).then(res=>res.json()).then(addressData=> {
+      setInhaler({ 
+        ...data[id],
+        address: addressData.display_name
+      })
+    })
+
+    mapRef.current?.animateCamera({
+      center: {
+        latitude: data[id].latitude - 0.002,
+        longitude: data[id].longitude,
+      },
+      zoom: 15
+    })
+  }
+
   const getNearbyPharmacies = async () => {
-    handleOpenPressStores()
-    poiListModalRef.current?.close()
+
+    const granted = await Location.hasServicesEnabledAsync()
+
+    if (!granted) return ;
+
+    let location = await Location.getCurrentPositionAsync({});
+    
+    storesModalRef.current?.present();
+    inhalerListModalRef.current?.close()
+
+    setBottomSheetState({
+      ...bottomSheetState,
+      position: 82,
+      lockPosition: 140,
+      storeButtonVisible: false,
+      secondSheetActive: true
+    })
+
+    mapRef.current?.animateCamera({
+      center: {
+        latitude: location.coords.latitude - 0.009,
+        longitude: location.coords.longitude,
+      },
+      zoom: 15
+    })
     /*try {
       console.log(location)
       const response = await axios.get(
@@ -156,6 +229,26 @@ const TabTwoScreen = () => {
     }
   };*/
 
+  const handleStoresIndexChange = async (index:number) => {
+    if (index === 1) {
+      const granted = await Location.hasServicesEnabledAsync()
+
+      if (!granted) {
+        return;
+      }
+      
+      let location = await Location.getCurrentPositionAsync({});
+
+      mapRef.current?.animateCamera({
+        center: {
+          latitude: location.coords.latitude - 0.009,
+          longitude: location.coords.longitude,
+        },
+        zoom: 15
+      })
+    }
+  }
+
   const handleGetLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
 
@@ -172,15 +265,15 @@ const TabTwoScreen = () => {
     }
 
     let location = await Location.getCurrentPositionAsync({});
-    setLocation(location.coords);
   
     // Ajustar el zoom del mapa manualmente
-    mapRef.current.animateToRegion({
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude,
-      latitudeDelta: 0.02, // Ajusta según tus necesidades
-      longitudeDelta: 0.02, // Ajusta según tus necesidades
-    });
+
+    mapRef.current?.animateCamera({
+      center: {
+        latitude: location.coords.latitude - 0.005,
+        longitude: location.coords.longitude,
+      },
+    })
   };
 
   /*  useEffect(() => {
@@ -228,11 +321,18 @@ const TabTwoScreen = () => {
   const { bottom: bottomSafeArea, top: topSafeArea } = useSafeAreaInsets();
 
   //#region variables
-  const poiListSnapPoints = useMemo(
+  const inhalerListSnapPoints = useMemo(
     () => [
       "14%",
       "40%",
       '90%',
+    ],
+    [bottomSafeArea]
+  );
+
+  const inhalerSnapPoints = useMemo(
+    () => [
+      "35%",
     ],
     [bottomSafeArea]
   );
@@ -248,20 +348,20 @@ const TabTwoScreen = () => {
   //#endregion
 
   //#region animated variables
-  const animatedPOIListIndex = useSharedValue<number>(0);
-  const animatedPOIListPosition = useSharedValue<number>(SCREEN_HEIGHT);
+  const animatedFloatingButtonIndex = useSharedValue<number>(0);
+  const animatedFloatingButtonPosition = useSharedValue<number>(SCREEN_HEIGHT);
 
-  const weatherAnimatedIndex = useDerivedValue(() =>
-    animatedPOIListIndex.value
+  const buttonAnimatedIndex = useDerivedValue(() =>
+    animatedFloatingButtonIndex.value
   );
-  const weatherAnimatedPosition = useDerivedValue(() =>
-    animatedPOIListPosition.value
+  const buttonAnimatedPosition = useDerivedValue(() =>
+    animatedFloatingButtonPosition.value
   );
   //#endregion
 
   //#region callbacks
   const handleTouchStart = useCallback(async () => {
-    poiListModalRef.current?.collapse();
+    inhalerListModalRef.current?.collapse();
 
     const granted = await Location.hasServicesEnabledAsync();
 
@@ -270,34 +370,46 @@ const TabTwoScreen = () => {
         setButtonState(1)
     }
   }, []);
-  
-  const handleOpenPressStores = useCallback(() => {
-		storesModalRef.current?.present();
-	}, []);
 
-  const handleOpenPressLocate = useCallback(() => {
-		locateModalRef.current?.present();
-    poiListModalRef.current?.close();
+  const handleOpenPressLocate = useCallback((id:number) => {
+    ubicateInhaler(id);
+
+    setBottomSheetState({
+      ...bottomSheetState,
+      position: 82,
+      storeButtonVisible: false,
+      secondSheetActive: true
+    })
+		inhalerModalRef.current?.present();
+    inhalerListModalRef.current?.close();
 	}, []);
   //#endregion
 
   //#region effects
   useLayoutEffect(() => {
-    requestAnimationFrame(() => poiListModalRef.current?.present());
+    requestAnimationFrame(() => inhalerListModalRef.current?.present());
   }, []);
   //#endregion
 
   useFocusEffect(
     useCallback(() => {
       const onBackPress = () => {
-        if (storeSheet !== -1) {
-          poiListModalRef.current?.present();
+        if (bottomSheetState.secondSheetActive) {
+          inhalerListModalRef.current?.present();
+          inhalerModalRef.current?.close();
           storesModalRef.current?.close();
-          setBottomSheetView(false);
-        } else if (locateSheet !== -1) {
-          poiListModalRef.current?.present();
-          locateModalRef.current?.close();
-          setBottomSheetView(false);
+
+          if (inhaler)
+            setInhaler(null)
+
+          setBottomSheetState({
+            ...bottomSheetState,
+            position: 162,
+            lockPosition: 540,
+            storeButtonVisible: true,
+            secondSheetActive: false
+          })
+
         } else {
           if (navigator.canGoBack())
             navigator.goBack()
@@ -313,22 +425,12 @@ const TabTwoScreen = () => {
         BackHandler.removeEventListener(
           'hardwareBackPress', onBackPress
         );
-    }, [storeSheet, locateSheet])
+    }, [bottomSheetState.secondSheetActive])
   );
-
-  const handleStoreSheetChanges = useCallback((index: number) => {
-    setStoreSheet(index)
-    setBottomSheetView(true)
-  }, []);
-
-  const handleLocateSheetChanges = useCallback((index: number) => {
-    setLocateSheet(index)
-    setBottomSheetView(true)
-  }, []);
   
   const renderItem = useCallback(
     ({ item }: any) => (
-      <Ripple onPress={handleOpenPressLocate}>
+      <Ripple onPress={() => handleOpenPressLocate(item.id)}>
         <View style={stylesItem.container}>
           <View style={stylesItem.infoView}>
             <Avatar size="$6" circular>
@@ -367,10 +469,12 @@ const TabTwoScreen = () => {
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
         }}
+        loadingEnabled={isMapLoading}
         style={styles.mapContainer}
         onTouchStart={handleTouchStart}
         showsUserLocation={true}
         showsMyLocationButton={false}
+        followsUserLocation={true}
       >
         {pharmacies.map((pharmacy) => (
         <Marker
@@ -383,20 +487,30 @@ const TabTwoScreen = () => {
           description={pharmacy.vicinity}
         />
       ))}
+
+      {inhaler && (
+        <Marker
+          coordinate={{
+            latitude: inhaler.latitude,
+            longitude: inhaler.longitude,
+          }}
+          title={inhaler.title}
+        />
+      )}
     </MapView>
 
       <BottomSheetView
-        animatedIndex={weatherAnimatedIndex}
-        animatedPosition={weatherAnimatedPosition}
-        topPosition={ bottoSheetView ? 82 : 162 }
-        topState={ !bottoSheetView }
+        animatedIndex={buttonAnimatedIndex}
+        animatedPosition={buttonAnimatedPosition}
+        position={ bottomSheetState.position }
+        lockPosition={ bottomSheetState.lockPosition }
       >
         <View style={styles.buttonView}>
           <Button style={styles.ubicationButton} onPress={handleGetLocation} alignSelf="center" size="$6" circular>
             { buttonState === 0 ? <LocationDisabledIcon /> : buttonState === 1 ? <LocationUnknowIcon /> : buttonState === 2 && <LocationCurrentIcon /> }
           </Button>
 
-          <Button style={[ styles.storeButton, { opacity: bottoSheetView ? 0 : 1, transition: "opacity 0.2s eas-in-out" }]} onPress={getNearbyPharmacies} size="$6" borderRadius={1000}>
+          <Button style={[ styles.storeButton, { opacity: bottomSheetState.storeButtonVisible ? 1 : 0, transition: "opacity 0.2s eas-in-out" }]} onPress={getNearbyPharmacies} size="$6" borderRadius={1000}>
             <StoreIcon />
             <MontserratBoldText>Buscar tiendas</MontserratBoldText>
           </Button>
@@ -404,16 +518,23 @@ const TabTwoScreen = () => {
       </BottomSheetView>
       
       <BottomSheetModal
-        ref={poiListModalRef}
+        ref={inhalerListModalRef}
         key="PoiListSheet"
         name="PoiListSheet"
         index={1}
         topInset={topSafeArea}
-        snapPoints={poiListSnapPoints}
+        snapPoints={inhalerListSnapPoints}
         enablePanDownToClose={false}
-        animatedPosition={animatedPOIListPosition}
-        animatedIndex={animatedPOIListIndex}
-        backdropComponent={BlurredBackground}
+        animatedPosition={buttonAnimatedPosition}
+        animatedIndex={buttonAnimatedIndex}
+        backdropComponent={(backdropProps: BottomSheetBackdropProps) => (
+          <BlurredBackgroundNew
+            {...backdropProps}
+            appearsOnIndex={2}
+            disappearsOnIndex={1}
+            pressBehavior={'collapse'}
+          />
+        )}
       >
         <View style={styles.bottomSheetContainer}>
           <View style={styles.headerContent}>
@@ -439,14 +560,21 @@ const TabTwoScreen = () => {
         ref={storesModalRef}
         key="StoresListSheet"
         name="StoresListSheet"
-        onChange={handleStoreSheetChanges}
         index={1}
+        onChange={handleStoresIndexChange}
         topInset={topSafeArea}
         snapPoints={storesListSnapPoints}
         enablePanDownToClose={false}
-        animatedPosition={animatedPOIListPosition}
-        animatedIndex={animatedPOIListIndex}
-        backdropComponent={BlurredBackground}
+        animatedPosition={buttonAnimatedPosition}
+        animatedIndex={buttonAnimatedIndex}
+        backdropComponent={(backdropProps: BottomSheetBackdropProps) => (
+          <BlurredBackgroundNew
+            {...backdropProps}
+            appearsOnIndex={2}
+            disappearsOnIndex={1}
+            pressBehavior={'collapse'}
+          />
+        )}
       >
         <View style={styles.bottomSheetContainer}>
           <View style={styles.headerContent}>
@@ -457,21 +585,58 @@ const TabTwoScreen = () => {
     </BottomSheetModal>
 
     <BottomSheetModal
-        ref={locateModalRef}
+        ref={inhalerModalRef}
         key="LocateListSheet"
         name="LocateListSheet"
-        onChange={handleLocateSheetChanges}
-        index={1}
+        index={0}
         topInset={topSafeArea}
-        snapPoints={storesListSnapPoints}
+        snapPoints={inhalerSnapPoints}
         enablePanDownToClose={false}
-        animatedPosition={animatedPOIListPosition}
-        animatedIndex={animatedPOIListIndex}
-        backdropComponent={BlurredBackground}
+        animatedPosition={buttonAnimatedPosition}
+        animatedIndex={buttonAnimatedIndex}
+        backdropComponent={(backdropProps: BottomSheetBackdropProps) => (
+          <BlurredBackgroundNew
+            {...backdropProps}
+            appearsOnIndex={1}
+            disappearsOnIndex={0}
+            pressBehavior={'collapse'}
+          />
+        )}
       >
         <View style={styles.bottomSheetContainer}>
           <View style={styles.headerContent}>
-            <MontserratBoldText>inhaladores</MontserratBoldText>
+            {
+              inhaler && (
+                <View style={stylesInhalerSheet.content}>
+                  <View style={stylesInhalerSheet.titleView}>
+                    <MontserratBoldText style={stylesInhalerSheet.title}>{ inhaler.title }</MontserratBoldText>
+                    <MontserratText  style={stylesInhalerSheet.address}>{ inhaler.address }</MontserratText>
+
+                    <View style={stylesInhalerSheet.inahlerStatusInfo}>
+                      <BatteryIcon style={stylesInhalerSheet.inahlerStatusIcon} />
+                      <MontserratSemiText>{ inhaler.battery }%</MontserratSemiText>
+                    </View>
+                  </View>
+
+                  <View style={stylesInhalerSheet.buttonsView}>
+                    <Button height="$11" borderRadius={'$radius.10'} style={stylesInhalerSheet.button}>
+                      <View style={stylesInhalerSheet.buttonTextView}>
+                        <SoundIcon />
+                        <MontserratBoldText>Sonido</MontserratBoldText>
+                        <MontserratText>Desactivado</MontserratText>
+                      </View>
+                    </Button>
+                    <Button height="$11" borderRadius={'$radius.10'} style={stylesInhalerSheet.button}>
+                      <View style={stylesInhalerSheet.buttonTextView}>
+                        <RouteIcon />
+                        <MontserratBoldText>Distancia</MontserratBoldText>
+                        <MontserratText>5m altitud 5m</MontserratText>
+                      </View>
+                    </Button>
+                  </View>
+                </View>
+              )
+            }
           </View>
 
         </View>
@@ -562,6 +727,59 @@ const stylesItem = StyleSheet.create({
     height: 4,
     borderRadius: 1000,
     backgroundColor: Colors.dotsGray
+  }
+})
+
+
+const stylesInhalerSheet = StyleSheet.create({
+  content: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 16
+  },
+  titleView: {
+    marginTop: 12,
+    display: "flex",
+    flexDirection: "column",
+    gap: 8
+  },
+  title: {
+    fontSize: 24
+  },
+  address: {
+    fontSize: 14,
+    lineHeight: 18,
+    color: Colors.darkGray
+  },
+  inahlerStatus: {
+		display: "flex",
+		flexDirection: "row",
+	},
+	inahlerStatusInfo: {
+		display: "flex",
+		flexDirection: "row",
+		alignItems: "center",
+		marginRight: 8
+	},
+	inahlerStatusIcon: {
+		marginRight: 4
+	},
+  buttonsView: {
+    display: "flex",
+    width: "100%",
+    flexDirection: "row",
+    gap: 16,
+  },
+  button: {
+    flex: 1,
+    display: "flex",
+    justifyContent: "flex-start",
+    backgroundColor: Colors.secondary
+  },
+  buttonTextView: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 4
   }
 })
 
