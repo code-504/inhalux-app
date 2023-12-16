@@ -20,11 +20,8 @@ import { MonitorProvider } from '@/context/MonitorProvider';
 import { InhalerProvider } from '@/context/InhalerProvider';
 import { TreatmentProvider } from '@/context/TreatmentProvider';
 import { RelationProvider } from '@/context/RelationsProvider';
-<<<<<<< HEAD
 import { NotificationProvider } from '@/context/NotificationsProvider';
-=======
 import NormalHeader from '@/components/Headers/NormalHeader';
->>>>>>> 4c320647b4f0641650345d8e15a199bfaff719c7
 
 export {
   // Catch any errors thrown by the Layout component.
