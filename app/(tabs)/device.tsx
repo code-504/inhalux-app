@@ -88,7 +88,7 @@ export default function TabOneScreen() {
 		//return () => clearInterval(interval);
 	}
 
-	console.log("DEVICE-DATA", data);
+	//console.log("DEVICE-DATA", data);
 
 	// ref
 	const bottomSheetRef = useRef<BottomSheetModal>(null);

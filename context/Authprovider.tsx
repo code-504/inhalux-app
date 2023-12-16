@@ -11,6 +11,7 @@ interface Props {
 export type InitializedUser = {
   id: String;
   name: String;
+  email: String;
 }
 
 export interface AuthContextType {
@@ -74,7 +75,8 @@ export function AuthProvider({ children }: Props) {
 
         const initializedUser: InitializedUser = {
           id: user.id,
-          name: users[0].name + " " + (users[0].last_name == null ? "" : users[0].last_name)
+          name: users[0].name + " " + (users[0].last_name == null ? "" : users[0].last_name),
+          email: user.email ? user.email : ""
         };
 
         setSupaUser(initializedUser);

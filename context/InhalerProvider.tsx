@@ -53,8 +53,8 @@ export function InhalerProvider({ children }: Props) {
                     battery: inhaler.inhaler_state.battery,
                     dose: inhaler.inhaler_state.dosis,
                   }));
-                  console.log("inhalersData", inhalersData);
-                  console.log("transformed", transformedData);
+                  //console.log("inhalersData", inhalersData);
+                  //console.log("transformed", transformedData);
                   
             setSupaInhalers(transformedData);
             // console.log("new supainhalers", supaInhalers);

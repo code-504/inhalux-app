@@ -21,6 +21,7 @@ import { MonitorProvider } from '@/context/MonitorProvider';
 import { InhalerProvider } from '@/context/InhalerProvider';
 import { TreatmentProvider } from '@/context/TreatmentProvider';
 import { RelationProvider } from '@/context/RelationsProvider';
+import { NotificationProvider } from '@/context/NotificationsProvider';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -61,11 +62,13 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <InhalerProvider>
-        <TreatmentProvider>
-          <RelationProvider>
-            <RootLayoutNav />
-          </RelationProvider>
-        </TreatmentProvider>
+        <NotificationProvider>
+          <TreatmentProvider>
+            <RelationProvider>
+              <RootLayoutNav />
+            </RelationProvider>
+          </TreatmentProvider>
+        </NotificationProvider>
       </InhalerProvider>
     </AuthProvider>
   );
