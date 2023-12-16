@@ -20,8 +20,12 @@ import { MonitorProvider } from '@/context/MonitorProvider';
 import { InhalerProvider } from '@/context/InhalerProvider';
 import { TreatmentProvider } from '@/context/TreatmentProvider';
 import { RelationProvider } from '@/context/RelationsProvider';
+<<<<<<< HEAD
+import { NotificationProvider } from '@/context/NotificationsProvider';
+=======
 import NormalHeader from '@/components/Headers/NormalHeader';
 import SimpleHeader from '@/components/Headers/SimpleHeader';
+>>>>>>> 4c320647b4f0641650345d8e15a199bfaff719c7
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -65,11 +69,13 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <InhalerProvider>
-        <TreatmentProvider>
-          <RelationProvider>
-            <RootLayoutNav />
-          </RelationProvider>
-        </TreatmentProvider>
+        <NotificationProvider>
+          <TreatmentProvider>
+            <RelationProvider>
+              <RootLayoutNav />
+            </RelationProvider>
+          </TreatmentProvider>
+        </NotificationProvider>
       </InhalerProvider>
     </AuthProvider>
   );

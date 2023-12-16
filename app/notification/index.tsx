@@ -12,49 +12,47 @@ import NotificationIcon from "@/assets/icons/notifications_active.svg"
 import PasswordIcon from "@/assets/icons/encrypted.svg"
 import LogoutIcon from "@/assets/icons/move_item.svg"
 import ShareIcon from "@/assets/icons/share.svg"
+import { useNotifications } from '@/context/NotificationsProvider'
+import { getTitleByDate, groupByDate } from '@/helpers/notifications'
 
 const NotificationScreen = () => {
+  const { supaNotifications } = useNotifications();
+  const groupedNotifications = groupByDate(supaNotifications);
+  //console.log("grouped", groupedNotifications);
+
   return (
-    <View style={styles.safeArea}>
-      <ImageBackground source={BackgroundImage} style={styles.imageBackground}>
-        <ScrollView style={styles.scrollView}>
-          <View style={styles.content}>
+    
+      <View style={styles.safeArea}>
+        {
+          supaNotifications.length !== 0 
+          ?
+            <ImageBackground source={BackgroundImage} style={styles.imageBackground}>
+            <ScrollView style={styles.scrollView}>
+              <View style={styles.content}>
+                
+              {Object.entries(groupedNotifications).map(([date, notifications]) => (
+                <CardOptionsList key={date} title={getTitleByDate(date)}>
+                  {notifications.map((notification: any) => (
+                    <CardOptionsList.ItemView key={notification.id}>
+                      {/* Agrega tus iconos según la lógica de tu aplicación */}
+                      <ShareIcon />
+                      <CardOptionsList.ItemText>{notification.title}</CardOptionsList.ItemText>
+                    </CardOptionsList.ItemView>
+                  ))}
+                </CardOptionsList>
+              ))}
 
-            <CardOptionsList title="Hoy">
-              <CardOptionsList.ItemView>
-                <ShareIcon />
-                <CardOptionsList.ItemText>Notificacaión prueba</CardOptionsList.ItemText>
-              </CardOptionsList.ItemView>
-
-              <CardOptionsList.ItemView>
-                <ShareIcon />
-                <CardOptionsList.ItemText>Notificacaión prueba</CardOptionsList.ItemText>
-              </CardOptionsList.ItemView>
-              <CardOptionsList.ItemView>
-                <ShareIcon />
-                <CardOptionsList.ItemText>Notificacaión prueba</CardOptionsList.ItemText>
-              </CardOptionsList.ItemView>
-            </CardOptionsList>
-
-            <CardOptionsList title="Ayer">
-              <CardOptionsList.ItemView>
-                <ShareIcon />
-                <CardOptionsList.ItemText>Notificacaión prueba</CardOptionsList.ItemText>
-              </CardOptionsList.ItemView>
-
-              <CardOptionsList.ItemView>
-                <ShareIcon />
-                <CardOptionsList.ItemText>Notificacaión prueba</CardOptionsList.ItemText>
-              </CardOptionsList.ItemView>
-              <CardOptionsList.ItemView>
-                <ShareIcon />
-                <CardOptionsList.ItemText>Notificacaión prueba</CardOptionsList.ItemText>
-              </CardOptionsList.ItemView>
-            </CardOptionsList>
+              </View>
+            </ScrollView>
+          </ImageBackground>
+        :
+          <View style={styles.noNotificationsView}>
+            <MontserratText style={styles.noNotificationsText}>No tienes Notificaciones!</MontserratText>
           </View>
-        </ScrollView>
-      </ImageBackground>
-    </View>
+        }
+        
+      </View>
+      
   )
 }
 
@@ -108,5 +106,22 @@ const styles = StyleSheet.create({
   },
   profileEmailText: {
     fontSize: 12
+  },
+  noNotificationsView: {
+    minWidth: "100%",
+    minHeight: "100%",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  noNotificationsText: {
+    fontSize: 24,
+    paddingVertical: 18,
+    paddingHorizontal: 20,
+    marginTop: -40,
+    textAlign: "center",
+    backgroundColor: "#fff",
+    borderRadius: 50,
   }
 })

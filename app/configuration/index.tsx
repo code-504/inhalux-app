@@ -12,8 +12,11 @@ import NotificationIcon from "@/assets/icons/notifications_active.svg"
 import PasswordIcon from "@/assets/icons/encrypted.svg"
 import LogoutIcon from "@/assets/icons/move_item.svg"
 import ShareIcon from "@/assets/icons/share.svg"
+import { useAuth } from '@/context/Authprovider'
 
 const ConfigurationScreen = () => {
+  const { supaUser } = useAuth();
+
   return (
     <View style={styles.safeArea}>
       <ImageBackground source={BackgroundImage} style={styles.imageBackground}>
@@ -34,8 +37,8 @@ const ConfigurationScreen = () => {
                     </Avatar>
 
                     <View style={styles.profileTextView}>
-                      <MontserratBoldText style={styles.profileNameText}>Jorge Ibarra Peña</MontserratBoldText>
-                      <MontserratText style={styles.profileEmailText}>jorgeibarrapena9@gmail.com</MontserratText>
+                      <MontserratBoldText style={styles.profileNameText}>{supaUser?.name}</MontserratBoldText>
+                      <MontserratText style={styles.profileEmailText}>{supaUser?.email}</MontserratText>
                     </View>
                   </View>
 

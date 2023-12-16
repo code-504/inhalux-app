@@ -58,9 +58,9 @@ export function RelationProvider({ children }: Props) {
       }));
     
         setSupaMonitors(transformedMonitorData);
-        console.log("Monitores: ", transformedMonitorData)
+        //console.log("Monitores: ", transformedMonitorData)
         setSupaPatients(transformedPatientData);
-        console.log("Pacientes: ", transformedPatientData)
+        //console.log("Pacientes: ", transformedPatientData)
   
     };
 
