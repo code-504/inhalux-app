@@ -38,6 +38,7 @@ import BlurredBackground from '@/components/blurredBackground/BlurredBackground'
 import BlurredDeviceBackground from '@/components/blurredBackground/BlurredDeviceBackground';
 import { useHeaderHeight } from '@react-navigation/elements';
 import DeviceHeader from '@/components/Headers/DeviceHeader';
+import { useInhalers } from '@/context/InhalerProvider';
 import { router } from 'expo-router';
 
 NavigationBar.setBackgroundColorAsync(Colors.white);
@@ -47,37 +48,29 @@ export default function TabOneScreen() {
 
 	const scrollX = useRef(new Animated.Value(0)).current
 	const [ refresh, setRefresh ] = useState<boolean>(false);
-	const [ data, setData ] = useState<any[]>([]);
-	const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+	const { supaInhalers: data, setSupaInhalers } = useInhalers();
+	//const [ data, setData ] = useState<any[]>([]);
 
-	const { session, } = useAuth();
+	// const { session, } = useAuth();
 
-	const inhalerlist = async () => {
-		const inhalers = await getInhalers(session?.user.id);
+	// const inhalerlist = async () => {
+	// 	const inhalers = await getInhalers(session?.user.id);
 		
-		if (inhalers)
-			setData(inhalers)
-		else
-			setData([])
-	}
+	// 	if (inhalers)
+	// 		setData(inhalers)
+	// 	else
+	// 		setData([])
+	// }
 
-	useEffect(() => {
-		inhalerlist()
-	}, [])
-
-	const pullRequest = async () => {
-		setRefresh(true);
-
-		await inhalerlist();
-
-		setRefresh(false)
-	}
+	// useEffect(() => {
+	// 	inhalerlist()
+	// }, [])
 
 	//console.log(pruebasData);
 
 	const { width: screenWidth } = Dimensions.get('window');
 	const SPACING = 12;
-	const ITEM_WIDTH = screenWidth;
+	const ITEM_WIDTH = screenWidth - 24;
 
 	const doLogout = async () => {
 		const { error } = await supabase.auth.signOut();
@@ -85,6 +78,18 @@ export default function TabOneScreen() {
 		if (error)
 			Alert.alert("Error", error.message)
 	}
+
+	const pullRequest = async () => {
+		setRefresh(true);
+
+		//await inhalerlist();
+
+		setRefresh(false)
+
+		//return () => clearInterval(interval);
+	}
+
+	console.log("DEVICE-DATA", data);
 
 	// ref
 	const bottomSheetRef = useRef<BottomSheetModal>(null);
@@ -172,7 +177,7 @@ export default function TabOneScreen() {
 					{/* Inicio */}
 
 					{
-						data && data.length > 0 &&
+						data && data.length > 0 ? (
 							<>
 							<View style={styles.carouselView}>
 
@@ -219,7 +224,11 @@ export default function TabOneScreen() {
 								</View>
 							</View>
 							</>
-				}	
+					) : (
+							<View style={styles.noInhalersView}>
+								<MontserratText style={styles.timeText}>No tienes Inhaladores!</MontserratText>
+							</View>
+				)}	
 					
 				{/* Final */}
 				<View style={styles.content}>

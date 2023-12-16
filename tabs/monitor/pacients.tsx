@@ -19,6 +19,8 @@ const PacientsTab = ({ list }: PacientsProps) => {
         console.log("Hola")
     }
 
+    console.log("list", list);
+
     return (
         <View>
             <HeaderAction 

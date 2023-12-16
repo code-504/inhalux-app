@@ -15,10 +15,12 @@ import { useMonitor } from '@/context/MonitorProvider';
 import BlurredDeviceBackground from '@/components/blurredBackground/BlurredDeviceBackground';
 import BlurredMonitorBackground from '@/components/blurredBackground/BlurredMonitorBackground';
 import { useFocusEffect, useNavigation } from 'expo-router';
+import { useRelations } from '@/context/RelationsProvider';
 
 export default function TabThreeScreen() {
 
 	const { optionsOpen, setOptionsOpen } = useMonitor();
+	const { supaMonitors, supaPatients } = useRelations();
 	const navigator = useNavigation()
 	
 	const bottomSheetRef = useRef<BottomSheetModal>(null);
@@ -50,22 +52,23 @@ export default function TabThreeScreen() {
 			avatar: "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
 			kindred: "Mamá"
 		}
-	]*/
-
+	]
+	
 	const pacients:PacientsInfo[] = []
+	*/	
 
 	const tabs = [
 		{
 			id: 1,
 			name: 'Pacientes',
 			Icon: PersonIcon,
-			Component: <PacientsTab list={pacients} />
+			Component: <PacientsTab list={supaPatients ? supaPatients : []} />
 		},
 		{
 			id: 2,
 			name: 'Compartidos',
 			Icon: ShreIcon,
-			Component: <SharesTab list={pacients} />
+			Component: <SharesTab list={supaMonitors ? supaMonitors : []} />
 		}
 	]
 

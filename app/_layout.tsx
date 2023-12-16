@@ -17,6 +17,9 @@ import '@tamagui/core/reset.css'
 import { TamaguiProvider } from 'tamagui'
 import appConfig from "@/tamagui.config"
 import { MonitorProvider } from '@/context/MonitorProvider';
+import { InhalerProvider } from '@/context/InhalerProvider';
+import { TreatmentProvider } from '@/context/TreatmentProvider';
+import { RelationProvider } from '@/context/RelationsProvider';
 import NormalHeader from '@/components/Headers/NormalHeader';
 
 export {
@@ -57,7 +60,13 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-        <RootLayoutNav />
+      <InhalerProvider>
+        <TreatmentProvider>
+          <RelationProvider>
+            <RootLayoutNav />
+          </RelationProvider>
+        </TreatmentProvider>
+      </InhalerProvider>
     </AuthProvider>
   );
 }
