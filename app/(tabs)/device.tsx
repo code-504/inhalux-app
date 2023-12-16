@@ -2,11 +2,9 @@ import { ImageBackground, View, StyleSheet, Dimensions, Alert, NativeSyntheticEv
 import { FlashList } from "@shopify/flash-list";
 import { Button, ScrollView, Switch } from 'tamagui'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import Colors from '@/constants/Colors'
 import Card from '@/components/Card/Card'
 import { Image } from 'expo-image';
-import Carousel, { Pagination } from 'react-native-snap-carousel';
 import SimpleWeatherCard from '@/components/Card/SimpleWeatherCard'
 import { StatusBar } from 'expo-status-bar';
 import * as NavigationBar from 'expo-navigation-bar';
@@ -39,7 +37,7 @@ import BlurredDeviceBackground from '@/components/blurredBackground/BlurredDevic
 import { useHeaderHeight } from '@react-navigation/elements';
 import DeviceHeader from '@/components/Headers/DeviceHeader';
 import { useInhalers } from '@/context/InhalerProvider';
-import { router } from 'expo-router';
+import { Tabs, router, useNavigation } from 'expo-router';
 
 NavigationBar.setBackgroundColorAsync(Colors.white);
 NavigationBar.setButtonStyleAsync("dark");
@@ -70,7 +68,7 @@ export default function TabOneScreen() {
 
 	const { width: screenWidth } = Dimensions.get('window');
 	const SPACING = 12;
-	const ITEM_WIDTH = screenWidth - 24;
+	const ITEM_WIDTH = screenWidth;
 
 	const doLogout = async () => {
 		const { error } = await supabase.auth.signOut();
@@ -110,7 +108,7 @@ export default function TabOneScreen() {
 				<View style={styles.inahlerCardContent}>
 					<View style={styles.inhalerCardLeft}>
 						<View style={styles.inahlerButton}>
-							<Button style={styles.settingsButton} alignSelf="center" size="$6" circular onPress={() => router.push("/device/hola")}>
+							<Button style={styles.settingsButton} alignSelf="center" size="$6" circular onPress={() => router.push(`/device/${item.id}`)}>
 								<SettingsIcon />
 							</Button>
 						</View>
@@ -158,6 +156,13 @@ export default function TabOneScreen() {
 
 	return (
 		<>
+
+		<Tabs.Screen
+            options={{
+                header: () => <DeviceHeader />,
+            }}
+        />
+
 		<View style={styles.safeAre}>
 			
 			<ImageBackground source={BackgroundImage} style={styles.imageBackground}>

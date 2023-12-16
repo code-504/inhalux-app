@@ -21,6 +21,7 @@ import { InhalerProvider } from '@/context/InhalerProvider';
 import { TreatmentProvider } from '@/context/TreatmentProvider';
 import { RelationProvider } from '@/context/RelationsProvider';
 import NormalHeader from '@/components/Headers/NormalHeader';
+import SimpleHeader from '@/components/Headers/SimpleHeader';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -31,6 +32,9 @@ export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: '/(tabs)',
 };
+
+import EditIcon from "@/assets/icons/edit.svg"
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -82,14 +86,17 @@ function RootLayoutNav() {
       <TamaguiProvider config={appConfig}>
         <SafeAreaProvider>
           <MonitorProvider>
+          <BottomSheetModalProvider>
           <Stack initialRouteName='(auth)'>
+            <Stack.Screen name='index' options={{ headerShown: false }} />
             <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
             <Stack.Screen name="(auth)/signup" options={{ headerShown: false }} />
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="device/[inhaler_id]" options={{ headerShown: false, presentation: "containedTransparentModal" }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false, animation: "none" }} />
+            <Stack.Screen name="device/[inhaler_id]" options={{ header: () => <SimpleHeader title="Información general" actionButton={{ fn: () => console.log("hola"), Icon: EditIcon }} />, presentation: "containedTransparentModal", animation: "none" }} />
             <Stack.Screen name="configuration" options={{ header: () => <NormalHeader title="Configuración" />, presentation: 'containedTransparentModal' }} />
             <Stack.Screen name="notification" options={{ header: () => <NormalHeader title="Notificaciones" />, presentation: 'containedTransparentModal' }} />
           </Stack>
+          </BottomSheetModalProvider>
           </MonitorProvider>
         </SafeAreaProvider>
       </TamaguiProvider>

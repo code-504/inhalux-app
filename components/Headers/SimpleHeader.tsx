@@ -11,16 +11,15 @@ import { MontserratSemiText } from '../StyledText'
 
 interface HeaderProps {
     title: string;
-    fn?: () => void;
-    Icon ?: React.FunctionComponent<React.SVGAttributes<SVGElement>>;
-    enableActionButton ?: boolean;
+    actionButton ?: {
+        fn: () => void;
+        Icon: React.FunctionComponent<React.SVGAttributes<SVGElement>>;
+    }
 }
 
-export default function SimpleHeader({ title, fn, Icon, enableActionButton }: HeaderProps) {
+export default function SimpleHeader({ title, actionButton}: HeaderProps) {
 
     const navigation = useNavigation();
-    const enable = enableActionButton || false;
-    const IconButton = Icon || null;
 
     const handleBackPress = () => {
         navigation.goBack();
@@ -37,9 +36,9 @@ export default function SimpleHeader({ title, fn, Icon, enableActionButton }: He
                 <MontserratSemiText style={styles.headerTitle}>{ title }</MontserratSemiText>
 
                 {
-                    Icon && 
-                    <Button style={styles.backButton} alignSelf="center" size="$6" circular onPress={fn}>
-                            <Icon />
+                    actionButton && 
+                    <Button style={styles.actionButton} alignSelf="center" size="$6" circular onPress={actionButton.fn}>
+                            <actionButton.Icon />
                     </Button>
                 }
             </View>
@@ -66,6 +65,11 @@ const styles = StyleSheet.create({
     backButton: {
         position: "absolute",
         left: 0,
+        backgroundColor: Colors.light.background
+    },
+    actionButton: {
+        position: "absolute",
+        right: 0,
         backgroundColor: Colors.light.background
     }
 })

@@ -7,20 +7,13 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MontserratSemiText } from './StyledText';
+import { BottomSheetViewPorps } from '@/interfaces/location';
 //import { SEARCH_HANDLE_HEIGHT } from '@gorhom/bottom-sheet-example-app';
 //import { LOCATION_DETAILS_HEIGHT } from '../locationDetails';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-interface BottomSheetViewPorps {
-  animatedPosition: Animated.SharedValue<number>;
-  animatedIndex: Animated.SharedValue<number>;
-  children: JSX.Element | ReactElement | JSX.Element[] | ReactElement[] | null;
-  topPosition: number;
-  topState: boolean;
-}
-
-const BottomSheetView = ({ animatedIndex, animatedPosition, children, topPosition, topState }: BottomSheetViewPorps) => {
+const BottomSheetView = ({ animatedIndex, animatedPosition, children, position, lockPosition }: BottomSheetViewPorps) => {
   // hooks
   const { bottom: bottomSafeArea } = useSafeAreaInsets();
 
@@ -28,8 +21,8 @@ const BottomSheetView = ({ animatedIndex, animatedPosition, children, topPositio
   const lockedYPosition = useMemo(
     () =>
     SCREEN_HEIGHT -
-    bottomSafeArea - (topState ? 430 : 540),
-    [bottomSafeArea, topState]
+    bottomSafeArea - lockPosition,
+    [bottomSafeArea, lockPosition]
   );
   const containerAnimatedStyle = useAnimatedStyle(
     () => ({
@@ -37,12 +30,12 @@ const BottomSheetView = ({ animatedIndex, animatedPosition, children, topPositio
         {
           translateY:
             animatedPosition.value > lockedYPosition
-              ? animatedPosition.value - topPosition
-              : lockedYPosition - topPosition,
+              ? animatedPosition.value - position
+              : lockedYPosition - position,
         },
       ],
     }),
-    [lockedYPosition]
+    [lockedYPosition, position]
   );
 
   const containerStyle = useMemo(
@@ -50,7 +43,7 @@ const BottomSheetView = ({ animatedIndex, animatedPosition, children, topPositio
       styles.container,
       containerAnimatedStyle,
     ],
-    [containerAnimatedStyle, topPosition]
+    [containerAnimatedStyle]
   );
 
   return (
