@@ -38,8 +38,9 @@ import BlurredBackground from '@/components/blurredBackground/BlurredBackground'
 import BlurredDeviceBackground from '@/components/blurredBackground/BlurredDeviceBackground';
 import { useHeaderHeight } from '@react-navigation/elements';
 import DeviceHeader from '@/components/Headers/DeviceHeader';
+import { router } from 'expo-router';
 
-NavigationBar.setBackgroundColorAsync(Colors.lightGrey);
+NavigationBar.setBackgroundColorAsync(Colors.white);
 NavigationBar.setButtonStyleAsync("dark");
 
 export default function TabOneScreen() {
@@ -104,7 +105,7 @@ export default function TabOneScreen() {
 				<View style={styles.inahlerCardContent}>
 					<View style={styles.inhalerCardLeft}>
 						<View style={styles.inahlerButton}>
-							<Button style={styles.settingsButton} alignSelf="center" size="$6" circular>
+							<Button style={styles.settingsButton} alignSelf="center" size="$6" circular onPress={() => router.push("/device/hola")}>
 								<SettingsIcon />
 							</Button>
 						</View>
@@ -381,6 +382,7 @@ const styles = StyleSheet.create({
 	},
 	inahlerTitle: {
 		fontSize: 18,
+		marginBottom: 8
 	},
 	inahlerStatus: {
 		display: "flex",

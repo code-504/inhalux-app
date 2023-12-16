@@ -10,17 +10,12 @@ import ArrowBackIcon from "@/assets/icons/arrow_back.svg";
 import { MontserratSemiText } from '../StyledText'
 
 interface HeaderProps {
-    title: string;
-    fn?: () => void;
-    Icon ?: React.FunctionComponent<React.SVGAttributes<SVGElement>>;
-    enableActionButton ?: boolean;
+    title: string
 }
 
-export default function SimpleHeader({ title, fn, Icon, enableActionButton }: HeaderProps) {
+export default function NormalHeader({ title }: HeaderProps) {
 
     const navigation = useNavigation();
-    const enable = enableActionButton || false;
-    const IconButton = Icon || null;
 
     const handleBackPress = () => {
         navigation.goBack();
@@ -35,13 +30,6 @@ export default function SimpleHeader({ title, fn, Icon, enableActionButton }: He
                 </Button>
 
                 <MontserratSemiText style={styles.headerTitle}>{ title }</MontserratSemiText>
-
-                {
-                    Icon && 
-                    <Button style={styles.backButton} alignSelf="center" size="$6" circular onPress={fn}>
-                            <Icon />
-                    </Button>
-                }
             </View>
         </SafeAreaView>
     )

@@ -79,8 +79,8 @@ const styleItem = StyleSheet.create({
     container: {
         display: 'flex',
         flexDirection: 'row',
-        gap: 16,
-        paddingHorizontal: 16,
+        gap: 20,
+        paddingHorizontal: 24,
         paddingVertical: 24,
         backgroundColor: Colors.white,
     },

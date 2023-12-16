@@ -15,14 +15,14 @@ export default function DeviceHeader() {
     const {supaUser} = useAuth();
 
     const handleNotificationPress = () => {
-        router.push("/notification/")
+        router.push("/notification")
     };
 
     return (
         <SafeAreaView style={styles.safeAre}>
             <View style={styles.header}>
                 <View style={styles.containerView}>
-                    <Link href="/configuration/">
+                    <Link href="/configuration">
                         <Avatar size="$6" circular>
                             <Avatar.Image
                                 accessibilityLabel="Cam"
