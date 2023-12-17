@@ -35,6 +35,7 @@ export const unstable_settings = {
 
 import EditIcon from "@/assets/icons/edit.svg"
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import SimpleHeader from '@/components/Headers/SimpleHeader';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -94,7 +95,7 @@ function RootLayoutNav() {
             <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
             <Stack.Screen name="(auth)/signup" options={{ headerShown: false }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false, animation: "none" }} />
-            <Stack.Screen name="device/[inhaler_id]" options={{ header: () => <SimpleHeader title="Información general" actionButton={{ fn: () => console.log("hola"), Icon: EditIcon }} />, presentation: "containedTransparentModal", animation: "none" }} />
+            <Stack.Screen name="device/[inhaler_id]" options={{ header: () => <SimpleHeader title="Información general" actionButton={{ fn: () => console.log("adios"), Icon: EditIcon }} />, presentation: "containedTransparentModal", animation: "none" }} />
             <Stack.Screen name="configuration" options={{ header: () => <NormalHeader title="Configuración" />, presentation: 'containedTransparentModal' }} />
             <Stack.Screen name="notification" options={{ header: () => <NormalHeader title="Notificaciones" />, presentation: 'containedTransparentModal' }} />
           </Stack>
