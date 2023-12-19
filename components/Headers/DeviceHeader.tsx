@@ -26,7 +26,7 @@ export default function DeviceHeader() {
                         <Avatar size="$6" circular>
                             <Avatar.Image
                                 accessibilityLabel="Cam"
-                                src="https://images.unsplash.com/photo-1548142813-c348350df52b?&w=150&h=150&dpr=2&q=80"
+                                src={supaUser?.avatar}
                             />
                             <Avatar.Fallback backgroundColor="$blue10" />
                         </Avatar>

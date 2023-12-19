@@ -11,7 +11,7 @@ export interface inhalerProps {
   title       : string,
   connection  : string,
   battery     : string,
-  dosis        : string,
+  dosis       : string,
 }
 
 export interface InhalerContextType {
