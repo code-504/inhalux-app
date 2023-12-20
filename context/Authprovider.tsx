@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import { useContext, useEffect, useState, createContext } from 'react';
 import { Session } from '@supabase/supabase-js'
 import { useRouter, useSegments, useRootNavigationState } from 'expo-router';
 import { supabase } from '@/services/supabase';
+import { Avatar } from 'tamagui';
 
 interface Props {
   children?: React.ReactNode;
@@ -12,6 +13,7 @@ export type InitializedUser = {
   id: String;
   name: String;
   email: String;
+  avatar: String;
 }
 
 export interface AuthContextType {
@@ -19,6 +21,7 @@ export interface AuthContextType {
   authInitialized: boolean;
   isLoading: boolean;
   supaUser: InitializedUser | null | undefined;
+  setSupaUser: Dispatch<SetStateAction<any>>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
@@ -68,7 +71,7 @@ export function AuthProvider({ children }: Props) {
 
       let { data: users, error } = await supabase
         .from('users')
-        .select("name, last_name")
+        .select("name, last_name, avatar")
         .eq('id', user.id)
 
         if(!users) return;
@@ -76,7 +79,8 @@ export function AuthProvider({ children }: Props) {
         const initializedUser: InitializedUser = {
           id: user.id,
           name: users[0].name + " " + (users[0].last_name == null ? "" : users[0].last_name),
-          email: user.email ? user.email : ""
+          email: user.email ? user.email : "",
+          avatar: users[0].avatar == null ? "https://ckcwfpbvhbstslprlbgr.supabase.co/storage/v1/object/public/avatars/default_avatar.png?t=2023-12-19T02%3A43%3A15.423Z" : users[0].avatar
         };
 
         setSupaUser(initializedUser);
@@ -102,7 +106,7 @@ export function AuthProvider({ children }: Props) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ session, authInitialized, isLoading, supaUser }}>
+    <AuthContext.Provider value={{ session, authInitialized, isLoading, supaUser, setSupaUser }}>
       {children}
     </AuthContext.Provider>
   );

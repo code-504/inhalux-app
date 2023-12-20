@@ -2,12 +2,12 @@ import { View, ImageBackground, StyleSheet, ScrollView } from 'react-native'
 import Colors from '@/constants/Colors'
 import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/components/StyledText'
 import Card from '@/components/Card/Card'
-import { Avatar, Button } from 'tamagui'
+import { Avatar, Button, Input } from 'tamagui'
 import CardOptionsList from '@/components/Card/CardOptionsList'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { StatusBar } from 'expo-status-bar'
 import { RefreshControl } from 'react-native-gesture-handler'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import SimpleWeatherCard from '@/components/Card/SimpleWeatherCard'
 import { Image } from 'expo-image';
 import { inhalerProps } from '@/context/InhalerProvider'
@@ -26,37 +26,85 @@ import HelpIcon from "@/assets/icons/help.svg"
 import AqIcon from "@/assets/icons/aq.svg"
 import HumIcon from "@/assets/icons/humidity_percentage.svg"
 import BlurredDeviceBackground from '@/components/blurredBackground/BlurredDeviceBackground'
-import { useLocalSearchParams } from 'expo-router'
+import { useLocalSearchParams, useNavigation } from 'expo-router'
 import { useInhalers } from '@/context/InhalerProvider'
+import { supabase } from '@/services/supabase'
 
 
 const Page = () => {
   const [ refresh, setRefresh ] = useState<boolean>(false);
   const { inhaler_id } = useLocalSearchParams();
-  const { fetchSupaInhalerById } = useInhalers();
+  //const { fetchSupaInhalerById } = useInhalers();
   const [item, setItem] = useState<inhalerProps | null>(null);
-  const [ isLoading, setIsLoading ] = useState<boolean>(true);
+  //const [ isLoading, setIsLoading ] = useState<boolean>(false);
+  const {supaInhalers, setSupaInhalers} = useInhalers();
+  const [ inhalerName, setInhalerName ] = useState<string>("");
+  const navigation = useNavigation();
 
-  const getInhaler = async () => {
+  /*const getInhaler = async () => {
     setIsLoading(true)
     const inhaler = await fetchSupaInhalerById(String(inhaler_id));
 
     setItem(inhaler)
     setIsLoading(false);
-  }
+  }*/
 
   useEffect(() => {
-    getInhaler();
+	const foundInhaler = supaInhalers?.find(inhaler => inhaler.id === inhaler_id);
+	const clonedInhaler = {...foundInhaler};
+	//console.log("found inhaler, ", foundInhaler);
+	setItem(clonedInhaler);
+	setInhalerName(foundInhaler.title);
   }, [])
 
-  const pullRequest = async () => {
+  	const pullRequest = async () => {
 		setRefresh(true);
 
-    const interval = setInterval(() => {
-      setRefresh(false)
-    }, 300)
+		const interval = setInterval(() => {
+			setRefresh(false)
+		}, 300)
 
 		return () => clearInterval(interval);
+	}
+
+	const handleUpdateInhaler = async() => {
+		const { data, error } = await supabase
+			.from('inhalers')
+			.update({ name: inhalerName })
+			.eq('id', inhaler_id)
+			.select()
+
+		setItem((prevItem) => {
+			if (prevItem) {
+			  return { ...prevItem, title: inhalerName };
+			}
+			return prevItem;
+		});
+
+		setSupaInhalers(prevSupaInhalers => {
+			return prevSupaInhalers.map((inhaler) =>
+				inhaler.id === inhaler_id ? { ...inhaler, title: inhalerName } : inhaler
+			);
+		});
+
+		console.log("supaInhalers ANTES", supaInhalers);
+		console.log("item", item);
+		console.log("supaInhalers DESPUES", supaInhalers);
+
+	}
+
+	const handleDeleteInhaler = async() => {
+		
+		const { error } = await supabase
+			.from('inhalers')
+			.delete()
+			.eq('id', inhaler_id)
+
+		setSupaInhalers((prevSupaInhalers) =>
+			prevSupaInhalers.filter((inhaler) => inhaler.id !== inhaler_id)
+		);
+
+		navigation.navigate('(tabs)');
 	}
 
 	// ref
@@ -82,7 +130,21 @@ const Page = () => {
 			>
 				<View style={styles.content}>
 
-          { !isLoading ? <RenderItem item={item} /> : null }
+          { item ? <RenderItem item={item} /> : null }
+
+		  <Input
+			id="inhaler_name"
+			onChangeText={(text) => setInhalerName(text)}
+			value={inhalerName}
+			borderRadius={32}
+			borderWidth={0}
+			style={styles.input}/>
+
+			<View style={styles.twoBlock}>
+				<Button style={styles.whiteButton} alignSelf="center" size="$6" onPress={handleUpdateInhaler}>Actualizar</Button>
+				<Button style={styles.whiteButton} alignSelf="center" size="$6" onPress={handleDeleteInhaler}>Eliminar</Button>
+			</View>
+
 					<View style={styles.timeView}>
 						<View style={styles.timeTitleView}>
 							<View style={styles.timeTitle}>
@@ -140,19 +202,19 @@ const RenderItem = ({ item }: any) => (
         <View style={styles.inhalerCardLeft}>
           <View style={styles.inahlerView}>
             <View style={styles.inahlerTitleView}>
-              <MontserratBoldText style={styles.inahlerTitle}>{ item.title }</MontserratBoldText>
-              <MontserratText>{ item.connection }</MontserratText>
+              <MontserratBoldText style={styles.inahlerTitle}>{item.title}</MontserratBoldText>
+              <MontserratText>{ item ? item.connection : "connection" }</MontserratText>
             </View>
 
             <View style={styles.inahlerStatus}>
               <View style={styles.inahlerStatusInfo}>
                 <BatteryIcon style={styles.inahlerStatusIcon} />
-                <MontserratSemiText>{ item.battery }%</MontserratSemiText>
+                <MontserratSemiText>{item.batter}%</MontserratSemiText>
               </View>
 
               <View style={styles.inahlerStatusInfo}>
                 <DoseIcon style={styles.inahlerStatusIcon} />
-                <MontserratSemiText>{ item.dose } dosis</MontserratSemiText>
+                <MontserratSemiText>{item.dosis} dosis</MontserratSemiText>
               </View>
             </View>
           </View>
@@ -363,5 +425,10 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		justifyContent: "space-between",
 		gap: 16
+	},
+	input: {
+		height: 60,
+		backgroundColor: "#fff",
+		textAlign: "center"
 	}
 })

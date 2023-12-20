@@ -11,7 +11,7 @@ export interface inhalerProps {
   title       : string,
   connection  : string,
   battery     : string,
-  dose        : string,
+  dosis       : string,
 }
 
 export interface InhalerContextType {
@@ -58,7 +58,7 @@ export function InhalerProvider({ children }: Props) {
                   title: inhaler.name,
                   connection: `Hace ${calculateDaysAgo(inhaler.inhaler_ubication.last_seen)}`,
                   battery: inhaler.inhaler_state.battery,
-                  dose: inhaler.inhaler_state.dosis,
+                  dosis: inhaler.inhaler_state.dosis,
                 }));
           setSupaInhalers(transformedData);
           // console.log("new supainhalers", supaInhalers);
@@ -89,7 +89,7 @@ export function InhalerProvider({ children }: Props) {
           title: String(inhalersData.name),
           connection: String(`Hace ${calculateDaysAgo(inhalersData.inhaler_ubication.last_seen)}`),
           battery: String(inhalersData.inhaler_state.battery),
-          dose: String(inhalersData.inhaler_state.dosis),
+          dosis: String(inhalersData.inhaler_state.dosis),
         }
 
         console.log(transformedData)
