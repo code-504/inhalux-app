@@ -7,10 +7,12 @@ import ArrowIcon from "@/assets/icons/arrow_outward.svg"
 import { StyleSheet } from 'react-native'
 import Colors from '@/constants/Colors'
 import { MontserratBoldText, MontserratText } from '../StyledText'
+import Ripple from 'react-native-material-ripple'
+import { Pacient } from '@/interfaces/Monitor'
 
-const ContactCard = ({ name, kindred, avatar }:PacientsInfo) => {
+const ContactCard = ({ name, kindred, avatar }:Pacient) => {
     return (
-        <View style={styles.cardView}>
+        <Ripple style={styles.cardView}>
             <View style={styles.cardContent}>
                 <Avatar size="$5" circular style={styles.avatar}>
                     <Avatar.Image
@@ -27,7 +29,7 @@ const ContactCard = ({ name, kindred, avatar }:PacientsInfo) => {
             </View>
 
             <ArrowIcon style={styles.arrowIcon} />
-        </View>
+        </Ripple>
     )
 }
 
@@ -39,7 +41,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        paddingHorizontal: 2,
+        paddingHorizontal: 24,
         height: 96,
         borderBottomWidth: 1,
         borderBottomColor: Colors.dotsGray

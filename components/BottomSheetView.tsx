@@ -7,7 +7,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MontserratSemiText } from './StyledText';
-import { BottomSheetViewPorps } from '@/interfaces/location';
+import { BottomSheetViewPorps } from '@/interfaces/Location';
 //import { SEARCH_HANDLE_HEIGHT } from '@gorhom/bottom-sheet-example-app';
 //import { LOCATION_DETAILS_HEIGHT } from '../locationDetails';
 

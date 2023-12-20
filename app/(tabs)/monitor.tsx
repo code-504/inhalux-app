@@ -14,13 +14,14 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useMonitor } from '@/context/MonitorProvider';
 import BlurredDeviceBackground from '@/components/blurredBackground/BlurredDeviceBackground';
 import BlurredMonitorBackground from '@/components/blurredBackground/BlurredMonitorBackground';
-import { useFocusEffect, useNavigation } from 'expo-router';
+import { Tabs, useFocusEffect, useNavigation } from 'expo-router';
 import { useRelations } from '@/context/RelationsProvider';
+import MonitorHeader from '@/components/Headers/MonitorHeader';
 
 export default function TabThreeScreen() {
 
 	const { optionsOpen, setOptionsOpen } = useMonitor();
-	const { supaMonitors, supaPatients } = useRelations();
+	const { supaMonitors, pacientState, setPacientState } = useRelations();
 	const navigator = useNavigation()
 	
 	const bottomSheetRef = useRef<BottomSheetModal>(null);
@@ -62,7 +63,7 @@ export default function TabThreeScreen() {
 			id: 1,
 			name: 'Pacientes',
 			Icon: PersonIcon,
-			Component: <PacientsTab list={supaPatients ? supaPatients : []} />
+			Component: <PacientsTab pacientState={pacientState} setPacientState={setPacientState} />
 		},
 		{
 			id: 2,
@@ -97,6 +98,13 @@ export default function TabThreeScreen() {
 
 	return (
 		<View style={styles.viewArea}>
+
+			<Tabs.Screen
+				options={{
+					header: () => <MonitorHeader />,
+				}}
+			/>
+
 			<ImageBackground source={BackgroundImage} style={styles.imageBackground}>
 				<View style={styles.container}>
 					<TabBar tabs={tabs} />
@@ -142,7 +150,6 @@ const styles = StyleSheet.create({
 const stylesBottom = StyleSheet.create({
 	container: {
 		paddingTop: 16,
-		paddingHorizontal: 24
 	},
 	title: {
 		fontSize: 26,
