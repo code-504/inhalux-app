@@ -19,6 +19,7 @@ import SearchIcon from "@/assets/icons/search.svg"
 import ContactCard from '@/components/Card/ContactCard'
 import { FlashList } from '@shopify/flash-list'
 import { PacientsTabProps } from '@/interfaces/Monitor'
+import { router } from 'expo-router'
 
 const PacientsTab = ({ pacientState, setPacientState }: PacientsTabProps) => {
 
@@ -71,7 +72,7 @@ const PacientsTab = ({ pacientState, setPacientState }: PacientsTabProps) => {
                     <>
                     <View style={styles.listView}>
                         <View style={styles.searchInputView}>
-                            <Input style={styles.searchInput} id="search-in-pacients" borderRadius="$10" borderWidth={1} placeholder="Buscar por nombre" onChange={(value) => handleChange(value)} />
+                            <Input style={styles.searchInput} id="search-in-pacients" borderRadius="$10" borderWidth={1} placeholder="Buscar por nombre" onChange={(value) => handleChange(value)} onPress={() => router.push("/monitor/pacient_search")} />
                             <SearchIcon style={styles.searchIcon}/>
                         </View>
                     </View>
