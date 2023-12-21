@@ -4,7 +4,7 @@ import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/compon
 import Card from '@/components/Card/Card'
 import { Avatar, Button } from 'tamagui'
 import CardOptionsList from '@/components/Card/CardOptionsList'
-import * as ImagePicker from "expo-image-picker"
+
 // Resources
 import BackgroundImage from "@/assets/images/background.png"
 import ArrowBackIcon from "@/assets/icons/arrow_back_simple.svg"
@@ -16,59 +16,10 @@ import { useAuth } from '@/context/Authprovider'
 import { err } from 'react-native-svg/lib/typescript/xml'
 import { supabase } from '@/services/supabase'
 import { decode } from 'base64-arraybuffer'
-import * as FileSystem from 'expo-file-system';
+import { handleErasePicture, handleTakePicture, handleUploadPicture } from '@/helpers/avatar'
 
 const ConfigurationScreen = () => {
-  const { supaUser, setSupaUser } = useAuth();
-
-  const handleTakePicture = async() => {
-
-  }
-
-  const handleUploadPicture = async() => {
-    const options: ImagePicker.ImagePickerOptions = {
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync(options);
-
-    if(!result.canceled){
-      const img = result.assets[0];
-      const base64 = await FileSystem.readAsStringAsync(img.uri, {encoding: 'base64'});
-      const filePath = `/public/${new Date().getTime()}.png`
-      const contentType = 'image/png';
-
-      if(supaUser?.avatar != "https://ckcwfpbvhbstslprlbgr.supabase.co/storage/v1/object/public/avatars/default_avatar.png?t=2023-12-19T02%3A43%3A15.423Z"){
-      
-      console.log("avatar", `public/${supaUser?.avatar.substring(supaUser?.avatar.lastIndexOf('/') + 1)}`);
-
-        const { data, error } = await supabase
-        .storage
-        .from('avatars')
-        .remove([`public/${supaUser?.avatar.substring(supaUser?.avatar.lastIndexOf('/') + 1)}`])
-      
-        console.log("dataDelete ",data);
-        console.log("errorDelete ",error);
-      }
-
-      const { data, error } = await supabase.storage.from("avatars").upload(filePath, decode(base64), { contentType });
-
-        console.log("data ",data);
-        console.log("error ",error);
-
-      const url = `https://ckcwfpbvhbstslprlbgr.supabase.co/storage/v1/object/public/avatars${filePath}`;
-      setSupaUser({ ...supaUser, avatar: url});
- 
-      const { data: userData, error: errorData } = await supabase
-        .from('users')
-        .update({ avatar: url })
-        .eq("id", supaUser?.id)
-        .select()
-        
-    }
-
-  }
+  const { supaUser, setSupaUser} = useAuth();
 
   return (
     <View style={styles.safeArea}>
@@ -101,9 +52,11 @@ const ConfigurationScreen = () => {
             </View>
 
             <View style={styles.twoBlock}>
-              <Button style={styles.whiteButton} alignSelf="center" size="$6" onPress={handleUploadPicture}>Subir Foto</Button>
-              <Button style={styles.whiteButton} alignSelf="center" size="$6" onPress={handleTakePicture}>Tomar Foto</Button>
+              <Button style={styles.whiteButton} alignSelf="center" size="$6" onPress={ () => handleUploadPicture(supaUser, setSupaUser)}>Subir Foto</Button>
+              <Button style={styles.whiteButton} alignSelf="center" size="$6" onPress={ () => handleTakePicture(supaUser, setSupaUser)}>Tomar Foto</Button>
             </View>
+            <Button style={styles.whiteButton} alignSelf="center" size="$6" onPress={ () => handleErasePicture(supaUser, setSupaUser)}>Borrar Foto</Button>
+
 
             <CardOptionsList title="Opciones de compartir">
               <CardOptionsList.ItemView>
