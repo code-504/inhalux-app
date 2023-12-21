@@ -31,5 +31,7 @@ export default {
   cyan: "#DEF6F5",
   dotsGray: '#E2E2E2',
   buttonGray: "#F8F8F8",
-  bottomBarGray: "#F1F2F2"
+  bottomBarGray: "#F1F2F2",
+  green: "#19A516",
+  red: "#A51616"
 };

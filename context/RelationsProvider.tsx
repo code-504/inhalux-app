@@ -1,6 +1,7 @@
-import React, { Dispatch, SetStateAction } from 'react';
+import React, { Dispatch, SetStateAction, useCallback } from 'react';
 import { useContext, useEffect, useState, createContext } from 'react';
 import { supabase } from '@/services/supabase';
+import { Pacient, PacientState } from '@/interfaces/Monitor';
 
 interface Props {
   children?: React.ReactNode;
@@ -9,8 +10,8 @@ interface Props {
 export interface RelationContextType {
     supaMonitors: any[] | null;
     setSupaMonitors: Dispatch<SetStateAction<any[] | null>>;
-    supaPatients: any[] | null;
-    setSupaPatients: Dispatch<SetStateAction<any[] | null>>;
+    pacientState: PacientState;
+    setPacientState: Dispatch<React.SetStateAction<PacientState>>
 }
 
 export const RelationContext = createContext<RelationContextType | undefined>(
@@ -22,9 +23,13 @@ export function RelationProvider({ children }: Props) {
     const [supaMonitors, setSupaMonitors] = useState<any | null>(null);
     const [supaPatients, setSupaPatients] = useState<any | null>(null);
 
-  useEffect(() => {
+    const [pacientState, setPacientState] = useState<PacientState>({
+      data: [],
+      filterText: "",
+      loading: true
+    });
 
-    const fetchSupaRelations = async () => {
+    /*const fetchSupaRelations = async () => {
       const { data: { user } } = await supabase.auth.getUser()
   
       if(!user) return;
@@ -62,9 +67,73 @@ export function RelationProvider({ children }: Props) {
         setSupaPatients(transformedPatientData);
         //console.log("Pacientes: ", transformedPatientData)
   
-    };
+    };*/
+  
+    const fetchPacientsData = useCallback(async () => {
+      try {
+        setPacientState({
+          ...pacientState,
+          loading: true
+        })
 
-    fetchSupaRelations();
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if(!user) return;
+
+        const query = supabase.from('user_relations').select(`
+          id, 
+          name_from_monitor,
+          user: fk_user_patient ( name, last_name )
+        `)
+        .eq('fk_user_monitor', user.id)
+        .like("user.name", '%' + pacientState.filterText + '%')
+        .order('name_from_monitor', { ascending: true });
+
+        const { data, error } = await query;
+
+        console.log("pacients", data)
+
+        if (error)
+          throw error;
+
+        if (!data) {
+          setPacientState({
+            ...pacientState,
+            data: [],
+            loading: false
+          })
+
+          return
+        }
+
+        let transformedPatientData = data.map((patient: any): Pacient => ({
+          name: patient.user.name + ( patient.user.last_name ? " " + patient.user.last_name : ""),
+          avatar: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+          kindred: patient.name_from_monitor ? patient.name_from_monitor : "Relativo",
+        }));
+
+        setPacientState({
+          ...pacientState,
+          data: transformedPatientData,
+          loading: false
+        })
+        
+      } catch(error) {
+        setPacientState({
+          ...pacientState,
+          data: [],
+          loading: false
+        })
+      }
+  }, [pacientState.filterText])
+
+  useEffect(() => {
+    fetchPacientsData()
+  }, [pacientState.filterText]);
+    
+  useEffect(() => {
+
+    fetchPacientsData();
 
   }, []);
 
@@ -73,8 +142,8 @@ export function RelationProvider({ children }: Props) {
         {
           supaMonitors, 
           setSupaMonitors,
-          supaPatients, 
-          setSupaPatients
+          pacientState,
+          setPacientState
         }
       }>
       {children}

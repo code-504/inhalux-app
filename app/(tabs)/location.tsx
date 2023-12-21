@@ -7,34 +7,34 @@ import React, {
   useState,
 } from 'react';
 import { View, StyleSheet, Dimensions, Platform, PermissionsAndroid, BackHandler } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker, Region, UserLocationChangeEvent } from 'react-native-maps';
 import {
   useSharedValue,
-  useAnimatedStyle,
   useDerivedValue,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   BottomSheetModal,
-  BottomSheetScrollView,
-  BottomSheetBackdrop,
-  TouchableOpacity,
   BottomSheetBackdropProps,
   BottomSheetModalProvider,
   BottomSheetFlatList,
 } from '@gorhom/bottom-sheet';
 import BottomSheetView from '@/components/BottomSheetView';
 import * as NavigationBar from 'expo-navigation-bar';
-
 import * as Location from 'expo-location';
 import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/components/StyledText';
 import axios from 'axios';
 import { StatusBar } from 'expo-status-bar';
-import BlurredBackground from '@/components/blurredBackground/BlurredBackground';
 import HeaderAction from '@/components/HeaderAction';
-import { Avatar, Button } from 'tamagui';
+import { Avatar, Button, Spinner } from 'tamagui';
 import Colors from '@/constants/Colors';
 import Ripple from 'react-native-material-ripple';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import BlurredBackgroundNew from '@/components/blurredBackground/BlurredBackgroundNew';
+import { stores } from '@/constants/Data';
+import { useFocusEffect, useNavigation } from 'expo-router';
+import { BottomSheetState, ButtonLocationState, InitLocation, LocationPermissions, LocationPoints, LocationType } from '../../interfaces/Location';
+import * as Network from 'expo-network';
 
 // Resources
 import AddIcon from "@/assets/icons/add.svg"
@@ -44,17 +44,20 @@ import LocationUnknowIcon from "@/assets/icons/location_searching.svg"
 import LocationCurrentIcon from "@/assets/icons/my_location.svg"
 import LocationDisabledIcon from "@/assets/icons/location_disabled.svg"
 import { FlashList } from '@shopify/flash-list';
-import BlurredStoresBackground from '@/components/blurredBackground/BlurredStoresBackground';
-import { useFocusEffect, useNavigation } from 'expo-router';
-import { BottomSheetState } from '../../interfaces/location';
-import BlurredBackgroundNew from '@/components/blurredBackground/BlurredBackgroundNew';
 import BatteryIcon from "@/assets/icons/battery.svg"
 import SoundIcon from "@/assets/icons/volume_up.svg"
 import RouteIcon from "@/assets/icons/alt_route.svg"
+import CloseIcon from "@/assets/icons/close.svg"
+
+import { GeofencingEventType } from 'expo-location';
+import * as TaskManager from 'expo-task-manager';
+import { supabase } from '@/services/supabase';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 NavigationBar.setBackgroundColorAsync("white");
 NavigationBar.setButtonStyleAsync("dark");
+
+const TASK_NAME = "background-location"
 
 const TabTwoScreen = () => {
   // refs
@@ -62,15 +65,16 @@ const TabTwoScreen = () => {
   const inhalerListModalRef = useRef<BottomSheetModal>(null);
   const storesModalRef  = useRef<BottomSheetModal>(null);
   const inhalerModalRef  = useRef<BottomSheetModal>(null);
-  const buttonStateRef = useRef<number>(0);
 
-  const navigator = useNavigation()
+  const navigatorB = useNavigation()
 
-  const [location, setLocation] = useState(null);
+  const [location, setLocation] = useState<Location.LocationObjectCoords>();
   const [pharmacies, setPharmacies] = useState([]);
-  const [buttonState, setButtonState] = useState<number>(0);
+  const [buttonState, setButtonState] = useState<ButtonLocationState>(ButtonLocationState.Inactive);
   const [isMapLoading, setIsMapLoading] = useState<boolean>(true);
   const [inhaler, setInhaler] = useState(null)
+  const [initialLocation, setInitialLocation] = useState<Region>()
+  const [permissionChange, setPermissionChange] = useState<boolean>(false);
 
   const [bottomSheetState, setBottomSheetState] = useState<BottomSheetState>({
     position: 162,
@@ -81,72 +85,141 @@ const TabTwoScreen = () => {
 
   const data:any[] = [
     {
-      id: 1,
+      id: 0,
       title: "Inhalador casa",
       where: "casa",
       when: "Hace tres minutos",
       latitude: 20.608629422133586,
       longitude: -103.28179174462451,
-      battery: 80
+      battery: 80,
+      address: "Calle Salamanca, San Martín de Las Flores, San Pedro Tlaquepaque, Jalisco, 45625, México"
+    },
+    {
+      id: 1,
+      title: "Inhalador casa",
+      where: "casa",
+      when: "Hace tres minutos",
+      latitude: 20.702444918665606,
+      longitude: -103.3888371168304,
+      battery: 45,
+      address: "C. Nueva Escocia 1885, 44630 Guadalajara, Jal."
     },
     {
       id: 2,
       title: "Inhalador casa",
       where: "casa",
       when: "Hace tres minutos",
-      latitude: 20.608629422133586,
-      longitude: -103.28179174462451,
-      battery: 45
-    },
-    {
-      id: 3,
-      title: "Inhalador casa",
-      where: "casa",
-      when: "Hace tres minutos",
-      latitude: 20.609493054084997,
-      longitude: -103.28020924139345,
-      battery: 32
+      latitude: 20.60994570626775,
+      longitude: -103.28013467661216,
+      battery: 32,
+      address: "Teapan 132, San Pedrito, 45625 San Pedro Tlaquepaque, Jal."
     }
   ]
-
-  const getLocation = async () => {
+  
+  const getPhoneLocation = async () => {
     try {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-
-      if (status !== 'granted') return;
-      
       setIsMapLoading(true)
 
-      const last = await Location.getLastKnownPositionAsync();
-      console.log("the last", last)
+      const granted = await Location.hasServicesEnabledAsync();
 
-
-      if (last) {
-        setLocation(last.coords);
-        buttonStateRef.current = 1;
+      if (!granted) {
+        setButtonState(ButtonLocationState.Inactive)
       } else {
-        const current = await Location.getCurrentPositionAsync();
-        setLocation(current.coords);
-        buttonStateRef.current = 0;
+        setButtonState(ButtonLocationState.Active)
       }
+
+      let value = await AsyncStorage.getItem('location').then((data) => {
+        return data ? JSON.parse(data) as Region : null
+      });
+
+      setInitialLocation({
+        latitude: value?.latitude || coords.latitude || 0,
+        longitude: value?.longitude || coords.longitude || 0,
+        latitudeDelta: value?.latitudeDelta || 0.0922,
+        longitudeDelta: value?.longitudeDelta || 0.0421,
+      })
+
       setIsMapLoading(false)
+      
     } catch (error) {
-      console.log(error);
+      setInitialLocation({
+        latitude: 0,
+        longitude: 0,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+      })
+
+      console.log(error)
       setIsMapLoading(false)
+      setButtonState(ButtonLocationState.Inactive)
     }
   };
 
+  const requestForegroundPermission = async () => {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    const granted = await Location.hasServicesEnabledAsync(); 
+
+    if (status !== 'granted') {
+      console.log("No tiene permiso")
+      return {
+        foregroundPermission: false,
+        hasLocationEnabled: granted
+      };
+    } else {
+      if (!permissionChange)
+        setPermissionChange(true)
+
+      return {
+        foregroundPermission: true,
+        hasLocationEnabled: granted
+      };
+    }
+  }
+
+  const getCurrentPosition = async () => {
+
+    const { foregroundPermission, hasLocationEnabled } = await requestForegroundPermission();
+
+    if (foregroundPermission && hasLocationEnabled)
+      await Location.watchPositionAsync({
+        accuracy: Location.Accuracy.Highest,
+        timeInterval: 3000,
+        distanceInterval: 8,
+    }, ({ coords }) => {
+      console.log(coords)
+      setLocation(coords)
+    })
+  }
+
   useEffect(() => {
-    getLocation();
+    getPhoneLocation();
   }, []);
 
-  const ubicateInhaler = async (id:number) => {
+  useEffect(() => {
+    getCurrentPosition();
+  }, [permissionChange]);
 
+  const ubicateInhaler = async (id:number) => {
+  
+    setInhaler({ 
+      ...data[id]
+    })
+
+    mapRef.current?.animateCamera({
+      center: {
+        latitude: data[id].latitude - 0.002,
+        longitude: data[id].longitude,
+      },
+      zoom: 15
+    })
+
+    /*
     console.log(data[id])
 
     const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${data[id].latitude}&lon=${data[id].longitude}`;
     
     await fetch(url).then(res=>res.json()).then(addressData=> {
+      console.log(addressData.display_name)
       setInhaler({ 
         ...data[id],
         address: addressData.display_name
@@ -159,17 +232,30 @@ const TabTwoScreen = () => {
         longitude: data[id].longitude,
       },
       zoom: 15
-    })
+    })*/
   }
 
   const getNearbyPharmacies = async () => {
 
-    const granted = await Location.hasServicesEnabledAsync()
+    const { foregroundPermission, hasLocationEnabled } = await requestForegroundPermission();
+    let errorRequest:boolean = false;
 
-    if (!granted) return ;
+    if (!foregroundPermission || !hasLocationEnabled)
+      return
 
-    let location = await Location.getCurrentPositionAsync({});
-    
+    if (!location)
+      return;
+
+      setButtonState(ButtonLocationState.Active)
+
+      mapRef.current?.animateCamera({
+        center: {
+          latitude: location.latitude - 0.009,
+          longitude: location.longitude,
+        },
+        zoom: 15
+      })
+
     storesModalRef.current?.present();
     inhalerListModalRef.current?.close()
 
@@ -181,28 +267,21 @@ const TabTwoScreen = () => {
       secondSheetActive: true
     })
 
-    mapRef.current?.animateCamera({
-      center: {
-        latitude: location.coords.latitude - 0.009,
-        longitude: location.coords.longitude,
-      },
-      zoom: 15
-    })
-    /*try {
-      console.log(location)
-      const response = await axios.get(
+    try {
+      /*const response = await axios.get(
         `https://maps.googleapis.com/maps/api/place/nearbysearch/json?` +
-          `location=${location.latitude},${location.longitude}` +
-          `&radius=1000&type=pharmacy&key=process.env.EXPO_PUBLIC_GOOGLE_MAPS_KEY`
+          `location=${location.coords.latitude},${location.coords.longitude}` +
+          `&radius=1000&type=pharmacy&key=${process.env.EXPO_PUBLIC_GOOGLE_MAPS_KEY}`
       );
 
       if (response.data && response.data.results) {
         console.log(response.data)
         setPharmacies(response.data.results);
-      }
+      }*/
+      setPharmacies(stores.results)
     } catch (error) {
       console.error('Error al obtener farmacias:', error);
-    }*/
+    }
   };
 
   /*const getNearbyPharmacies = async () => {
@@ -229,51 +308,51 @@ const TabTwoScreen = () => {
     }
   };*/
 
-  const handleStoresIndexChange = async (index:number) => {
-    if (index === 1) {
-      const granted = await Location.hasServicesEnabledAsync()
+  const handleGetLocation = async () => {
+    try {
+      const { foregroundPermission, hasLocationEnabled } = await requestForegroundPermission();
+      let errorRequest:boolean = false;
 
-      if (!granted) {
+      if (!foregroundPermission || !hasLocationEnabled)
+      return
+
+      if (!location)
+        return;
+
+      if (buttonState === ButtonLocationState.Loading) return;
+      
+      setButtonState(ButtonLocationState.Loading)
+
+      /*let { status } = await Location.requestForegroundPermissionsAsync();
+
+      if (status !== 'granted') {
+        console.error('Permiso de ubicación denegado');
+        setButtonState(ButtonLocationState.Inactive)
         return;
       }
-      
-      let location = await Location.getCurrentPositionAsync({});
 
+      let location = await Location.getCurrentPositionAsync({});*/
       mapRef.current?.animateCamera({
         center: {
-          latitude: location.coords.latitude - 0.009,
-          longitude: location.coords.longitude,
+          latitude: location.latitude - 0.005,
+          longitude: location.longitude,
         },
-        zoom: 15
+        zoom: 15,
       })
+
+      setButtonState(ButtonLocationState.Current)
+      /*const place = await Location.reverseGeocodeAsync({
+        latitude : location.coords.latitude,
+        longitude : location.coords.longitude
+      });
+
+      console.log(place)*/
+    
+      // Ajustar el zoom del mapa manualmente
+    } catch (error) {
+      setButtonState(ButtonLocationState.Inactive)
+      console.log(error)
     }
-  }
-
-  const handleGetLocation = async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
-
-    if (status !== 'granted') {
-      console.error('Permiso de ubicación denegado');
-      return;
-    }
-
-    const granted = await Location.hasServicesEnabledAsync();
-
-    if (granted) {
-      if (buttonStateRef.current === 0 || buttonStateRef.current === 1)
-      buttonStateRef.current = 2
-    }
-
-    let location = await Location.getCurrentPositionAsync({});
-  
-    // Ajustar el zoom del mapa manualmente
-
-    mapRef.current?.animateCamera({
-      center: {
-        latitude: location.coords.latitude - 0.005,
-        longitude: location.coords.longitude,
-      },
-    })
   };
 
   /*  useEffect(() => {
@@ -284,16 +363,17 @@ const TabTwoScreen = () => {
   }, [permissionStatus])*/
 
   const checkLocationPermission = async () => {
-    console.log("activado")
     try {
       if (Platform.OS === 'android') {
         const granted = await Location.hasServicesEnabledAsync();
-        console.log( buttonStateRef.current)
         if (!granted) {
-          buttonStateRef.current = 0;
+          setButtonState(ButtonLocationState.Inactive)
         } else {
-          if (buttonStateRef.current === 0)
-            buttonStateRef.current = 1;
+          setPermissionChange(true)
+          
+          if (buttonState !== ButtonLocationState.Loading)
+          if (buttonState === ButtonLocationState.Inactive) 
+            setButtonState(ButtonLocationState.Active)
         }
       }
     } catch (err) {
@@ -302,19 +382,14 @@ const TabTwoScreen = () => {
   };
 
   useEffect(() => {
-    // Establece un temporizador para realizar la verificación cada 10 segundos (ajusta según tus necesidades)
-    const intervalId = setInterval(checkLocationPermission, 10000);
+    // Establece un temporizador para realizar la verificación cada 5 segundos (ajusta según tus necesidades)
+    const intervalId = setInterval(checkLocationPermission, 5000);
 
     // Limpia el temporizador al desmontar el componente
     return () => {
       clearInterval(intervalId);
     };
-  }, []);
-
-  useEffect(() => {
-    console.log(buttonStateRef.current)
-    setButtonState(buttonStateRef.current)
-  }, [buttonStateRef.current])
+  }, [buttonState]);
 
   // hooks
   //const headerHeight = useHeaderHeight();
@@ -340,7 +415,6 @@ const TabTwoScreen = () => {
   const storesListSnapPoints = useMemo(
     () => [
       "14%",
-      "67%",
       '90%',
     ],
     [bottomSafeArea]
@@ -363,15 +437,22 @@ const TabTwoScreen = () => {
   const handleTouchStart = useCallback(async () => {
     inhalerListModalRef.current?.collapse();
 
-    const granted = await Location.hasServicesEnabledAsync();
+    const { hasLocationEnabled } = await requestForegroundPermission();
 
-    if (granted) {
-      if (buttonState === 2)
-        setButtonState(1)
+    if (hasLocationEnabled) {
+      setButtonState(ButtonLocationState.Active)
+    } else {
+      if (buttonState === ButtonLocationState.Active || ButtonLocationState.Current)
+      setButtonState(ButtonLocationState.Inactive)
     }
+
+    if (buttonState === ButtonLocationState.Current)
+      setButtonState(ButtonLocationState.Active)  
   }, []);
 
   const handleOpenPressLocate = useCallback((id:number) => {
+    console.log(id)
+    setButtonState(ButtonLocationState.Active)
     ubicateInhaler(id);
 
     setBottomSheetState({
@@ -391,6 +472,66 @@ const TabTwoScreen = () => {
   }, []);
   //#endregion
 
+  const handleCloseButton = () => {
+    inhalerListModalRef.current?.present();
+    inhalerModalRef.current?.close();
+
+    setInhaler(null)
+
+    setBottomSheetState({
+      ...bottomSheetState,
+      position: 162,
+      lockPosition: 540,
+      storeButtonVisible: true,
+      secondSheetActive: false
+    })
+  }
+
+  const handleStoreItemPress = (item:any) => {
+    setButtonState(ButtonLocationState.Active)
+    storesModalRef.current?.collapse();
+
+    mapRef.current?.animateCamera({
+      center: {
+        latitude: item.geometry.location.lat - 0.005,
+        longitude: item.geometry.location.lng,
+      },
+    })
+  }
+
+  const handleRegionChange = async ({ latitude, longitude, latitudeDelta, longitudeDelta }: Region) => {
+    try {
+      const jsonValue = JSON.stringify({
+        latitude,
+        longitude,
+        latitudeDelta,
+        longitudeDelta
+      });
+
+      await AsyncStorage.setItem(
+        'location',
+        jsonValue
+      );
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const requestPermissions = async () => {
+    const { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync();
+    if (foregroundStatus === 'granted') {
+      const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
+      if (backgroundStatus === 'granted') {
+        await Location.startLocationUpdatesAsync(TASK_NAME, {
+            accuracy: Location.Accuracy.High,
+            timeInterval: 10000,
+            distanceInterval: 15,
+            pausesUpdatesAutomatically: true,
+         });
+      }
+    }
+  };
+  
   useFocusEffect(
     useCallback(() => {
       const onBackPress = () => {
@@ -402,6 +543,9 @@ const TabTwoScreen = () => {
           if (inhaler)
             setInhaler(null)
 
+          if (pharmacies)
+            setPharmacies([])
+
           setBottomSheetState({
             ...bottomSheetState,
             position: 162,
@@ -411,9 +555,10 @@ const TabTwoScreen = () => {
           })
 
         } else {
-          if (navigator.canGoBack())
-            navigator.goBack()
+          if (navigatorB.canGoBack())
+            navigatorB.goBack()
         }
+        
         return true;
       };
   
@@ -449,6 +594,7 @@ const TabTwoScreen = () => {
                     <View style={stylesItem.dot}></View>
                     <MontserratText>{ item.when }</MontserratText>
                 </View>
+
             </View>
           </View>
         </View>
@@ -457,47 +603,75 @@ const TabTwoScreen = () => {
     []
 );
 
+const renderStoreItem = useCallback(
+  ({ item }: any) => {
+
+    return (
+    <Ripple onPress={() => handleStoreItemPress(item)}>
+      <View style={stylesStoreItem.container}>
+        <View style={stylesStoreItem.infoView}>
+          <MontserratSemiText style={stylesStoreItem.title}>{ item.name }</MontserratSemiText>
+          <MontserratText style={stylesStoreItem.address}>{ String(item.vicinity).split(",")[0] }</MontserratText>
+          {
+            item.business_status !== "OPERATIONAL" ? (
+              <MontserratSemiText style={stylesStoreItem.noService}>Farmacia fuera de servicio</MontserratSemiText>
+            ) :
+            item.opening_hours && (
+              <MontserratSemiText style={item.opening_hours.open_now ? stylesStoreItem.isOpen : stylesStoreItem.isClose }>{ item.opening_hours.open_now ? "Abierto" : "Cerrado" }</MontserratSemiText>
+            )
+          }
+        </View>
+      </View>
+    </Ripple>
+    )
+  },
+  []
+);
+
   return (
     <>
     <BottomSheetModalProvider>
     <View style={styles.container}>
-      <MapView
-        ref={mapRef}
-        initialRegion={{
-          latitude: location?.latitude || 0,
-          longitude: location?.longitude || 0,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        }}
-        loadingEnabled={isMapLoading}
-        style={styles.mapContainer}
-        onTouchStart={handleTouchStart}
-        showsUserLocation={true}
-        showsMyLocationButton={false}
-        followsUserLocation={true}
-      >
-        {pharmacies.map((pharmacy) => (
-        <Marker
-          key={pharmacy.place_id}
-          coordinate={{
-            latitude: pharmacy.geometry.location.lat,
-            longitude: pharmacy.geometry.location.lng,
-          }}
-          title={pharmacy.name}
-          description={pharmacy.vicinity}
-        />
-      ))}
+      {
+        !isMapLoading &&
+        <MapView
+          ref={mapRef}
+          initialRegion={initialLocation}
+          style={styles.mapContainer}
+          onTouchStart={handleTouchStart}
+          showsUserLocation={true}
+          showsMyLocationButton={false}
+          followsUserLocation={true}
+          onRegionChange={handleRegionChange}
+          showsPointsOfInterest={false}
+          showsCompass={false}
+          showsBuildings={false}
+          rotateEnabled={false}
+          pitchEnabled={false}
+        >
+          {pharmacies.map((pharmacy) => (
+          <Marker
+            key={pharmacy.place_id}
+            coordinate={{
+              latitude: pharmacy.geometry.location.lat,
+              longitude: pharmacy.geometry.location.lng,
+            }}
+            title={pharmacy.name}
+            description={pharmacy.vicinity}
+          />
+        ))}
 
-      {inhaler && (
-        <Marker
-          coordinate={{
-            latitude: inhaler.latitude,
-            longitude: inhaler.longitude,
-          }}
-          title={inhaler.title}
-        />
-      )}
-    </MapView>
+        {inhaler && (
+          <Marker
+            coordinate={{
+              latitude: inhaler.latitude,
+              longitude: inhaler.longitude,
+            }}
+            title={inhaler.title}
+          />
+        )}
+      </MapView>
+    }
 
       <BottomSheetView
         animatedIndex={buttonAnimatedIndex}
@@ -507,10 +681,10 @@ const TabTwoScreen = () => {
       >
         <View style={styles.buttonView}>
           <Button style={styles.ubicationButton} onPress={handleGetLocation} alignSelf="center" size="$6" circular>
-            { buttonState === 0 ? <LocationDisabledIcon /> : buttonState === 1 ? <LocationUnknowIcon /> : buttonState === 2 && <LocationCurrentIcon /> }
+            { buttonState === ButtonLocationState.Loading ? <Spinner /> : buttonState === ButtonLocationState.Inactive ? <LocationDisabledIcon /> : buttonState === ButtonLocationState.Active ? <LocationUnknowIcon /> : buttonState === ButtonLocationState.Current && <LocationCurrentIcon /> }
           </Button>
 
-          <Button style={[ styles.storeButton, { opacity: bottomSheetState.storeButtonVisible ? 1 : 0, transition: "opacity 0.2s eas-in-out" }]} onPress={getNearbyPharmacies} size="$6" borderRadius={1000}>
+          <Button style={[ styles.storeButton, { opacity: bottomSheetState.storeButtonVisible ? 1 : 0 }]} onPress={getNearbyPharmacies} size="$6" borderRadius={1000}>
             <StoreIcon />
             <MontserratBoldText>Buscar tiendas</MontserratBoldText>
           </Button>
@@ -542,14 +716,13 @@ const TabTwoScreen = () => {
               title="Ubicación"
               subtitle="Encuentra tu inhaLux facilmente"
               Icon={AddIcon}
-              action={() => null}
+              action={() => requestPermissions()}
             />
           </View>
-            <FlashList
+            <BottomSheetFlatList
               data={data}
               keyExtractor={(item: any) => item.id}
               renderItem={renderItem}
-              estimatedItemSize={96}
             />
         </View>
       </BottomSheetModal>
@@ -561,7 +734,6 @@ const TabTwoScreen = () => {
         key="StoresListSheet"
         name="StoresListSheet"
         index={1}
-        onChange={handleStoresIndexChange}
         topInset={topSafeArea}
         snapPoints={storesListSnapPoints}
         enablePanDownToClose={false}
@@ -578,22 +750,35 @@ const TabTwoScreen = () => {
       >
         <View style={styles.bottomSheetContainer}>
           <View style={styles.headerContent}>
-            <MontserratBoldText>lista de tiendas</MontserratBoldText>
+            <MontserratBoldText style={styles.headerText}>Lista de tiendas</MontserratBoldText>
           </View>
 
+          <BottomSheetFlatList
+            data={pharmacies}
+            keyExtractor={(_, index) => index.toString()}
+            renderItem={renderStoreItem}
+          />
+
+          { /*<FlashList
+              data={pharmacies}
+              keyExtractor={(_, index) => index.toString()}
+              renderItem={renderStoreItem}
+              estimatedItemSize={96}
+        />*/ }
         </View>
     </BottomSheetModal>
 
     <BottomSheetModal
         ref={inhalerModalRef}
-        key="LocateListSheet"
-        name="LocateListSheet"
+        key="inhalerModalSheet"
+        name="inhalerModalSheet"
         index={0}
         topInset={topSafeArea}
         snapPoints={inhalerSnapPoints}
         enablePanDownToClose={false}
         animatedPosition={buttonAnimatedPosition}
         animatedIndex={buttonAnimatedIndex}
+        enableOverDrag={false}
         backdropComponent={(backdropProps: BottomSheetBackdropProps) => (
           <BlurredBackgroundNew
             {...backdropProps}
@@ -604,13 +789,18 @@ const TabTwoScreen = () => {
         )}
       >
         <View style={styles.bottomSheetContainer}>
+
+          <Button style={stylesInhalerSheet.closeButton} circular onPress={() => handleCloseButton()}>
+            <CloseIcon />
+          </Button>
+
           <View style={styles.headerContent}>
             {
               inhaler && (
                 <View style={stylesInhalerSheet.content}>
                   <View style={stylesInhalerSheet.titleView}>
                     <MontserratBoldText style={stylesInhalerSheet.title}>{ inhaler.title }</MontserratBoldText>
-                    <MontserratText  style={stylesInhalerSheet.address}>{ inhaler.address }</MontserratText>
+                    <MontserratText style={stylesInhalerSheet.address}>{ inhaler.address }</MontserratText>
 
                     <View style={stylesInhalerSheet.inahlerStatusInfo}>
                       <BatteryIcon style={stylesInhalerSheet.inahlerStatusIcon} />
@@ -646,6 +836,23 @@ const TabTwoScreen = () => {
     </>
   );
 };
+
+TaskManager.defineTask(TASK_NAME, async ({ data: { locations }, error }) => {
+  if (error) {
+    console.log(error.message)
+    return;
+  }
+
+  if (locations) {
+    const { error: supabaseError } = await supabase.from("inhaler_ubication").update({ latitude: locations[0].coords.latitude, longitude: locations[0].coords.longitude }).eq("id", "78d0246e-9444-468b-8e2f-7d9c48b6bbfe")
+
+    if (supabaseError)
+      console.log(supabaseError)
+
+    console.log('Received new locations', locations);
+  }
+ });
+
 
 const styles = StyleSheet.create({
   container: {
@@ -688,7 +895,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerContent: {
+    marginBottom: 16,
     paddingHorizontal: 24
+  },
+  headerText: {
+    fontSize: 22
   }
 });
 
@@ -744,12 +955,18 @@ const stylesInhalerSheet = StyleSheet.create({
     gap: 8
   },
   title: {
-    fontSize: 24
+    fontSize: 22
   },
   address: {
     fontSize: 14,
     lineHeight: 18,
     color: Colors.darkGray
+  },
+  closeButton: {
+    position: "absolute",
+    top: 0,
+    right: 24,
+    zIndex: 200
   },
   inahlerStatus: {
 		display: "flex",
@@ -780,6 +997,39 @@ const stylesInhalerSheet = StyleSheet.create({
     display: "flex",
     flexDirection: "column",
     gap: 4
+  }
+})
+
+const stylesStoreItem = StyleSheet.create({
+  container: {
+    width: "100%",
+  },
+  infoView: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-start",
+    minHeight: 96,
+    gap: 4,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderColor: Colors.bottomBarGray,
+    borderBottomWidth: 1
+  },
+  title: {
+    fontSize: 16
+  },
+  address: {
+    fontSize: 14,
+    color: Colors.darkGray
+  },
+  noService: {
+    color: Colors.black
+  },
+  isOpen: {
+    color: Colors.green
+  },
+  isClose: {
+    color: Colors.red
   }
 })
 

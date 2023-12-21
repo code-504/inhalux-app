@@ -1,10 +1,15 @@
-import { View, Text, StyleSheet } from 'react-native'
-import React from 'react'
+import { View, Text, StyleSheet, NativeSyntheticEvent, TextInputChangeEventData } from 'react-native'
+import React, {
+    Dispatch,
+    SetStateAction,
+    useEffect,
+    useState
+} from 'react'
 import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/components/StyledText'
 import HeaderAction from '@/components/HeaderAction'
 import { Image } from 'expo-image'
 import Colors from '@/constants/Colors'
-import { Avatar, Input, ScrollView } from 'tamagui'
+import { Avatar, Input, ScrollView, Spinner } from 'tamagui'
 
 // Resources
 import pacientBackground from "@/assets/images/pacients-empty.png"
@@ -12,39 +17,75 @@ import AddIcon from "@/assets/icons/add.svg"
 import ArrowIcon from "@/assets/icons/arrow_outward.svg"
 import SearchIcon from "@/assets/icons/search.svg"
 import ContactCard from '@/components/Card/ContactCard'
+import { FlashList } from '@shopify/flash-list'
+import { PacientsTabProps } from '@/interfaces/Monitor'
+import { router } from 'expo-router'
 
-const PacientsTab = ({ list }: PacientsProps) => {
+const PacientsTab = ({ pacientState, setPacientState }: PacientsTabProps) => {
 
+    const [hasData, setHasData] = useState<boolean>(false);
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
+    
     const addPacient = () => {
         console.log("Hola")
     }
 
-    console.log("list", list);
+    const handleChange = (e: NativeSyntheticEvent<TextInputChangeEventData>) => {
+        setDebouncedSearchTerm(e.nativeEvent.text)
+    }
+
+    useEffect(() => {
+        const timerId = setTimeout(() => {
+            setPacientState({
+                ...pacientState,
+                filterText: debouncedSearchTerm || "",
+            });
+        }, 400);
+    
+        // Limpia el temporizador en cada cambio de searchTerm
+        return () => {
+          clearTimeout(timerId);
+        };
+      }, [debouncedSearchTerm]);
+
+    useEffect(() => {
+        if (pacientState.data === null)
+            setHasData(false)
+        else
+            setHasData(true)
+    }, [])
 
     return (
         <View>
+            <View style={styles.listView}>
             <HeaderAction 
                 title="Lista de pacientes"
                 subtitle="Información de sus inhaLux"
                 Icon={AddIcon}
                 action={addPacient}
             />
+            </View>
 
             {
-                list.length >= 1 ? 
+                hasData ? 
                 (
+                    <>
                     <View style={styles.listView}>
                         <View style={styles.searchInputView}>
-                            <Input style={styles.searchInput} id="search-in-pacients" borderRadius="$10" borderWidth={1} placeholder="Buscar por nombre" />
+                            <Input style={styles.searchInput} id="search-in-pacients" borderRadius="$10" borderWidth={1} placeholder="Buscar por nombre" onChange={(value) => handleChange(value)} onPress={() => router.push("/monitor/pacient_search")} />
                             <SearchIcon style={styles.searchIcon}/>
                         </View>
-
-                        { 
-                            list.map((item, index) => (
-                                <ContactCard key={index} name={item.name} kindred={item.kindred} avatar={item.avatar} />
-                            ))
-                        }
                     </View>
+
+                    <View style={styles.listContent}>
+                        <FlashList 
+                            data={pacientState.data}
+                            keyExtractor={(_, index) => index.toString()}
+                            renderItem={({ item }) => (<ContactCard name={item.name} kindred={item.kindred} avatar={item.avatar} />)}
+                            estimatedItemSize={96}
+                        />
+                    </View>
+                    </>
                 ) :
                 (   
                     <View style={styles.emptyView}>
@@ -85,6 +126,10 @@ const styles = StyleSheet.create({
     listView: {
         display: "flex",
         flexDirection: "column",
+        paddingHorizontal: 24
+    },
+    listContent: {
+        height: "100%"
     },
     searchInputView: {
         position: "relative"

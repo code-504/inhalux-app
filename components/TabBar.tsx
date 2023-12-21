@@ -103,9 +103,7 @@ function TabBar({ tabs }: TabBarProps) {
 				renderItem={( { item, index } ) => {
 					return (
 						<View style={{ width: ITEM_WIDTH, marginTop: 20, height: "100%"}}>
-							<View style={{ marginHorizontal: SPACING * 2 }}>
-								<RenderItem item={ item } />
-							</View>
+							<RenderItem item={ item } />
 						</View>
 					);
 				}}
@@ -133,8 +131,8 @@ const styles = StyleSheet.create({
 	backgroundColor: Colors.white
   },
   tabView: {
-	paddingHorizontal: 24, 
-	width: "100%"
+	width: "100%",
+	paddingHorizontal: 24,
   },
   tabsContainer: {
 	display: "flex",
