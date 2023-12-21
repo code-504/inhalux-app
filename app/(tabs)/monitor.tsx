@@ -1,6 +1,6 @@
 import TabBar from '@/components/TabBar';
 import Colors from '@/constants/Colors'
-import { View, StyleSheet, ImageBackground, BackHandler } from 'react-native';
+import { View, StyleSheet, ImageBackground, BackHandler, Pressable } from 'react-native';
 
 // Resources
 import BackgroundImage from "@/assets/images/background.png"
@@ -14,14 +14,14 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useMonitor } from '@/context/MonitorProvider';
 import BlurredDeviceBackground from '@/components/blurredBackground/BlurredDeviceBackground';
 import BlurredMonitorBackground from '@/components/blurredBackground/BlurredMonitorBackground';
-import { Tabs, useFocusEffect, useNavigation } from 'expo-router';
+import { Link, Tabs, useFocusEffect, useNavigation } from 'expo-router';
 import { useRelations } from '@/context/RelationsProvider';
 import MonitorHeader from '@/components/Headers/MonitorHeader';
 
 export default function TabThreeScreen() {
 
 	const { optionsOpen, setOptionsOpen } = useMonitor();
-	const { supaMonitors, pacientState, setPacientState } = useRelations();
+	const { pacientState, setPacientState, shareState, setShareState } = useRelations();
 	const navigator = useNavigation()
 	
 	const bottomSheetRef = useRef<BottomSheetModal>(null);
@@ -69,7 +69,7 @@ export default function TabThreeScreen() {
 			id: 2,
 			name: 'Compartidos',
 			Icon: ShreIcon,
-			Component: <SharesTab list={supaMonitors ? supaMonitors : []} />
+			Component: <SharesTab shareState={shareState} setShareState={setShareState} />
 		}
 	]
 
@@ -98,18 +98,16 @@ export default function TabThreeScreen() {
 
 	return (
 		<View style={styles.viewArea}>
-
+			<ImageBackground source={BackgroundImage} style={styles.imageBackground}>
+			
 			<Tabs.Screen
 				options={{
 					header: () => <MonitorHeader />,
 				}}
 			/>
-
-			<ImageBackground source={BackgroundImage} style={styles.imageBackground}>
 				<View style={styles.container}>
 					<TabBar tabs={tabs} />
 				</View>
-			</ImageBackground>
 
 			<BottomSheetModal
 					ref={bottomSheetRef}
@@ -129,11 +127,16 @@ export default function TabThreeScreen() {
 						</View>
 					</View>
 				</BottomSheetModal>
+			</ImageBackground>
 		</View>
 	)
 }
 
 const styles = StyleSheet.create({
+	animatedView: {
+        height: 64,
+        backgroundColor: "red"
+    },
 	viewArea: {
 		flex: 1,
         backgroundColor: Colors.lightGrey

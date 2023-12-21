@@ -1,7 +1,10 @@
 import React from 'react'
 import { Redirect } from 'expo-router'
 import { useAuth } from '@/context/Authprovider'
-import { MontserratText } from '@/components/StyledText';
+
+import 'react-native-gesture-handler';
+import { gestureHandlerRootHOC } from 'react-native-gesture-handler';
+import Animated from 'react-native-reanimated';
 
 const index = () => {
   
@@ -14,4 +17,4 @@ const index = () => {
   return  <Redirect href="/(tabs)/device" />;
 }
 
-export default index
+export default gestureHandlerRootHOC(index)

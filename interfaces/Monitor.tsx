@@ -1,18 +1,23 @@
 import { Dispatch, SetStateAction } from "react"
 
-export interface Pacient {
+export interface ListMonitor {
     avatar: string;
     kindred: string;
     name: string
 }
 
-export interface PacientState {
-    data: Pacient[];
+export interface ListMonitorState {
+    data: ListMonitor[];
     filterText: string;
     loading: boolean;
 }
 
 export interface PacientsTabProps {
-    pacientState: PacientState;
-    setPacientState: Dispatch<SetStateAction<PacientState>>
+    pacientState: ListMonitorState;
+    setPacientState: Dispatch<SetStateAction<ListMonitorState>>
+}
+
+export interface SharesTabProps {
+    shareState: ListMonitorState;
+    setShareState: Dispatch<SetStateAction<ListMonitorState>>
 }

@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, NativeSyntheticEvent, TextInputChangeEventData } from 'react-native'
+import { View, Text, StyleSheet, NativeSyntheticEvent, TextInputChangeEventData, TouchableOpacity, Pressable } from 'react-native'
 import React, {
     Dispatch,
     SetStateAction,
@@ -19,12 +19,12 @@ import SearchIcon from "@/assets/icons/search.svg"
 import ContactCard from '@/components/Card/ContactCard'
 import { FlashList } from '@shopify/flash-list'
 import { PacientsTabProps } from '@/interfaces/Monitor'
-import { router } from 'expo-router'
 
 const PacientsTab = ({ pacientState, setPacientState }: PacientsTabProps) => {
 
     const [hasData, setHasData] = useState<boolean>(false);
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
+    const [ isLoading, setIsLoading ] = useState<boolean>(false);
     
     const addPacient = () => {
         console.log("Hola")
@@ -35,11 +35,13 @@ const PacientsTab = ({ pacientState, setPacientState }: PacientsTabProps) => {
     }
 
     useEffect(() => {
+        setIsLoading(true);
         const timerId = setTimeout(() => {
             setPacientState({
                 ...pacientState,
                 filterText: debouncedSearchTerm || "",
             });
+            setIsLoading(false)
         }, 400);
     
         // Limpia el temporizador en cada cambio de searchTerm
@@ -71,10 +73,15 @@ const PacientsTab = ({ pacientState, setPacientState }: PacientsTabProps) => {
                 (
                     <>
                     <View style={styles.listView}>
+
                         <View style={styles.searchInputView}>
-                            <Input style={styles.searchInput} id="search-in-pacients" borderRadius="$10" borderWidth={1} placeholder="Buscar por nombre" onChange={(value) => handleChange(value)} onPress={() => router.push("/monitor/pacient_search")} />
+                            <Input style={styles.searchInput} id="search-in-pacients" borderRadius="$10" borderWidth={1} placeholder="Buscar por nombre" onChange={(value) => handleChange(value)} />
                             <SearchIcon style={styles.searchIcon}/>
                         </View>
+
+                        {
+                                isLoading && <Spinner />
+                            }
                     </View>
 
                     <View style={styles.listContent}>

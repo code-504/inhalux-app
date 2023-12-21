@@ -1,16 +1,16 @@
-import { ImageBackground, View, StyleSheet, Dimensions, Alert, NativeSyntheticEvent, NativeScrollEvent, Animated, ViewToken } from 'react-native'
+import { ImageBackground, View, StyleSheet, Dimensions, Alert, NativeSyntheticEvent, NativeScrollEvent, Animated as AnimatedReact, ViewToken, Pressable, Image } from 'react-native'
 import { FlashList } from "@shopify/flash-list";
 import { Button, ScrollView, Switch } from 'tamagui'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Colors from '@/constants/Colors'
 import Card from '@/components/Card/Card'
-import { Image } from 'expo-image';
 import SimpleWeatherCard from '@/components/Card/SimpleWeatherCard'
 import { StatusBar } from 'expo-status-bar';
 import * as NavigationBar from 'expo-navigation-bar';
 import {ExpandingDot} from "react-native-animated-pagination-dots";
 import { supabase } from '@/services/supabase'
 import HeaderAction from '@/components/HeaderAction'
+import Animated from 'react-native-reanimated';
 
 // Recursos
 import { MontserratText, MontserratBoldText, MontserratSemiText } from '@/components/StyledText'
@@ -20,6 +20,8 @@ import BackgroundImage from "@/assets/images/background.png"
 import AddIcon from "@/assets/icons/add.svg"
 import SettingsIcon from "@/assets/icons/settings.svg"
 import inhaler from "@/assets/images/inhaler-img.png"
+const IMAGE = Image.resolveAssetSource(inhaler).uri;
+
 import inhalerShadow from "@/assets/images/inhaler-shadow-img.png"
 import BatteryIcon from "@/assets/icons/battery.svg"
 import DoseIcon from "@/assets/icons/dose.svg"
@@ -37,14 +39,14 @@ import BlurredDeviceBackground from '@/components/blurredBackground/BlurredDevic
 import { useHeaderHeight } from '@react-navigation/elements';
 import DeviceHeader from '@/components/Headers/DeviceHeader';
 import { useInhalers } from '@/context/InhalerProvider';
-import { Tabs, router, useNavigation } from 'expo-router';
+import { Link, Tabs, router, useNavigation } from 'expo-router';
 
 NavigationBar.setBackgroundColorAsync(Colors.white);
 NavigationBar.setButtonStyleAsync("dark");
 
 export default function TabOneScreen() {
 
-	const scrollX = useRef(new Animated.Value(0)).current
+	const scrollX = useRef(new AnimatedReact.Value(0)).current
 	const [ refresh, setRefresh ] = useState<boolean>(false);
 	const { supaInhalers: data, setSupaInhalers } = useInhalers();
 	//const [ data, setData ] = useState<any[]>([]);
@@ -103,6 +105,7 @@ export default function TabOneScreen() {
 	const headerHeight = useHeaderHeight();
 
 	const RenderItem = ({ item }: any) => (
+		<Pressable onPress={() => router.push("/modal")}>
 		<Card style={styles.inahlerCard} radius={44}>
 			<View style={styles.inahlerCardView}>
 				<View style={styles.inahlerCardContent}>
@@ -134,7 +137,12 @@ export default function TabOneScreen() {
 					</View>
 
 					<View style={styles.inhalerCardRight}>
-						<Image style={styles.inahlerImage} source={inhaler} />
+							<Animated.Image
+								sharedTransitionTag="sharedTag"
+								style={styles.inahlerImage} source={{ uri: IMAGE }}
+							/>
+
+						{ /*<Image style={styles.inahlerImage} source={inhaler} />*/}
 						<Image style={styles.inahlerShadowImage} source={inhalerShadow} />
 					</View>
 				</View>
@@ -152,6 +160,7 @@ export default function TabOneScreen() {
 				</View>
 			</View>
 		</Card>
+		</Pressable>
 	);
 
 	return (
@@ -197,7 +206,7 @@ export default function TabOneScreen() {
 									snapToAlignment={"center"}
 									scrollEventThrottle={16}
 									estimatedItemSize={ITEM_WIDTH}
-									onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } }}], {
+									onScroll={AnimatedReact.event([{ nativeEvent: { contentOffset: { x: scrollX } }}], {
 										useNativeDriver: false
 									})}
 									renderItem={({ item, index }) => {
