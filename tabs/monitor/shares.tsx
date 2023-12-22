@@ -1,47 +1,92 @@
-import { View, Text, StyleSheet } from 'react-native'
-import React from 'react'
+import { View, Text, StyleSheet, NativeSyntheticEvent, TextInputChangeEventData } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/components/StyledText'
 import HeaderAction from '@/components/HeaderAction'
 import { Image } from 'expo-image'
 import Colors from '@/constants/Colors'
-import { Avatar, Input, ScrollView } from 'tamagui'
+import { Avatar, Input, ScrollView, Spinner } from 'tamagui'
 
 // Resources
 import sharesBackground from "@/assets/images/shares-empty.png"
 import AddIcon from "@/assets/icons/add.svg"
 import SearchIcon from "@/assets/icons/search.svg"
 import ContactCard from '@/components/Card/ContactCard'
+import { SharesTabProps } from '@/interfaces/Monitor'
+import { FlashList } from '@shopify/flash-list'
 
-const SharesTab = ({ list }: PacientsProps) => {
+const SharesTab = ({ shareState, setShareState }: SharesTabProps) => {
 
-    const addPacient = () => {
+    const [hasData, setHasData] = useState<boolean>(false);
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
+    const [ isLoading, setIsLoading ] = useState<boolean>(false);
+    
+    const addShare = () => {
         console.log("Hola")
     }
 
+    const handleChange = (e: NativeSyntheticEvent<TextInputChangeEventData>) => {
+        setDebouncedSearchTerm(e.nativeEvent.text)
+    }
+
+    useEffect(() => {
+        setIsLoading(true);
+        const timerId = setTimeout(() => {
+            setShareState({
+                ...shareState,
+                filterText: debouncedSearchTerm || "",
+            });
+            setIsLoading(false)
+        }, 400);
+    
+        // Limpia el temporizador en cada cambio de searchTerm
+        return () => {
+          clearTimeout(timerId);
+        };
+      }, [debouncedSearchTerm]);
+
+    useEffect(() => {
+        if (shareState.data.length === 0)
+            setHasData(false)
+        else
+            setHasData(true)
+    }, [])
+
     return (
         <View>
+            <View style={styles.listView}>
             <HeaderAction 
                 title="Lista de compartidos"
-                subtitle="Personas con las que has compartido"
+                subtitle="Compartiste tu inhaLux"
                 Icon={AddIcon}
-                action={addPacient}
+                action={addShare}
             />
+            </View>
 
             {
-                list.length >= 1 ? 
+                hasData ? 
                 (
+                    <>
                     <View style={styles.listView}>
+
                         <View style={styles.searchInputView}>
-                            <Input style={styles.searchInput} id="search-in-shares" borderRadius="$10" borderWidth={1} placeholder="Buscar por nombre" />
+                            <Input style={styles.searchInput} id="search-in-shares" borderRadius="$10" borderWidth={1} placeholder="Buscar por nombre" onChange={(value) => handleChange(value)} />
                             <SearchIcon style={styles.searchIcon}/>
                         </View>
 
-                        { 
-                            list.map((item, index) => (
-                                <ContactCard key={index} name={item.name} kindred={item.kindred} avatar={item.avatar} />
-                            ))
-                        }
+                        {
+                                isLoading && <Spinner />
+                            }
                     </View>
+
+                    <View style={styles.listContent}>
+                        <FlashList 
+                            data={shareState.data}
+                            keyExtractor={(_, index) => index.toString()}
+                            renderItem={({ item }) => (<ContactCard name={item.name} kindred={item.kindred} avatar={item.avatar} />)}
+                            estimatedItemSize={96}
+                        />
+                    </View>
+                    </>
                 ) :
                 (   
                     <View style={styles.emptyView}>
@@ -82,6 +127,10 @@ const styles = StyleSheet.create({
     listView: {
         display: "flex",
         flexDirection: "column",
+        paddingHorizontal: 24
+    },
+    listContent: {
+        height: "100%"
     },
     searchInputView: {
         position: "relative"
