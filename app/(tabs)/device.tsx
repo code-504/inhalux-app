@@ -30,6 +30,13 @@ import TrackChangesIcon from "@/assets/icons/track_changes.svg"
 import HelpIcon from "@/assets/icons/help.svg"
 import AqIcon from "@/assets/icons/aq.svg"
 import HumIcon from "@/assets/icons/humidity_percentage.svg"
+import PM2_5Icon from "@/assets/icons/blur_circular.svg"
+import PM10Icon from "@/assets/icons/blur.svg"
+import CoIcon from "@/assets/icons/co.svg"
+import TempIcon from "@/assets/icons/device_thermostat.svg"
+import NitroIcon from "@/assets/icons/circles_ext.svg"
+import OzonoIcon from "@/assets/icons/radio_button_checked.svg"
+
 import { useAuth } from '@/context/Authprovider';
 import { getInhalers } from '@/services/api/device';
 import { RefreshControl } from 'react-native-gesture-handler';
@@ -258,10 +265,27 @@ export default function TabOneScreen() {
 								<HelpIcon />
 							</Button>
 						</View>
+						{/* <SimpleWeatherCard Icon={HumIcon} color={Colors.cyan} title="Humedad" calification="Excelente" value="35%" /> */}
+						<View style={styles.weatherGrid}>
+							<View style={styles.twoBlock}>
+								<SimpleWeatherCard Icon={AqIcon} color={Colors.pink} title="Calidad del aire" calification="Buena" value="25" medition='ppm' />
+								<SimpleWeatherCard Icon={CoIcon} color={Colors.blueLight} title="Monóxido de carbono" calification="Excelente" value="1,455.3" medition='(μg/m3)' />
+							</View>
 
-						<View style={styles.twoBlock}>
-							<SimpleWeatherCard Icon={AqIcon} color={Colors.pink} title="Calidad del aire" calification="Buena" value="25 ppm" />
-							<SimpleWeatherCard Icon={HumIcon} color={Colors.cyan} title="Humedad" calification="Excelente" value="35%" />
+							<View style={styles.oneBlock}>
+								<SimpleWeatherCard Icon={PM2_5Icon} color={Colors.redLight} title="PM 2.5" calification="Regular" value="43.2" medition='(μg/m3)' />
+								<SimpleWeatherCard Icon={PM10Icon} color={Colors.orangeLight} title="PM 10" calification="Bueno" value="52.1" medition='(μg/m3)' />
+							</View>
+
+							<View style={styles.twoBlock}>
+								<SimpleWeatherCard Icon={TempIcon} color={Colors.brownLight} title="Temperatura" calification="Regluar" value="35" medition='°C' />
+								<SimpleWeatherCard Icon={HumIcon} color={Colors.blueLight} title="Humedad" calification="Excelente" value="35" medition='%' />
+							</View>
+
+							<View style={styles.twoBlock}>
+								<SimpleWeatherCard Icon={NitroIcon} color={Colors.purpleLight} title="Dióxido de nitrógeno" calification="Regular" value="87.1" medition='(μg/m3)' />
+								<SimpleWeatherCard Icon={OzonoIcon} color={Colors.greenLight} title="Ozono" calification="Bueno" value="93.0" medition='(μg/m3)' />
+							</View>
 						</View>
 					</View>
 				</View>
@@ -281,6 +305,7 @@ export default function TabOneScreen() {
 						<MontserratBoldText style={stylesBottom.title}>Información sobre la calidad del aire</MontserratBoldText>
 						<MontserratText style={stylesBottom.infoText}>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do.</MontserratText>
 					</View>
+					
 				</View>
 			</BottomSheetModal>
 
@@ -363,7 +388,7 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		justifyContent: "space-between",
 		width: "100%",
-		height: 215
+		height: 189
 	},
 	inhalerCardLeft: {
 		display: "flex",
@@ -378,15 +403,15 @@ const styles = StyleSheet.create({
 	},
 	inahlerImage: {
 		top: -55,
-		left: -5,
-		width: '100%',
+		left: 5,
+		width: '96%',
     	aspectRatio: 16 / 26,
 		zIndex: 1
 	},
 	inahlerShadowImage: {
-		top: -270,
-		left: -30,
-		width: '100%',
+		top: -280,
+		left: -20,
+		width: '96%',
     	aspectRatio: 16 / 26,
 		zIndex: 0
 	},
@@ -460,6 +485,18 @@ const styles = StyleSheet.create({
 		marginTop: 8,
 		fontSize: 14,
 		color: Colors.darkGray
+	},
+	weatherGrid: {
+		display: "flex",
+		flexDirection: "column",
+		gap: 16
+	},
+	oneBlock: {
+		display: "flex",
+		flexDirection: "row",
+		backgroundColor: Colors.white,
+		borderRadius: 28,
+		gap: 16
 	},
 	twoBlock: {
 		display: "flex",
