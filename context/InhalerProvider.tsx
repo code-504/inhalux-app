@@ -12,9 +12,13 @@ interface Props {
 export interface inhalerProps {
   id          : string,
   title       : string,
-  connection  : string,
   battery     : string,
   dosis       : string,
+  connection  : string,
+  latitude    : string,
+  altitude    : string,
+  longitude   : string,
+  address     : string
 }
 
 export interface InhalerContextType {
@@ -52,7 +56,7 @@ export function InhalerProvider({ children }: Props) {
               id, 
               name,
               inhaler_state ( dosis, battery ),
-              inhaler_ubication ( latitude, longitude, altitude, last_seen )
+              inhaler_ubication ( latitude, longitude, altitude, last_seen, address )
               `)
               .eq('fk_user_id', user.id)
               .order('name', { ascending: true })
@@ -64,9 +68,14 @@ export function InhalerProvider({ children }: Props) {
                   connection: `Hace ${calculateDaysAgo(inhaler.inhaler_ubication.last_seen)}`,
                   battery: inhaler.inhaler_state.battery,
                   dosis: inhaler.inhaler_state.dosis,
+                  altitude: inhaler.inhaler_ubication.altitude,
+                  longitude: inhaler.inhaler_ubication.longitude,
+                  latitude: inhaler.inhaler_ubication.latitude,
+                  address: inhaler.inhaler_ubication.address,
                 }));
           setSupaInhalers(transformedData);
-          // console.log("new supainhalers", supaInhalers);
+          console.log("inhalersData", inhalersData);
+          console.log("transformedData", transformedData);
       } 
 
   };

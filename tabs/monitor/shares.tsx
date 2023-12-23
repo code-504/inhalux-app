@@ -15,6 +15,7 @@ import { SharesTabProps } from '@/interfaces/Monitor'
 import { FlashList } from '@shopify/flash-list'
 
 const SharesTab = ({ shareState, setShareState }: SharesTabProps) => {
+    console.log("shareState: ", shareState);
 
     const [hasData, setHasData] = useState<boolean>(false);
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");

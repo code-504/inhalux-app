@@ -14,13 +14,13 @@ import { Avatar, Input, ScrollView, Spinner } from 'tamagui'
 // Resources
 import pacientBackground from "@/assets/images/pacients-empty.png"
 import AddIcon from "@/assets/icons/add.svg"
-import ArrowIcon from "@/assets/icons/arrow_outward.svg"
 import SearchIcon from "@/assets/icons/search.svg"
 import ContactCard from '@/components/Card/ContactCard'
 import { FlashList } from '@shopify/flash-list'
 import { PacientsTabProps } from '@/interfaces/Monitor'
 
 const PacientsTab = ({ pacientState, setPacientState }: PacientsTabProps) => {
+    console.log("pacientState: ", pacientState);
 
     const [hasData, setHasData] = useState<boolean>(false);
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
@@ -37,10 +37,10 @@ const PacientsTab = ({ pacientState, setPacientState }: PacientsTabProps) => {
     useEffect(() => {
         setIsLoading(true);
         const timerId = setTimeout(() => {
-            setPacientState({
-                ...pacientState,
+            setPacientState(prevState => ({
+                ...prevState,
                 filterText: debouncedSearchTerm || "",
-            });
+            }));
             setIsLoading(false)
         }, 400);
     
