@@ -1,4 +1,4 @@
-import { View, ImageBackground, StyleSheet, ScrollView } from 'react-native'
+import { View, ImageBackground, StyleSheet, ScrollView, Alert } from 'react-native'
 import Colors from '@/constants/Colors'
 import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/components/StyledText'
 import Card from '@/components/Card/Card'
@@ -20,6 +20,13 @@ import { handleErasePicture, handleTakePicture, handleUploadPicture } from '@/he
 
 const ConfigurationScreen = () => {
   const { supaUser, setSupaUser} = useAuth();
+
+  const doLogout = async () => {
+		const { error } = await supabase.auth.signOut();
+
+		if (error)
+			Alert.alert("Error", error.message)
+	}
 
   return (
     <View style={styles.safeArea}>
@@ -80,7 +87,7 @@ const ConfigurationScreen = () => {
             <CardOptionsList title="Sesión">
               <CardOptionsList.ItemView>
                 <LogoutIcon />
-                <CardOptionsList.ItemText>Cerrar sesión</CardOptionsList.ItemText>
+                <CardOptionsList.ItemButton onPressFunction={() => doLogout()} >Cerrar sesión</CardOptionsList.ItemButton>
               </CardOptionsList.ItemView>
             </CardOptionsList>
           </View>

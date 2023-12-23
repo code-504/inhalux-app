@@ -79,13 +79,6 @@ export default function TabOneScreen() {
 	const SPACING = 12;
 	const ITEM_WIDTH = screenWidth;
 
-	const doLogout = async () => {
-		const { error } = await supabase.auth.signOut();
-
-		if (error)
-			Alert.alert("Error", error.message)
-	}
-
 	const pullRequest = async () => {
 		setRefresh(true);
 
@@ -192,7 +185,7 @@ export default function TabOneScreen() {
 						title="Dispositivos"
 						subtitle="Información general"
 						Icon={AddIcon}
-						action={doLogout}
+						action={()=>{}}
 					/>
 				</View>
 					{/* Inicio */}
