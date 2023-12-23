@@ -3,6 +3,7 @@ import { useContext, useEffect, useState, createContext } from 'react';
 import { supabase } from '@/services/supabase';
 import { WeatherAPI, WeatherData } from '@/interfaces/Device';
 import axios from 'axios';
+import publicIP from 'react-native-public-ip';
 import * as Location from 'expo-location'
 
 interface Props {
@@ -115,20 +116,16 @@ export function InhalerProvider({ children }: Props) {
 
   const fetchWeatherData = async () => {
     try {
+      
+      const ip = await publicIP();
 
-      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (!ip)
+        return ;
 
-      if (status !== 'granted') {
-        throw 'Permission to access location was denied';
-      }
-
-      const location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.High
-      });
-      const apiData = await axios.get<WeatherAPI>(`https://api.weatherapi.com/v1/current.json?key=0da3a00c4b724f50880205522232112&q=${location.coords.latitude},${location.coords.longitude}&aqi=yes`)
+      const apiData = await axios.get<WeatherAPI>(`https://api.weatherapi.com/v1/current.json?key=0da3a00c4b724f50880205522232112&q=${ip}&aqi=yes`)
 
       setWeatherData({
-        location: apiData.data.location.name,
+        location: `${apiData.data.location.name}, ${apiData.data.location.country}`,
         temp: apiData.data.current.temp_c,
         hum: apiData.data.current.humidity,
         ...apiData.data.current.air_quality,

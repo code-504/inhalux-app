@@ -11,7 +11,7 @@ import {ExpandingDot} from "react-native-animated-pagination-dots";
 import { supabase } from '@/services/supabase'
 import HeaderAction from '@/components/HeaderAction'
 import Animated from 'react-native-reanimated';
-
+ 
 // Recursos
 import { MontserratText, MontserratBoldText, MontserratSemiText } from '@/components/StyledText'
 import BackgroundImage from "@/assets/images/background.png"
@@ -105,7 +105,6 @@ export default function TabOneScreen() {
 	const headerHeight = useHeaderHeight();
 
 	const RenderItem = ({ item }: any) => (
-		<Pressable onPress={() => router.push("/modal")}>
 		<Card style={styles.inahlerCard} radius={44}>
 			<View style={styles.inahlerCardView}>
 				<View style={styles.inahlerCardContent}>
@@ -160,7 +159,6 @@ export default function TabOneScreen() {
 				</View>
 			</View>
 		</Card>
-		</Pressable>
 	);
 
 	return (
