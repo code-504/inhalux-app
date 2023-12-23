@@ -8,7 +8,7 @@ interface WeatherCardProps {
     color       : string
     title       : string
     calification: string
-    value       : string
+    value       : number | undefined
     medition   ?: string
 }
 
