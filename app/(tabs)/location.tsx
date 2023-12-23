@@ -52,6 +52,7 @@ import CloseIcon from "@/assets/icons/close.svg"
 import { GeofencingEventType } from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 import { supabase } from '@/services/supabase';
+import { useInhalers } from '@/context/InhalerProvider';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 NavigationBar.setBackgroundColorAsync("white");
@@ -83,12 +84,16 @@ const TabTwoScreen = () => {
     secondSheetActive: false
   });
 
-  const data:any[] = [
+  const { supaInhalers } = useInhalers();
+  console.log("location", supaInhalers);
+  
+  const data:any[] = supaInhalers;
+  /*[
     {
       id: 0,
       title: "Inhalador casa",
       where: "casa",
-      when: "Hace tres minutos",
+      connection: "Hace tres minutos",
       latitude: 20.608629422133586,
       longitude: -103.28179174462451,
       battery: 80,
@@ -98,7 +103,7 @@ const TabTwoScreen = () => {
       id: 1,
       title: "Inhalador casa",
       where: "casa",
-      when: "Hace tres minutos",
+      connection: "Hace tres minutos",
       latitude: 20.702444918665606,
       longitude: -103.3888371168304,
       battery: 45,
@@ -108,13 +113,13 @@ const TabTwoScreen = () => {
       id: 2,
       title: "Inhalador casa",
       where: "casa",
-      when: "Hace tres minutos",
+      connection: "Hace tres minutos",
       latitude: 20.60994570626775,
       longitude: -103.28013467661216,
       battery: 32,
       address: "Teapan 132, San Pedrito, 45625 San Pedro Tlaquepaque, Jal."
     }
-  ]
+  ]*/
   
   const getPhoneLocation = async () => {
     try {
@@ -200,15 +205,17 @@ const TabTwoScreen = () => {
   }, [permissionChange]);
 
   const ubicateInhaler = async (id:number) => {
-  
-    setInhaler({ 
-      ...data[id]
-    })
+    const tempoInhaler = data.find(item => item.id === id);
+
+    setInhaler(tempoInhaler)
+    console.log("inhalerseteadoID: ", id);
+    console.log("inhalerseteado: ", inhaler);
+    
 
     mapRef.current?.animateCamera({
       center: {
-        latitude: data[id].latitude - 0.002,
-        longitude: data[id].longitude,
+        latitude: tempoInhaler.latitude - 0.002,
+        longitude: tempoInhaler.longitude,
       },
       zoom: 15
     })
@@ -450,7 +457,7 @@ const TabTwoScreen = () => {
       setButtonState(ButtonLocationState.Active)  
   }, []);
 
-  const handleOpenPressLocate = useCallback((id:number) => {
+  const handleOpenPressLocate = useCallback((id:any) => {
     console.log(id)
     setButtonState(ButtonLocationState.Active)
     ubicateInhaler(id);
@@ -590,9 +597,9 @@ const TabTwoScreen = () => {
                 <MontserratSemiText style={stylesItem.textTitle}>{ item.title }</MontserratSemiText>
 
                 <View style={stylesItem.textDescription}>
-                    <MontserratText>{ item.where }</MontserratText>
+                    <MontserratText>{ item.where ? item.where : "Casa" }</MontserratText>
                     <View style={stylesItem.dot}></View>
-                    <MontserratText>{ item.when }</MontserratText>
+                    <MontserratText>{ item.connection }</MontserratText>
                 </View>
 
             </View>

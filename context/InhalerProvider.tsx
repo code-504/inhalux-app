@@ -51,7 +51,7 @@ export function InhalerProvider({ children }: Props) {
               id, 
               name,
               inhaler_state ( dosis, battery ),
-              inhaler_ubication ( latitude, longitude, altitude, last_seen )
+              inhaler_ubication ( latitude, longitude, altitude, last_seen, address )
               `)
               .eq('fk_user_id', user.id)
               .order('name', { ascending: true })
@@ -69,7 +69,8 @@ export function InhalerProvider({ children }: Props) {
                   address: inhaler.inhaler_ubication.address,
                 }));
           setSupaInhalers(transformedData);
-          // console.log("new supainhalers", supaInhalers);
+          console.log("inhalersData", inhalersData);
+          console.log("transformedData", transformedData);
       } 
 
   };

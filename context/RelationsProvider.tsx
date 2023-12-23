@@ -46,7 +46,7 @@ export function RelationProvider({ children }: Props) {
         const query = supabase.from('user_relations').select(`
           id, 
           name_from_monitor,
-          user: fk_user_patient ( name, last_name )
+          user: fk_user_patient ( name, last_name, avatar )
         `)
         .eq('fk_user_monitor', user.id)
         .like("user.name", '%' + pacientState.filterText + '%')
@@ -69,9 +69,11 @@ export function RelationProvider({ children }: Props) {
           return
         }
 
-        let transformedPatientData = data.map((patient: any): ListMonitor => ({
+        let transformedPatientData = data.filter((patient: any) => patient.user !== null).map((patient: any): ListMonitor => ({
           name: patient.user.name + ( patient.user.last_name ? " " + patient.user.last_name : ""),
-          avatar: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+          avatar: patient.user.avatar == null
+            ? "https://ckcwfpbvhbstslprlbgr.supabase.co/storage/v1/object/public/avatars/default_avatar.png?t=2023-12-19T02%3A43%3A15.423Z"
+            : patient.user.avatar,
           kindred: patient.name_from_monitor ? patient.name_from_monitor : "Relativo",
         }));
 
@@ -127,9 +129,11 @@ export function RelationProvider({ children }: Props) {
         return
       }
 
-      let transformedShareData = data.map((share: any): ListMonitor => ({
+      let transformedShareData = data.filter((patient: any) => patient.user !== null).map((share: any): ListMonitor => ({
         name: share.user.name + ( share.user.last_name ? " " + share.user.last_name : ""),
-        avatar: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+        avatar: share.user.avatar == null
+        ? "https://ckcwfpbvhbstslprlbgr.supabase.co/storage/v1/object/public/avatars/default_avatar.png?t=2023-12-19T02%3A43%3A15.423Z"
+        : share.user.avatar,
         kindred: share.name_from_monitor ? share.name_from_monitor : "Relativo",
       }));
 
