@@ -97,6 +97,7 @@ function RootLayoutNav() {
             <Stack.Screen name="(tabs)" options={{ headerShown: false, animation: "none" }} />
             <Stack.Screen name="device/[inhaler_id]" options={{ header: () => <SimpleHeader title="Información general" actionButton={{ fn: () => console.log("adios"), Icon: EditIcon }} />, presentation: "containedTransparentModal", animation: "none" }} />
             <Stack.Screen name="configuration" options={{ header: () => <NormalHeader title="Configuración" />, presentation: 'containedTransparentModal' }} />
+            <Stack.Screen name="configuration/profile" options={{ header: () => <NormalHeader title="Perfil de usuario" />, presentation: 'containedModal' }} />
             <Stack.Screen name="device/connect_device" options={{ headerShown: false }} />
             <Stack.Screen name="notification" options={{ header: () => <NormalHeader title="Notificaciones" />, presentation: 'containedTransparentModal' }} />
           </Stack>

@@ -17,6 +17,8 @@ import { err } from 'react-native-svg/lib/typescript/xml'
 import { supabase } from '@/services/supabase'
 import { decode } from 'base64-arraybuffer'
 import { handleErasePicture, handleTakePicture, handleUploadPicture } from '@/helpers/avatar'
+import Ripple from 'react-native-material-ripple'
+import { router } from 'expo-router'
 
 const ConfigurationScreen = () => {
   const { supaUser, setSupaUser} = useAuth();
@@ -36,6 +38,7 @@ const ConfigurationScreen = () => {
 
             <View>
               <MontserratSemiText style={styles.groupTitleText}>Editar perfil de usuario</MontserratSemiText>
+              <Ripple onPress={() => router.push("/configuration/profile")} style={{ borderRadius: 24, overflow: "hidden" }}>
               <Card radius={24}>
                 <View style={styles.cardProflie}>
                   <View style={styles.cardProfileView}>
@@ -56,6 +59,7 @@ const ConfigurationScreen = () => {
                   <ArrowBackIcon />
                 </View>
               </Card>
+              </Ripple>
             </View>
 
             <View style={styles.twoBlock}>

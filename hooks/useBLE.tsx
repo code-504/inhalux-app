@@ -67,22 +67,10 @@ function useBLE(): BluetoothLowEnergyApi {
 
   const requestPermissions = async () => {
     if (Platform.OS === "android") {
-      if ((ExpoDevice.platformApiLevel ?? -1) < 31) {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          {
-            title: "Location Permission",
-            message: "Bluetooth Low Energy requires Location",
-            buttonPositive: "OK",
-          }
-        );
-        return granted === PermissionsAndroid.RESULTS.GRANTED;
-      } else {
-        const isAndroid31PermissionsGranted =
+      const isAndroid31PermissionsGranted =
           await requestAndroid31Permissions();
 
         return isAndroid31PermissionsGranted;
-      }
     } else {
       return true;
     }
@@ -96,7 +84,8 @@ function useBLE(): BluetoothLowEnergyApi {
       if (error) {
         console.log(error);
       }
-      if (device && device.name?.includes("Light-System")) {
+
+      if (device && device.name?.includes("inhaLux")) {
         setAllDevices((prevState: Device[]) => {
           if (!isDuplicteDevice(prevState, device)) {
             return [...prevState, device];
@@ -118,11 +107,21 @@ function useBLE(): BluetoothLowEnergyApi {
     }
   };
 
-  const disconnectFromDevice = () => {
+  const disconnectFromDevice = async () => {
     if (connectedDevice) {
-      bleManager.cancelDeviceConnection(connectedDevice.id);
+      bleManager.cancelTransaction('LISTEN');
+      await connectedDevice.cancelConnection();
       setConnectedDevice(null);
       setHeartRate(0);
+
+      /*await connectedDevice.cancelConnection().then(() => {
+        setConnectedDevice(null);
+        setHeartRate(0);
+      });
+      await bleManager.cancelDeviceConnection(connectedDevice.id).then((device) => {
+        setConnectedDevice(null);
+        setHeartRate(0);
+      });*/
     }
   };
 
