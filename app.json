@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "inhaLux",
-    "slug": "inhaLux",
+    "name": "inhalux",
+    "slug": "inhalux",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -38,7 +38,8 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.inhalabs.inhalux"
+      "package": "com.inhalabs.inhalux",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",
@@ -62,6 +63,6 @@
         "projectId": "f9822285-6761-48ff-9ba7-2562be1e4cba"
       }
     },
-    "owner": "code-504"
+    "owner": "rogelioexpo"
   }
 }

@@ -1,7 +1,7 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Link, Stack, Tabs } from 'expo-router';
 import { useColorScheme, StyleSheet, View } from 'react-native';
-
+import Push from '../../components/Push';
 import Colors from '@/constants/Colors'
 
 // Resources
@@ -64,6 +64,7 @@ export default function TabLayout() {
     
     return (
         <>
+            {/* <Push/> */}
             <Tabs
                 screenOptions={{
                     tabBarStyle: {
