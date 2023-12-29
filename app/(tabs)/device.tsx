@@ -11,7 +11,7 @@ import {ExpandingDot} from "react-native-animated-pagination-dots";
 import { supabase } from '@/services/supabase'
 import HeaderAction from '@/components/HeaderAction'
 import Animated from 'react-native-reanimated';
-
+ 
 // Recursos
 import { MontserratText, MontserratBoldText, MontserratSemiText } from '@/components/StyledText'
 import BackgroundImage from "@/assets/images/background.png"
@@ -55,7 +55,7 @@ export default function TabOneScreen() {
 
 	const scrollX = useRef(new AnimatedReact.Value(0)).current
 	const [ refresh, setRefresh ] = useState<boolean>(false);
-	const { supaInhalers: data, setSupaInhalers } = useInhalers();
+	const { supaInhalers: data, setSupaInhalers, weatherData } = useInhalers();
 	//const [ data, setData ] = useState<any[]>([]);
 
 	// const { session, } = useAuth();
@@ -105,7 +105,6 @@ export default function TabOneScreen() {
 	const headerHeight = useHeaderHeight();
 
 	const RenderItem = ({ item }: any) => (
-		<Pressable onPress={() => router.push("/modal")}>
 		<Card style={styles.inahlerCard} radius={44}>
 			<View style={styles.inahlerCardView}>
 				<View style={styles.inahlerCardContent}>
@@ -160,7 +159,6 @@ export default function TabOneScreen() {
 				</View>
 			</View>
 		</Card>
-		</Pressable>
 	);
 
 	return (
@@ -251,7 +249,7 @@ export default function TabOneScreen() {
 							<View style={styles.timeTitle}>
 								<MontserratText style={styles.timeText}>Pronóstico del</MontserratText>
 								<MontserratBoldText style={styles.timeText}>Tiempo</MontserratBoldText>
-								<MontserratBoldText style={styles.timeLocationText}>En Guadalajara</MontserratBoldText>
+								<MontserratSemiText style={styles.timeLocationText}>En { weatherData?.location }</MontserratSemiText>
 							</View>
 
 							<Button style={styles.whiteButton} alignSelf="center" size="$6" circular onPress={handleOpenPress}>
@@ -261,23 +259,23 @@ export default function TabOneScreen() {
 						{/* <SimpleWeatherCard Icon={HumIcon} color={Colors.cyan} title="Humedad" calification="Excelente" value="35%" /> */}
 						<View style={styles.weatherGrid}>
 							<View style={styles.twoBlock}>
-								<SimpleWeatherCard Icon={AqIcon} color={Colors.pink} title="Calidad del aire" calification="Buena" value="25" medition='ppm' />
-								<SimpleWeatherCard Icon={CoIcon} color={Colors.blueLight} title="Monóxido de carbono" calification="Excelente" value="1,455.3" medition='(μg/m3)' />
+								<SimpleWeatherCard Icon={AqIcon} color={Colors.pink} title="Calidad del aire" calification="Buena" value={weatherData?.aq} medition='us' />
+								<SimpleWeatherCard Icon={CoIcon} color={Colors.blueLight} title="Monóxido de carbono" calification="Excelente" value={weatherData?.co} medition='(μg/m3)' />
 							</View>
 
 							<View style={styles.oneBlock}>
-								<SimpleWeatherCard Icon={PM2_5Icon} color={Colors.redLight} title="PM 2.5" calification="Regular" value="43.2" medition='(μg/m3)' />
-								<SimpleWeatherCard Icon={PM10Icon} color={Colors.orangeLight} title="PM 10" calification="Bueno" value="52.1" medition='(μg/m3)' />
+								<SimpleWeatherCard Icon={PM2_5Icon} color={Colors.redLight} title="PM 2.5" calification="Regular" value={weatherData?.pm2_5} medition='(μg/m3)' />
+								<SimpleWeatherCard Icon={PM10Icon} color={Colors.orangeLight} title="PM 10" calification="Bueno" value={weatherData?.pm10} medition='(μg/m3)' />
 							</View>
 
 							<View style={styles.twoBlock}>
-								<SimpleWeatherCard Icon={TempIcon} color={Colors.brownLight} title="Temperatura" calification="Regluar" value="35" medition='°C' />
-								<SimpleWeatherCard Icon={HumIcon} color={Colors.blueLight} title="Humedad" calification="Excelente" value="35" medition='%' />
+								<SimpleWeatherCard Icon={TempIcon} color={Colors.brownLight} title="Temperatura" calification="Regluar" value={weatherData?.temp} medition='°C' />
+								<SimpleWeatherCard Icon={HumIcon} color={Colors.blueLight} title="Humedad" calification="Excelente" value={weatherData?.hum} medition='%' />
 							</View>
 
 							<View style={styles.twoBlock}>
-								<SimpleWeatherCard Icon={NitroIcon} color={Colors.purpleLight} title="Dióxido de nitrógeno" calification="Regular" value="87.1" medition='(μg/m3)' />
-								<SimpleWeatherCard Icon={OzonoIcon} color={Colors.greenLight} title="Ozono" calification="Bueno" value="93.0" medition='(μg/m3)' />
+								<SimpleWeatherCard Icon={NitroIcon} color={Colors.purpleLight} title="Dióxido de nitrógeno" calification="Regular" value={weatherData?.no2} medition='(μg/m3)' />
+								<SimpleWeatherCard Icon={OzonoIcon} color={Colors.greenLight} title="Ozono" calification="Bueno" value={weatherData?.o3} medition='(μg/m3)' />
 							</View>
 						</View>
 					</View>

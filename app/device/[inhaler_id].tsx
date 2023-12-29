@@ -26,7 +26,7 @@ import HelpIcon from "@/assets/icons/help.svg"
 import AqIcon from "@/assets/icons/aq.svg"
 import HumIcon from "@/assets/icons/humidity_percentage.svg"
 import BlurredDeviceBackground from '@/components/blurredBackground/BlurredDeviceBackground'
-import { useLocalSearchParams, useNavigation } from 'expo-router'
+import { router, useLocalSearchParams, useNavigation } from 'expo-router'
 import { useInhalers } from '@/context/InhalerProvider'
 import { supabase } from '@/services/supabase'
 
@@ -143,6 +143,8 @@ const Page = () => {
 			<View style={styles.twoBlock}>
 				<Button style={styles.whiteButton} alignSelf="center" size="$6" onPress={handleUpdateInhaler}>Actualizar</Button>
 				<Button style={styles.whiteButton} alignSelf="center" size="$6" onPress={handleDeleteInhaler}>Eliminar</Button>
+
+				<Button style={styles.whiteButton} alignSelf="center" size="$6" onPress={() => router.push("/device/connect_device")}>Conectar</Button>
 			</View>
 
 					<View style={styles.timeView}>

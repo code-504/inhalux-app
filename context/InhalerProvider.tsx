@@ -1,6 +1,10 @@
 import React, { Dispatch, SetStateAction } from 'react';
 import { useContext, useEffect, useState, createContext } from 'react';
 import { supabase } from '@/services/supabase';
+import { WeatherAPI, WeatherData } from '@/interfaces/Device';
+import axios from 'axios';
+import publicIP from 'react-native-public-ip';
+import * as Location from 'expo-location'
 
 interface Props {
   children?: React.ReactNode;
@@ -22,6 +26,7 @@ export interface InhalerContextType {
   supaInhalers: any[] | null;
   setSupaInhalers: Dispatch<SetStateAction<any[]>>;
   fetchSupaInhalerById: (id: string) => Promise<inhalerProps | null>;
+  weatherData: WeatherData | undefined
 }
 
 export const InhalerContext = createContext<InhalerContextType | undefined>(
@@ -31,6 +36,7 @@ export const InhalerContext = createContext<InhalerContextType | undefined>(
 export function InhalerProvider({ children }: Props) {
 
   const [supaInhalers, setSupaInhalers] = useState<any[]>([]);
+  const [weatherData, setWeatherData] = useState<WeatherData>()
 
   const calculateDaysAgo = (lastSeen: string): string => {
     const today = new Date();
@@ -108,8 +114,32 @@ export function InhalerProvider({ children }: Props) {
       return null;
   };
 
+  const fetchWeatherData = async () => {
+    try {
+      
+      const ip = await publicIP();
+
+      if (!ip)
+        return ;
+
+      const apiData = await axios.get<WeatherAPI>(`https://api.weatherapi.com/v1/current.json?key=0da3a00c4b724f50880205522232112&q=${ip}&aqi=yes`)
+
+      setWeatherData({
+        location: `${apiData.data.location.name}, ${apiData.data.location.country}`,
+        temp: apiData.data.current.temp_c,
+        hum: apiData.data.current.humidity,
+        ...apiData.data.current.air_quality,
+        aq: apiData.data.current.air_quality['us-epa-index'],
+      })
+
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   useEffect(() => {
     fetchSupaInhalers();
+    fetchWeatherData();
   }, []);
 
   return (
@@ -117,7 +147,8 @@ export function InhalerProvider({ children }: Props) {
         {
           supaInhalers, 
           setSupaInhalers,
-          fetchSupaInhalerById
+          fetchSupaInhalerById,
+          weatherData
         }
       }>
       {children}
