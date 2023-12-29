@@ -60,7 +60,11 @@
     "react-native-url-polyfill": "^2.0.0",
     "react-native-web": "~0.19.6",
     "tamagui": "^1.74.15",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "expo-notifications": "~0.20.1",
+    "expo-constants": "~14.4.2",
+    "expo-device": "~5.4.0",
+    "expo-dev-client": "~2.4.12"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
