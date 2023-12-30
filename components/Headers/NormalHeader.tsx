@@ -1,4 +1,4 @@
-import {  View, StyleSheet } from 'react-native'
+import {  View, StyleSheet, Animated } from 'react-native'
 import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Button } from 'tamagui'
@@ -10,10 +10,11 @@ import ArrowBackIcon from "@/assets/icons/arrow_back.svg";
 import { MontserratSemiText } from '../StyledText'
 
 interface HeaderProps {
-    title: string
+    title: string;
+    animHeaderValue ?: Animated.Value
 }
 
-export default function NormalHeader({ title }: HeaderProps) {
+export default function NormalHeader({ title, animHeaderValue }: HeaderProps) {
 
     const navigation = useNavigation();
 
@@ -21,15 +22,26 @@ export default function NormalHeader({ title }: HeaderProps) {
         navigation.goBack();
     };
 
+    const animateHeaderOpacity = animHeaderValue?.interpolate({
+        inputRange: [0, 200],
+        outputRange: [0, 1],
+        extrapolate: 'clamp'
+      })
+
     return (
         <SafeAreaView style={styles.safeAre}>
 
-            <View style={styles.header}>
+            <View style={ styles.header}>
                 <Button style={styles.backButton} alignSelf="center" size="$6" circular onPress={handleBackPress}>
                     <ArrowBackIcon />
                 </Button>
 
-                <MontserratSemiText style={styles.headerTitle}>{ title }</MontserratSemiText>
+                <Animated.Text style={[
+                    styles.headerTitle,
+                    {
+                        opacity: animateHeaderOpacity
+                    }
+                ]}>{ title }</Animated.Text>
             </View>
         </SafeAreaView>
     )
@@ -49,7 +61,8 @@ const styles = StyleSheet.create({
         alignItems: "center"
     },
     headerTitle: {
-        fontSize: 18
+        fontSize: 18,
+        fontFamily: "Montserrat-Semibold"
     },
     backButton: {
         position: "absolute",

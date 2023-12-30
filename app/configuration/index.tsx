@@ -67,7 +67,7 @@ const ConfigurationScreen = () => {
             </CardOptionsList>
 
             <CardOptionsList title="Configuración general">
-              <CardOptionsList.ItemView>
+              <CardOptionsList.ItemView onPressFunction={() => router.push("/configuration/notifications")}>
                 <NotificationIcon />
                 <CardOptionsList.ItemText>Notificaciones</CardOptionsList.ItemText>
               </CardOptionsList.ItemView>

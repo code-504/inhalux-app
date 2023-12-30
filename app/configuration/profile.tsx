@@ -4,7 +4,7 @@ import Colors from '@/constants/Colors'
 import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/components/StyledText'
 import { AlertDialog, Button, Input, Label, ScrollView } from 'tamagui'
 import { useAuth } from '@/context/Authprovider'
-import { Easing, useSharedValue, withTiming } from 'react-native-reanimated'
+import Animated, { Easing, useSharedValue, withTiming } from 'react-native-reanimated'
 import { BottomSheetBackdropProps, BottomSheetModal } from '@gorhom/bottom-sheet'
 import BlurredBackgroundNew from '@/components/blurredBackground/BlurredBackgroundNew'
 import { handleErasePicture, handleTakePicture, handleUploadPicture } from '@/helpers/avatar'
@@ -122,7 +122,7 @@ const ProfilePage = () => {
 
             <View style={styles.avatarContent }>
               <View style={styles.avatarView}>
-                <Image source={{ uri: supaUser?.avatar }} style={{
+                <Animated.Image source={{ uri: supaUser?.avatar }} style={{
                   width: 220,
                   height: 220,
                   borderRadius: 1000

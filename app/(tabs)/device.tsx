@@ -253,7 +253,7 @@ export default function TabOneScreen() {
 							</View>
 
 							<Button style={styles.whiteButton} alignSelf="center" size="$6" circular onPress={handleOpenPress}>
-								<HelpIcon />
+								<HelpIcon fill={Colors.black} />
 							</Button>
 						</View>
 						{/* <SimpleWeatherCard Icon={HumIcon} color={Colors.cyan} title="Humedad" calification="Excelente" value="35%" /> */}
