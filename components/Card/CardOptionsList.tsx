@@ -13,6 +13,7 @@ interface CardOptionsListProps {
 interface ItemViewProps {
   children: React.ReactElement<ItemTextProps> | React.ReactElement<ItemTextProps>[];
   style?: StyleProp<ViewStyle>;
+  onPressFunction ?: Dispatch<SetStateAction<any>>
 }
 
 interface ItemTextProps {
@@ -21,7 +22,6 @@ interface ItemTextProps {
 
 interface ItemButtonProps {
   children: string;
-  onPressFunction: Dispatch<SetStateAction<any>>
 }
 
 export default function CardOptionsList({ title, children }: CardOptionsListProps) {
@@ -50,10 +50,10 @@ export default function CardOptionsList({ title, children }: CardOptionsListProp
   );
 }
 
-const ItemView = ({ children, style }: ItemViewProps) => (
-    <View style={[styleItem.container, style]}>
+const ItemView = ({ children, style, onPressFunction }: ItemViewProps) => (
+    <Ripple onPress={onPressFunction} style={[styleItem.container, style]}>
         {children}
-    </View>
+    </Ripple>
 );
 
 const ItemText = ({ children }: ItemTextProps) => (
@@ -61,16 +61,16 @@ const ItemText = ({ children }: ItemTextProps) => (
     {children}
   </MontserratSemiText>
 );
-
+/*
 const ItemButton = ({ children, onPressFunction }: ItemButtonProps) => (
   <Button onPress={onPressFunction} style={styleButtonText.text}>
     {children}
   </Button>
-);
+);*/
 
 CardOptionsList.ItemView = ItemView;
 CardOptionsList.ItemText = ItemText;
-CardOptionsList.ItemButton = ItemButton;
+//CardOptionsList.ItemButton = ItemButton;
 
 const styles = StyleSheet.create({
     titleText: {
@@ -93,6 +93,7 @@ const styleItem = StyleSheet.create({
         display: 'flex',
         flexDirection: 'row',
         alignItems: "center",
+        overflow: "hidden",
         gap: 20,
         paddingHorizontal: 24,
         paddingVertical: 24,
@@ -110,7 +111,7 @@ const styleItem = StyleSheet.create({
 
 const styleItemText = StyleSheet.create({
   text: {
-    fontSize: 16,
+    fontSize: 14,
   },
 });
 

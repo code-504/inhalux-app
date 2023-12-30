@@ -79,9 +79,9 @@ const ConfigurationScreen = () => {
             </CardOptionsList>
 
             <CardOptionsList title="Sesión">
-              <CardOptionsList.ItemView>
+              <CardOptionsList.ItemView onPressFunction={() => doLogout()}>
                 <LogoutIcon />
-                <CardOptionsList.ItemButton onPressFunction={() => doLogout()} >Cerrar sesión</CardOptionsList.ItemButton>
+                <CardOptionsList.ItemText>Cerrar sesión</CardOptionsList.ItemText>
               </CardOptionsList.ItemView>
             </CardOptionsList>
           </View>

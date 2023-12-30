@@ -1,14 +1,13 @@
-import { View, Text, ImageBackground, StyleSheet, KeyboardAvoidingView, Platform, Keyboard, Dimensions, Image } from 'react-native'
+import { View, ImageBackground, StyleSheet, Keyboard, Dimensions, Image } from 'react-native'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Colors from '@/constants/Colors'
 import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/components/StyledText'
-import { AlertDialog, Avatar, Button, Input, Label, ScrollView, XStack, YStack } from 'tamagui'
+import { AlertDialog, Button, Input, Label, ScrollView } from 'tamagui'
 import { useAuth } from '@/context/Authprovider'
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
-import { BottomSheetBackdropProps, BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet'
+import { Easing, useSharedValue, withTiming } from 'react-native-reanimated'
+import { BottomSheetBackdropProps, BottomSheetModal } from '@gorhom/bottom-sheet'
 import BlurredBackgroundNew from '@/components/blurredBackground/BlurredBackgroundNew'
-import { Stack } from 'expo-router'
+import { handleErasePicture, handleTakePicture, handleUploadPicture } from '@/helpers/avatar'
 
 // Resources
 import BackgroundImage from "@/assets/images/background.png"
@@ -16,7 +15,7 @@ import PictureIcon from "@/assets/icons/add_a_photo.svg"
 import CameraIcon from "@/assets/icons/camera.svg"
 import GaleryIcon from "@/assets/icons/imagesmode.svg"
 import DeleteIcon from "@/assets/icons/delete_forever.svg"
-import { handleErasePicture, handleTakePicture, handleUploadPicture } from '@/helpers/avatar'
+import InfoIcon from "@/assets/icons/help.svg"
 
 const ProfilePage = () => {
   const { supaUser, setSupaUser } = useAuth();
@@ -161,6 +160,14 @@ const ProfilePage = () => {
                   style={styles.input}
                 />
               </View>
+
+              <View style={styles.inputView}>
+                <View style={styles.infoContent}>
+                  <InfoIcon fill={Colors.darkGray} />
+                  <MontserratText style={styles.infoText}>Tu foto, nombre y apellido de perfil solo podrá ser visto por alguien más si has decido ser el monitor o paciente.</MontserratText>
+                </View>
+              </View>
+
             </View>
 
             <View style={styles.loginButtonView}>
@@ -364,7 +371,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    gap: 8,
+    gap: 24,
   },
   avatarView: {
     position: "relative"
@@ -384,6 +391,17 @@ const styles = StyleSheet.create({
 		flexDirection: "column",
 		gap: 24
 	},
+  infoText: {
+    fontSize: 12,
+    color: Colors.darkGray,
+    lineHeight: 18
+  },
+  infoContent: {
+    display: "flex",
+    flexDirection: "row",
+    gap: 16,
+    marginRight: 24
+  },
 	inputView: {
 		display: "flex",
 		flexDirection: "column",
