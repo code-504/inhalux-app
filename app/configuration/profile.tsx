@@ -1,4 +1,4 @@
-import { View, ImageBackground, StyleSheet, Keyboard, Dimensions, Image } from 'react-native'
+import { View, ImageBackground, StyleSheet, Keyboard, Dimensions, Image, Alert } from 'react-native'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Colors from '@/constants/Colors'
 import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/components/StyledText'
@@ -16,11 +16,14 @@ import CameraIcon from "@/assets/icons/camera.svg"
 import GaleryIcon from "@/assets/icons/imagesmode.svg"
 import DeleteIcon from "@/assets/icons/delete_forever.svg"
 import InfoIcon from "@/assets/icons/help.svg"
+import { supabase } from '@/services/supabase'
 
 const ProfilePage = () => {
   const { supaUser, setSupaUser } = useAuth();
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [photoState, setPhotoState] = useState<boolean>(false);
+  const [userName, setUserName] = useState<string>("");
+  const [userLastName, setUserLastName] = useState<string>("");
 
   const width = useSharedValue(200); // Initial size of the image
   const photoModalRef  = useRef<BottomSheetModal>(null);
@@ -31,6 +34,21 @@ const ProfilePage = () => {
     ],
     []
   );
+
+  useEffect(() => {
+    const fullName = supaUser?.name; // Puedes reemplazar esto con supaUser.name
+    const names = fullName?.split(' ');
+
+    // Obtén el primer nombre
+    const first = names?.[0] || '';
+
+    // Obtén los apellidos
+    const last = names?.slice(1).join(' ') || '';
+
+    // Actualiza los estados
+    setUserName(first);
+    setUserLastName(last);
+  }, []); 
 
   useEffect(() => {
     const keyboardWillShowSub = Keyboard.addListener('keyboardDidShow', keyboardDidShow);
@@ -91,6 +109,23 @@ const ProfilePage = () => {
     await handleErasePicture(supaUser, setSupaUser);
   }
 
+  const handleUpdateUserName = async() => {
+
+    setSupaUser({...supaUser, name: `${userName.trim()} ${userLastName.trim()}`});
+
+    const { data, error } = await supabase
+      .from('users')
+      .update({ name: userName, last_name: userLastName })
+      .eq('id', supaUser?.id)
+      .select()
+
+    if(error == null){
+      Alert.alert("Usuario Actualizado Correctamente")
+    }else{
+      Alert.alert(error.message);
+    }
+  }
+
   /*const { subscribe, dispatch } = useTamagui();
 
   const keyboardDidShow = () => {
@@ -140,23 +175,25 @@ const ProfilePage = () => {
           <View style={styles.downView}>
             <View style={styles.inputContainerView}>
               <View style={styles.inputView}>
-                <Label style={styles.inputLabel} htmlFor="email"><MontserratSemiText>Nombre</MontserratSemiText></Label>
+                <Label style={styles.inputLabel} htmlFor="name"><MontserratSemiText>Nombre</MontserratSemiText></Label>
                 <Input
-                  id="email"
+                  id="name"
                   borderRadius={32}
                   borderWidth={0}
-                  value={supaUser?.name}
+                  onChange={(e) => setUserName(e.nativeEvent.text)}
+                  value={userName}
                   style={styles.input}
                 />
               </View>
               <View style={styles.inputView}>
-                <Label style={styles.inputLabel} htmlFor="password"><MontserratSemiText>Apellidos</MontserratSemiText></Label>
+                <Label style={styles.inputLabel} htmlFor="last_name"><MontserratSemiText>Apellidos</MontserratSemiText></Label>
                 <Input
-                  id="password"
-                  secureTextEntry={true}
+                  id="last_name"
                   borderRadius={32}
                   borderWidth={0}
+                  onChange={(e) => setUserLastName(e.nativeEvent.text)}
                   paddingHorizontal={24}
+                  value={userLastName}
                   style={styles.input}
                 />
               </View>
@@ -171,7 +208,7 @@ const ProfilePage = () => {
             </View>
 
             <View style={styles.loginButtonView}>
-              <Button style={styles.loginButton} borderRadius={32} height={52}>
+              <Button onPress={handleUpdateUserName} style={styles.loginButton} borderRadius={32} height={52}>
                 <MontserratSemiText style={styles.loginText}>Guardar cambios</MontserratSemiText>
               </Button>
             </View>
