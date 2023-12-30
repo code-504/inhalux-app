@@ -36,26 +36,26 @@ const ConfigurationScreen = () => {
             <View>
               <MontserratSemiText style={styles.groupTitleText}>Editar perfil de usuario</MontserratSemiText>
               <Ripple onPress={() => router.push("/configuration/profile")} style={{ borderRadius: 24, overflow: "hidden" }}>
-              <Card radius={24}>
-                <View style={styles.cardProflie}>
-                  <View style={styles.cardProfileView}>
-                    <Avatar size="$6" circular>
-                      <Avatar.Image
-                          accessibilityLabel="Cam"
-                          src={supaUser?.avatar}
-                        />
-                      <Avatar.Fallback backgroundColor="$blue10" />
-                    </Avatar>
+                <Card radius={24}>
+                  <View style={styles.cardProflie}>
+                    <View style={styles.cardProfileView}>
+                      <Avatar size="$6" circular>
+                        <Avatar.Image
+                            accessibilityLabel="Cam"
+                            src={supaUser?.avatar}
+                          />
+                        <Avatar.Fallback backgroundColor="$blue10" />
+                      </Avatar>
 
-                    <View style={styles.profileTextView}>
-                      <MontserratBoldText style={styles.profileNameText}>{supaUser?.name}</MontserratBoldText>
-                      <MontserratText style={styles.profileEmailText}>{supaUser?.email}</MontserratText>
+                      <View style={styles.profileTextView}>
+                        <MontserratBoldText style={styles.profileNameText}>{supaUser?.name}</MontserratBoldText>
+                        <MontserratText style={styles.profileEmailText}>{supaUser?.email}</MontserratText>
+                      </View>
                     </View>
-                  </View>
 
-                  <ArrowBackIcon />
-                </View>
-              </Card>
+                    <ArrowBackIcon />
+                  </View>
+                </Card>
               </Ripple>
             </View>
 
@@ -72,10 +72,12 @@ const ConfigurationScreen = () => {
                 <CardOptionsList.ItemText>Notificaciones</CardOptionsList.ItemText>
               </CardOptionsList.ItemView>
 
-              <CardOptionsList.ItemView>
-                <PasswordIcon />
-                <CardOptionsList.ItemText>Configurar contraseña</CardOptionsList.ItemText>
-              </CardOptionsList.ItemView>
+              <Ripple onPress={() => router.push("/configuration/password")} style={{ padding:0, margin: 0 }}>
+                <CardOptionsList.ItemView>
+                  <PasswordIcon />
+                  <CardOptionsList.ItemText>Configurar contraseña</CardOptionsList.ItemText>
+                </CardOptionsList.ItemView>
+              </Ripple>
             </CardOptionsList>
 
             <CardOptionsList title="Sesión">
