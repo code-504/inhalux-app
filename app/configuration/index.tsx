@@ -2,7 +2,7 @@ import { View, ImageBackground, StyleSheet, ScrollView, Alert } from 'react-nati
 import Colors from '@/constants/Colors'
 import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/components/StyledText'
 import Card from '@/components/Card/Card'
-import { Avatar, Button } from 'tamagui'
+import { Avatar } from 'tamagui'
 import CardOptionsList from '@/components/Card/CardOptionsList'
 
 // Resources
@@ -13,10 +13,7 @@ import PasswordIcon from "@/assets/icons/encrypted.svg"
 import LogoutIcon from "@/assets/icons/move_item.svg"
 import ShareIcon from "@/assets/icons/share.svg"
 import { useAuth } from '@/context/Authprovider'
-import { err } from 'react-native-svg/lib/typescript/xml'
 import { supabase } from '@/services/supabase'
-import { decode } from 'base64-arraybuffer'
-import { handleErasePicture, handleTakePicture, handleUploadPicture } from '@/helpers/avatar'
 import Ripple from 'react-native-material-ripple'
 import { router } from 'expo-router'
 
@@ -61,13 +58,6 @@ const ConfigurationScreen = () => {
               </Card>
               </Ripple>
             </View>
-
-            <View style={styles.twoBlock}>
-              <Button style={styles.whiteButton} alignSelf="center" size="$6" onPress={ () => handleUploadPicture(supaUser, setSupaUser)}>Subir Foto</Button>
-              <Button style={styles.whiteButton} alignSelf="center" size="$6" onPress={ () => handleTakePicture(supaUser, setSupaUser)}>Tomar Foto</Button>
-            </View>
-            <Button style={styles.whiteButton} alignSelf="center" size="$6" onPress={ () => handleErasePicture(supaUser, setSupaUser)}>Borrar Foto</Button>
-
 
             <CardOptionsList title="Opciones de compartir">
               <CardOptionsList.ItemView>

@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
 	},
 	input: {
 		height: 60,
-		backgroundColor: Colors.inputBackground
+		backgroundColor: Colors.inputBackground,
 	},
 	loginButtonView: {
 		marginTop: 32,

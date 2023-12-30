@@ -10,10 +10,10 @@ interface Props {
 }
 
 export type InitializedUser = {
-  id: String;
-  name: String;
-  email: String;
-  avatar: String;
+  id: string;
+  name: string;
+  email: string;
+  avatar: string | undefined;
 }
 
 export interface AuthContextType {
