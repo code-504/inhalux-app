@@ -48,7 +48,7 @@ import DeviceHeader from '@/components/Headers/DeviceHeader';
 import { useInhalers } from '@/context/InhalerProvider';
 import { Link, Tabs, router, useNavigation } from 'expo-router';
 
-NavigationBar.setBackgroundColorAsync(Colors.white);
+NavigationBar.setBackgroundColorAsync("transparent");
 NavigationBar.setButtonStyleAsync("dark");
 
 export default function TabOneScreen() {
@@ -56,6 +56,7 @@ export default function TabOneScreen() {
 	const scrollX = useRef(new AnimatedReact.Value(0)).current
 	const [ refresh, setRefresh ] = useState<boolean>(false);
 	const { supaInhalers: data, setSupaInhalers, weatherData } = useInhalers();
+
 	//const [ data, setData ] = useState<any[]>([]);
 
 	// const { session, } = useAuth();

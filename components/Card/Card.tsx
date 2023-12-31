@@ -11,7 +11,7 @@ interface Props {
 	children	: JSX.Element
 }
 
-const Card = ({ color, radius, children }:Props) => {
+const Card = ({ color, radius, children, style }:Props) => {
     
     const styles = StyleSheet.create({
         cardStyle: {
@@ -24,7 +24,7 @@ const Card = ({ color, radius, children }:Props) => {
     });
 
 	return (
-		<View style={styles.cardStyle}>
+		<View style={[ styles.cardStyle, style]}>
 			{ children }
 		</View>
 	)

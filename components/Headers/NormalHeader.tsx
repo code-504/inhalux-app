@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
         alignItems: "center"
     },
     headerTitle: {
-        fontSize: 18,
+        fontSize: 16,
         fontFamily: "Montserrat-Semibold"
     },
     backButton: {

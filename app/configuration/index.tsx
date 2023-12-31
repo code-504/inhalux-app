@@ -16,6 +16,10 @@ import { useAuth } from '@/context/Authprovider'
 import { supabase } from '@/services/supabase'
 import Ripple from 'react-native-material-ripple'
 import { router } from 'expo-router'
+import * as NavigationBar from 'expo-navigation-bar';
+
+NavigationBar.setBackgroundColorAsync("transparent");
+NavigationBar.setButtonStyleAsync("dark");
 
 const ConfigurationScreen = () => {
   const { supaUser, setSupaUser} = useAuth();
@@ -36,7 +40,7 @@ const ConfigurationScreen = () => {
             <View>
               <MontserratSemiText style={styles.groupTitleText}>Editar perfil de usuario</MontserratSemiText>
               <Ripple onPress={() => router.push("/configuration/profile")} style={{ borderRadius: 24, overflow: "hidden" }}>
-                <Card radius={24}>
+                <Card style={{ paddingHorizontal: 24 }} radius={24}>
                   <View style={styles.cardProflie}>
                     <View style={styles.cardProfileView}>
                       <Avatar size="$6" circular>
@@ -60,9 +64,9 @@ const ConfigurationScreen = () => {
             </View>
 
             <CardOptionsList title="Opciones de compartir">
-              <CardOptionsList.ItemView>
+              <CardOptionsList.ItemView onPressFunction={() => router.push("/configuration/shareoptions")}>
                 <ShareIcon />
-                <CardOptionsList.ItemText>Compartir inhalador</CardOptionsList.ItemText>
+                <CardOptionsList.ItemText>Opciones de compartir cuenta</CardOptionsList.ItemText>
               </CardOptionsList.ItemView>
             </CardOptionsList>
 
@@ -72,12 +76,10 @@ const ConfigurationScreen = () => {
                 <CardOptionsList.ItemText>Notificaciones</CardOptionsList.ItemText>
               </CardOptionsList.ItemView>
 
-              <Ripple onPress={() => router.push("/configuration/password")} style={{ padding:0, margin: 0 }}>
-                <CardOptionsList.ItemView>
-                  <PasswordIcon />
-                  <CardOptionsList.ItemText>Configurar contraseña</CardOptionsList.ItemText>
-                </CardOptionsList.ItemView>
-              </Ripple>
+              <CardOptionsList.ItemView onPressFunction={() => router.push("/configuration/password")}>
+                <PasswordIcon />
+                <CardOptionsList.ItemText>Configurar contraseña</CardOptionsList.ItemText>
+              </CardOptionsList.ItemView>
             </CardOptionsList>
 
             <CardOptionsList title="Sesión">
@@ -118,7 +120,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   groupTitleText: {
-    fontSize: 16,
+    fontSize: 14,
     marginBottom: 16
   },
   cardProflie: {
@@ -139,7 +141,7 @@ const styles = StyleSheet.create({
     gap: 4
   },
   profileNameText: {
-    fontSize: 16
+    fontSize: 14
   },
   profileEmailText: {
     fontSize: 12

@@ -1,8 +1,5 @@
 import { View, StyleSheet, ImageBackground, Dimensions, Animated } from 'react-native'
 import React, { useEffect, useRef } from 'react'
-
-// Resources
-import BackgroundImage from "@/assets/images/background.png"
 import Colors from '@/constants/Colors'
 import { ScrollView } from 'tamagui'
 import { MontserratSemiText } from '@/components/StyledText'
@@ -10,10 +7,12 @@ import NotificationsList from '@/components/NotificationsList'
 import { Stack } from 'expo-router'
 import NormalHeader from '@/components/Headers/NormalHeader'
 
+// Resources
+import BackgroundImage from "@/assets/images/background.png"
+
 const NotificationsPage = () => {
 
     let scrollOffsetY = useRef(new Animated.Value(0)).current;
-    
     
     return (
         <View style={styles.safeArea}>

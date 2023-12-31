@@ -1,6 +1,6 @@
 import React, { Dispatch, SetStateAction } from 'react';
 import { View, StyleSheet, StyleProp, ViewStyle } from 'react-native';
-import { MontserratSemiText } from '../StyledText';
+import { MontserratSemiText, MontserratText } from './StyledText';
 import Colors from '@/constants/Colors';
 import Ripple from 'react-native-material-ripple';
 import { Button } from 'tamagui';
@@ -20,27 +20,16 @@ interface ItemTextProps {
   children: string;
 }
 
-export default function CardOptionsList({ title, children }: CardOptionsListProps) {
-  const childrenArray = React.Children.toArray(children);
-  const totalChildren = childrenArray.length;
+interface ItemDescriptionProps {
+  children: React.ReactElement | React.ReactElement[];
+}
 
+export default function OptionsList({ title, children }: CardOptionsListProps) {
   return (
     <View style={styles.container}>
       <MontserratSemiText style={styles.titleText}>{title}</MontserratSemiText>
       <View style={styles.viewList}>
-        {React.Children.map(children, (child, index) => {
-          const isFirst = index === 0;
-          const isLast = index === totalChildren - 1;
-
-          return React.cloneElement(child, {
-            style: [
-              styleItem.container,
-              isFirst && styleItem.firstChild,
-              isLast && styleItem.lastChild,
-              child.props.style,
-            ],
-          });
-        })}
+        { children }
       </View>
     </View>
   );
@@ -52,18 +41,34 @@ const ItemView = ({ children, style, onPressFunction }: ItemViewProps) => (
     </Ripple>
 );
 
+const TextView = ({ children }: ItemDescriptionProps) => (
+  <View style={styleItemText.content}>
+    {children}
+  </View>
+)
+
 const ItemText = ({ children }: ItemTextProps) => (
   <MontserratSemiText style={styleItemText.text}>
     {children}
   </MontserratSemiText>
 );
 
-CardOptionsList.ItemView = ItemView;
-CardOptionsList.ItemText = ItemText;
+const ItemDescription = ({ children }: ItemTextProps) => (
+  <MontserratText style={styleItemText.description}>
+    {children}
+  </MontserratText>
+)
+
+OptionsList.ItemView = ItemView;
+OptionsList.ItemText = ItemText;
+OptionsList.ItemDescription = ItemDescription;
+OptionsList.TextView = TextView;
 
 const styles = StyleSheet.create({
     titleText: {
-        fontSize: 14,
+      paddingHorizontal: 24,
+      fontSize: 12,
+      color: Colors.darkGray
     },
     container: {
         display: 'flex',
@@ -81,25 +86,28 @@ const styleItem = StyleSheet.create({
     container: {
         display: 'flex',
         flexDirection: 'row',
-        alignItems: "center",
+        alignItems: "flex-start",
         overflow: "hidden",
-        gap: 20,
+        gap: 24,
         paddingHorizontal: 24,
         paddingVertical: 24,
         backgroundColor: Colors.white,
     },
-    firstChild: {
-        borderTopLeftRadius: 24,
-        borderTopRightRadius: 24
-    },
-    lastChild: {
-        borderBottomLeftRadius: 24,
-        borderBottomRightRadius: 24
-    }
 });
 
 const styleItemText = StyleSheet.create({
   text: {
-    fontSize: 14,
+    fontSize: 16,
   },
+  description: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: Colors.darkGray
+  },
+  content: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 8,
+    paddingRight: 64
+  }
 });
