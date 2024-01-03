@@ -13,16 +13,15 @@ import SearchIcon from "@/assets/icons/search.svg"
 import ContactCard from '@/components/Card/ContactCard'
 import { SharesTabProps } from '@/interfaces/Monitor'
 import { FlashList } from '@shopify/flash-list'
+import { router } from 'expo-router'
 
 const SharesTab = ({ shareState, setShareState }: SharesTabProps) => {
-    console.log("shareState: ", shareState);
-
     const [hasData, setHasData] = useState<boolean>(false);
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
     const [ isLoading, setIsLoading ] = useState<boolean>(false);
     
     const addShare = () => {
-        console.log("Hola")
+        router.push("/monitor/share_link")
     }
 
     const handleChange = (e: NativeSyntheticEvent<TextInputChangeEventData>) => {
@@ -54,7 +53,7 @@ const SharesTab = ({ shareState, setShareState }: SharesTabProps) => {
 
     return (
         <View>
-            <View style={styles.listView}>
+            <View style={styles.headerView}>
             <HeaderAction 
                 title="Lista de compartidos"
                 subtitle="Compartiste tu inhaLux"
@@ -70,7 +69,8 @@ const SharesTab = ({ shareState, setShareState }: SharesTabProps) => {
                     <View style={styles.listView}>
 
                         <View style={styles.searchInputView}>
-                            <Input style={styles.searchInput} id="search-in-shares" borderRadius="$10" borderWidth={1} placeholder="Buscar por nombre" onChange={(value) => handleChange(value)} />
+                            <MontserratSemiText style={styles.subTitle}>Buscar monitor</MontserratSemiText>
+                            <Input style={styles.searchInput} id="search-in-shares" borderRadius="$10" borderWidth={0} placeholder="Buscar por nombre" onChange={(value) => handleChange(value)} />
                             <SearchIcon style={styles.searchIcon}/>
                         </View>
 
@@ -125,10 +125,17 @@ const styles = StyleSheet.create({
         textAlign: "center",
         color: Colors.darkGray
     },
+    headerView: {
+        display: "flex",
+        flexDirection: "column",
+        paddingHorizontal: 24,
+        marginBottom: 24
+    },
     listView: {
         display: "flex",
         flexDirection: "column",
-        paddingHorizontal: 24
+        marginTop: 28,
+        paddingHorizontal: 24,
     },
     listContent: {
         height: "100%"
@@ -139,14 +146,18 @@ const styles = StyleSheet.create({
     searchInput: {
         marginTop: 12,
         marginBottom: 24,
-        height: 56,
+        height: 64,
         paddingLeft: 24,
         paddingRight: 60,
-        backgroundColor: Colors.white
+        backgroundColor: Colors.lightGrey,
     },
     searchIcon: {
         position: "absolute",
-        top: "31%",
-        right: 22
-    }
+        top: "42%",
+        right: 24
+    },
+    subTitle: {
+        fontSize: 12,
+        color: Colors.darkGray
+    },
 })

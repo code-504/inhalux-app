@@ -101,7 +101,10 @@ function RootLayoutNav() {
             <Stack.Screen name="configuration/password" options={{ presentation: 'transparentModal' }} />
             <Stack.Screen name="configuration/notifications" options={{ presentation: 'transparentModal' }} />
             <Stack.Screen name="configuration/shareoptions" options={{ presentation: 'transparentModal' }} />
-            <Stack.Screen name="device/connect_device" options={{ headerShown: false }} />
+            <Stack.Screen name="device/search_device" options={{ presentation: 'transparentModal' }} />
+            <Stack.Screen name="device/connect_device" options={{ presentation: 'transparentModal' }} />
+            <Stack.Screen name="monitor/scan_pacient" options={{ header: () => <NormalHeader title="Escanear" />, presentation: 'transparentModal' }}  />
+            <Stack.Screen name="monitor/share_link" options={{ header: () => <NormalHeader title="Compartir" />, presentation: 'transparentModal' }}  />
             <Stack.Screen name="notification" options={{ header: () => <NormalHeader title="Notificaciones" />, presentation: 'transparentModal' }} />
           </Stack>
           </BottomSheetModalProvider>

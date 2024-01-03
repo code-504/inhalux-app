@@ -17,6 +17,7 @@ import { supabase } from '@/services/supabase'
 import Ripple from 'react-native-material-ripple'
 import { router } from 'expo-router'
 import * as NavigationBar from 'expo-navigation-bar';
+import { useEffect } from 'react'
 
 NavigationBar.setBackgroundColorAsync("transparent");
 NavigationBar.setButtonStyleAsync("dark");

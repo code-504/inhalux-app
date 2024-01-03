@@ -80,6 +80,7 @@ const ProfilePage = () => {
   }
 
   const openPhoto = async () => {
+    Keyboard.dismiss()
     photoModalRef.current?.close();
     setPhotoState(true);
 
@@ -125,27 +126,6 @@ const ProfilePage = () => {
       Alert.alert(error.message);
     }
   }
-
-  /*const { subscribe, dispatch } = useTamagui();
-
-  const keyboardDidShow = () => {
-    imageSize.value = withTiming(30); // Adjust the size as needed
-  };
-
-  const keyboardDidHide = () => {
-    imageSize.value = withTiming(50); // Adjust the size as needed
-  };
-
-  // Subscribe to keyboard events
-  useEffect(() => {
-    const showSub = subscribe('keyboardDidShow', keyboardDidShow);
-    const hideSub = subscribe('keyboardDidHide', keyboardDidHide);
-
-    return () => {
-      showSub();
-      hideSub();
-    };
-  }, []);*/
   
   return (
     <View style={styles.safeArea}>

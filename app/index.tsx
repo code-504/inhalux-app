@@ -1,11 +1,14 @@
 import React from 'react'
 import { Redirect } from 'expo-router'
 import { useAuth } from '@/context/Authprovider'
+import {enableLatestRenderer} from 'react-native-maps';
 
 import 'react-native-gesture-handler';
 import { gestureHandlerRootHOC } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
+
+enableLatestRenderer();
 
 const index = () => {
   

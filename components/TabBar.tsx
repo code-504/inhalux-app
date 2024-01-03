@@ -1,6 +1,6 @@
 import Colors from '@/constants/Colors';
 import React, { useRef, useState } from 'react';
-import { View, StyleSheet, LayoutChangeEvent, TouchableHighlightBase, Dimensions } from 'react-native';
+import { View, StyleSheet, LayoutChangeEvent, TouchableHighlightBase, Dimensions, Keyboard } from 'react-native';
 import Animated, { useSharedValue, withSpring } from 'react-native-reanimated';
 import { MontserratSemiText } from './StyledText';
 import { Button } from 'tamagui';
@@ -29,6 +29,8 @@ function TabBar({ tabs }: TabBarProps) {
 	const flashListRef = useRef<FlashList<any>>(null);
 
 	const handleTabPress = (index: number) => {
+		Keyboard.dismiss();
+
 		setActiveTab(index);
 
 		scrollToIndex(index)
@@ -48,8 +50,6 @@ function TabBar({ tabs }: TabBarProps) {
 		setWidth(width);
 	};
 
-	const tabComponents = tabs.map((tab) => tab.Component);
-
 	const scrollToIndex = (index:number) => {
 		flashListRef.current?.scrollToIndex({ index: index, animated: true })
 	};
@@ -57,57 +57,58 @@ function TabBar({ tabs }: TabBarProps) {
 	return (
 		<View>
 			<View style={styles.tabView}>
-			<View style={styles.container}>
-				<View style={styles.tabsContainer}>
-					{tabs.map((tab, index) => (
-	
-						<Ripple
-							key={index}
-							onTouchStart={() => handleTabPress(index)}
-							style={[styles.tab]}
-						>
-								<tab.Icon />
-								<MontserratSemiText>{tab.name}</MontserratSemiText>
-						</Ripple>
-					))}
-				</View>
+				<View style={styles.container}>
+					<View style={styles.tabsContainer}>
+						{tabs.map((tab, index) => (
+		
+							<Ripple
+								key={index}
+								onTouchStart={() => handleTabPress(index)}
+								style={[styles.tab]}
+							>
+									<tab.Icon />
+									<MontserratSemiText>{tab.name}</MontserratSemiText>
+							</Ripple>
+						))}
+					</View>
 
-				<Animated.View
-					onLayout={handleLayout}
-					style={{
-						width: "50%",
-						height: 60,
-						borderRadius: 100,
-						backgroundColor: Colors.secondary, // Cambia el color del slider según tus preferencias
-						position: 'absolute',
-						zIndex: -1,
-						transform: [{ translateX }]
-					}}
-				/>
-			</View>
+					<Animated.View
+						onLayout={handleLayout}
+						style={{
+							width: "50%",
+							height: 60,
+							borderRadius: 100,
+							backgroundColor: Colors.secondary, // Cambia el color del slider según tus preferencias
+							position: 'absolute',
+							zIndex: -1,
+							transform: [{ translateX }]
+						}}
+					/>
+				</View>
 			</View>
 			
-			<FlashList 
-				ref={flashListRef}
-				data={tabs}
-				keyExtractor={(item: any) => item.id}
-				horizontal
-				showsHorizontalScrollIndicator={false}
-				scrollEnabled={false}
-				pagingEnabled
-				decelerationRate={0}
-				snapToInterval={ITEM_WIDTH}
-				snapToAlignment={"center"}
-				scrollEventThrottle={16}
-				estimatedItemSize={ITEM_WIDTH}
-				renderItem={( { item, index } ) => {
-					return (
-						<View style={{ width: ITEM_WIDTH, marginTop: 20, height: "100%"}}>
-							<RenderItem item={ item } />
-						</View>
-					);
-				}}
-			/>
+				<FlashList 
+					ref={flashListRef}
+					data={tabs}
+					keyExtractor={(item: any) => item.id}
+					horizontal
+					showsHorizontalScrollIndicator={false}
+					scrollEnabled={false}
+					pagingEnabled
+					decelerationRate={0}
+					snapToInterval={ITEM_WIDTH}
+					snapToAlignment={"center"}
+					scrollEventThrottle={16}
+					estimatedItemSize={ITEM_WIDTH}
+					renderItem={( { item, index } ) => {
+						return (
+							<View style={{ width: ITEM_WIDTH, marginTop: 20, height: "100%"}}>
+								<RenderItem item={ item } />
+							</View>
+						);
+					}}
+				/>
+				<View style={styles.background}></View>
 		
 			{ /*tabComponents[activeTab] && tabComponents[activeTab]*/ }
 		</View>
@@ -155,6 +156,17 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 14,
+  },
+  background: { 
+	position: "absolute",
+	top: 0,
+	width: "100%",
+	backgroundColor: Colors.white, 
+	marginTop: 200,
+	height: "100%" ,
+	zIndex: -1,
+	borderTopLeftRadius: 38,
+        borderTopRightRadius: 38,
   }
 });
 

@@ -40,7 +40,6 @@ import OzonoIcon from "@/assets/icons/radio_button_checked.svg"
 import { useAuth } from '@/context/Authprovider';
 import { getInhalers } from '@/services/api/device';
 import { RefreshControl } from 'react-native-gesture-handler';
-import BottomSheet, { BottomSheetBackdrop, BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import BlurredBackground from '@/components/blurredBackground/BlurredBackground';
 import BlurredDeviceBackground from '@/components/blurredBackground/BlurredDeviceBackground';
 import { useHeaderHeight } from '@react-navigation/elements';
@@ -48,7 +47,14 @@ import DeviceHeader from '@/components/Headers/DeviceHeader';
 import { useInhalers } from '@/context/InhalerProvider';
 import { Link, Tabs, router, useNavigation } from 'expo-router';
 
-NavigationBar.setBackgroundColorAsync("transparent");
+import {
+	BottomSheetFlatList,
+	BottomSheetModal,
+	BottomSheetModalProvider,
+} from '@gorhom/bottom-sheet';
+
+
+NavigationBar.setBackgroundColorAsync(Colors.white);
 NavigationBar.setButtonStyleAsync("dark");
 
 export default function TabOneScreen() {
@@ -104,6 +110,94 @@ export default function TabOneScreen() {
 	}, []);
 
 	const headerHeight = useHeaderHeight();
+
+	interface WeatherDataDescriptionProps {
+		id			: string;
+		Icon        : React.FunctionComponent<React.SVGAttributes<SVGElement>>;
+		color		: string;
+		title		: string;
+		description	: string;
+	}
+
+	const WeatherDataDescription: WeatherDataDescriptionProps[] = [
+		{
+			id: "info-1",
+			Icon: AqIcon,
+			color: Colors.pink,
+			title: "Calidad del aire",
+			description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+		},
+		{
+			id: "info-2",
+			Icon: CoIcon,
+			color: Colors.blueLight,
+			title: "Monóxido de carbono",
+			description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+		},
+		{
+			id: "info-3",
+			Icon: PM2_5Icon,
+			color: Colors.redLight,
+			title: "PM 2.5",
+			description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+		},
+		{
+			id: "info-4",
+			Icon: PM10Icon,
+			color: Colors.orangeLight,
+			title: "PM 10",
+			description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+		},
+		{
+			id: "info-5",
+			Icon: TempIcon,
+			color: Colors.brownLight,
+			title: "Temperatura",
+			description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+		},
+		{
+			id: "info-6",
+			Icon: HumIcon,
+			color: Colors.blueLight,
+			title: "Humedad",
+			description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+		},
+		{
+			id: "info-7",
+			Icon: NitroIcon,
+			color: Colors.purpleLight,
+			title: "Dióxido de nitrógeno",
+			description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+		},
+		{
+			id: "info-8",
+			Icon: OzonoIcon,
+			color: Colors.greenLight,
+			title: "Ozono",
+			description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+		},
+	]
+
+	const renderInfoItem = useCallback(
+		({ item }: any) => {
+		  	return (
+				<View style={stylesItem.container}>
+
+					<View style={stylesItem.cardIconView}>
+						<View style={[stylesItem.cardIcon, { backgroundColor: item.color }]}>
+							<item.Icon />
+						</View>
+					</View>
+
+					<View style={stylesItem.textView}>
+						<MontserratSemiText style={stylesItem.textTitle}>{ item.title }</MontserratSemiText>
+						<MontserratText style={stylesItem.textDescription}>{ item.description }</MontserratText>	
+					</View>
+				</View>
+		  	)
+		}, []
+	);
+
 
 	const RenderItem = ({ item }: any) => (
 		<Card style={styles.inahlerCard} radius={44}>
@@ -184,7 +278,7 @@ export default function TabOneScreen() {
 						title="Dispositivos"
 						subtitle="Información general"
 						Icon={AddIcon}
-						action={()=>{}}
+						action={()=> router.push("/device/search_device")}
 					/>
 				</View>
 					{/* Inicio */}
@@ -285,20 +379,21 @@ export default function TabOneScreen() {
 
 			<BottomSheetModal
 				ref={bottomSheetRef}
-				key="PoiListSheet"
-				name="PoiListSheet"
-				index={0}
 				snapPoints={snapPoints}
-				enablePanDownToClose
+				index={0}
 				backdropComponent={BlurredDeviceBackground}
 			>
 				<View style={stylesBottom.container}>
-					<View>
-						<MontserratBoldText style={stylesBottom.title}>Información sobre la calidad del aire</MontserratBoldText>
-						<MontserratText style={stylesBottom.infoText}>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do.</MontserratText>
-					</View>
-					
+					<MontserratSemiText style={stylesBottom.title}>{`Información \nsobre la calidad del aire`}</MontserratSemiText>
+					<MontserratText style={stylesBottom.description}>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</MontserratText>
 				</View>
+
+				<BottomSheetFlatList
+					data={WeatherDataDescription}
+					keyExtractor={(_, index) => index.toString()}
+					renderItem={renderInfoItem}
+					contentContainerStyle={stylesBottom.container}
+				/>
 			</BottomSheetModal>
 
 			</ImageBackground>
@@ -308,14 +403,54 @@ export default function TabOneScreen() {
 	)
 }
 
+const stylesItem = StyleSheet.create({
+	container: {
+		display: "flex",
+		flexDirection: "row",
+		width: "100%",
+		paddingVertical: 18,
+		gap: 24
+	},
+	cardIconView: {
+        display: "flex",
+        justifyContent: "flex-start",
+    },
+    cardIcon: {
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: 100,
+        width: 32,
+        height: 32,
+    },
+	textView: {
+		display: "flex",
+		flexDirection: "column",
+		gap: 8
+	},
+	textTitle: {
+		fontSize: 16
+	},
+	textDescription: {
+		fontSize: 14,
+		lineHeight: 20
+	},
+})
+
 const stylesBottom = StyleSheet.create({
 	container: {
 		paddingTop: 16,
 		paddingHorizontal: 24
 	},
 	title: {
-		fontSize: 26,
-		lineHeight: 36,
+		fontSize: 20,
+		lineHeight: 26,
+		marginBottom: 16
+	},
+	description: {
+		fontSize: 14,
+		lineHeight: 20,
+		color: Colors.darkGray,
 		marginBottom: 16
 	},
 	infoText: {

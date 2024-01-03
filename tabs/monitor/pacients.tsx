@@ -19,16 +19,11 @@ import ContactCard from '@/components/Card/ContactCard'
 import { FlashList } from '@shopify/flash-list'
 import { PacientsTabProps } from '@/interfaces/Monitor'
 
-const PacientsTab = ({ pacientState, setPacientState }: PacientsTabProps) => {
-    console.log("pacientState: ", pacientState);
+const PacientsTab = ({ pacientState, setPacientState, onFunction }: PacientsTabProps) => {
 
     const [hasData, setHasData] = useState<boolean>(false);
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
     const [ isLoading, setIsLoading ] = useState<boolean>(false);
-    
-    const addPacient = () => {
-        console.log("Hola")
-    }
 
     const handleChange = (e: NativeSyntheticEvent<TextInputChangeEventData>) => {
         setDebouncedSearchTerm(e.nativeEvent.text)
@@ -59,13 +54,13 @@ const PacientsTab = ({ pacientState, setPacientState }: PacientsTabProps) => {
 
     return (
         <View>
-            <View style={styles.listView}>
-            <HeaderAction 
-                title="Lista de pacientes"
-                subtitle="Información de sus inhaLux"
-                Icon={AddIcon}
-                action={addPacient}
-            />
+            <View style={styles.headerView}>
+                <HeaderAction 
+                    title="Lista de pacientes"
+                    subtitle="Información de sus inhaLux"
+                    Icon={AddIcon}
+                    action={onFunction}
+                />
             </View>
 
             {
@@ -75,7 +70,8 @@ const PacientsTab = ({ pacientState, setPacientState }: PacientsTabProps) => {
                     <View style={styles.listView}>
 
                         <View style={styles.searchInputView}>
-                            <Input style={styles.searchInput} id="search-in-pacients" borderRadius="$10" borderWidth={1} placeholder="Buscar por nombre" onChange={(value) => handleChange(value)} />
+                            <MontserratSemiText style={styles.subTitle}>Buscar paciente</MontserratSemiText>
+                            <Input style={styles.searchInput} id="search-in-pacients" borderRadius="$10" borderWidth={0} placeholder="Buscar por nombre" onChange={(value) => handleChange(value)} />
                             <SearchIcon style={styles.searchIcon}/>
                         </View>
 
@@ -133,7 +129,8 @@ const styles = StyleSheet.create({
     listView: {
         display: "flex",
         flexDirection: "column",
-        paddingHorizontal: 24
+        marginTop: 28,
+        paddingHorizontal: 24,
     },
     listContent: {
         height: "100%"
@@ -144,14 +141,24 @@ const styles = StyleSheet.create({
     searchInput: {
         marginTop: 12,
         marginBottom: 24,
-        height: 56,
+        height: 64,
         paddingLeft: 24,
         paddingRight: 60,
-        backgroundColor: Colors.white
+        backgroundColor: Colors.lightGrey,
     },
     searchIcon: {
         position: "absolute",
-        top: "31%",
-        right: 22
-    }
+        top: "42%",
+        right: 24
+    },
+    subTitle: {
+        fontSize: 12,
+        color: Colors.darkGray
+    },
+    headerView: {
+        display: "flex",
+        flexDirection: "column",
+        paddingHorizontal: 24,
+        marginBottom: 24
+    },
 })

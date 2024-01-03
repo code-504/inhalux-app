@@ -1,3 +1,4 @@
+import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import { Dispatch, SetStateAction } from "react"
 
 export interface ListMonitor {
@@ -13,6 +14,7 @@ export interface ListMonitorState {
 }
 
 export interface PacientsTabProps {
+    onFunction: () => void;
     pacientState: ListMonitorState;
     setPacientState: Dispatch<SetStateAction<ListMonitorState>>
 }

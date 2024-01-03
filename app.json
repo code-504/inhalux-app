@@ -49,7 +49,16 @@
     "plugins": [
       "@react-native-google-signin/google-signin",
       "expo-router",
-      "react-native-ble-plx"
+      "react-native-ble-plx",
+      [
+        "react-native-vision-camera",
+        {
+          "cameraPermissionText": "$(PRODUCT_NAME) needs access to your Camera.",
+          "enableMicrophonePermission": true,
+          "enableCodeScanner": true,
+          "microphonePermissionText": "$(PRODUCT_NAME) needs access to your Microphone."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

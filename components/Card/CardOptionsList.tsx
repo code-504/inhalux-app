@@ -83,7 +83,7 @@ const styleItem = StyleSheet.create({
         flexDirection: 'row',
         alignItems: "center",
         overflow: "hidden",
-        gap: 20,
+        gap: 24,
         paddingHorizontal: 24,
         paddingVertical: 24,
         backgroundColor: Colors.white,

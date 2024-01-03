@@ -143,8 +143,6 @@ const Page = () => {
 			<View style={styles.twoBlock}>
 				<Button style={styles.whiteButton} alignSelf="center" size="$6" onPress={handleUpdateInhaler}>Actualizar</Button>
 				<Button style={styles.whiteButton} alignSelf="center" size="$6" onPress={handleDeleteInhaler}>Eliminar</Button>
-
-				<Button style={styles.whiteButton} alignSelf="center" size="$6" onPress={() => router.push("/device/connect_device")}>Conectar</Button>
 			</View>
 
 					<View style={styles.timeView}>

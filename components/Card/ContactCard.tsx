@@ -8,9 +8,9 @@ import { StyleSheet } from 'react-native'
 import Colors from '@/constants/Colors'
 import { MontserratBoldText, MontserratText } from '../StyledText'
 import Ripple from 'react-native-material-ripple'
-import { Pacient } from '@/interfaces/Monitor'
+import { ListMonitor } from '@/interfaces/Monitor'
 
-const ContactCard = ({ name, kindred, avatar }:Pacient) => {
+const ContactCard = ({ name, kindred, avatar }: ListMonitor) => {
     return (
         <Ripple style={styles.cardView}>
             <View style={styles.cardContent}>
@@ -43,8 +43,8 @@ const styles = StyleSheet.create({
         alignItems: "center",
         paddingHorizontal: 24,
         height: 96,
-        borderBottomWidth: 1,
-        borderBottomColor: Colors.dotsGray
+        //borderBottomWidth: 1,
+        //borderBottomColor: Colors.dotsGray
     },
     cardContent: {
         display: "flex",

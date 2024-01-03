@@ -85,7 +85,6 @@ const TabTwoScreen = () => {
   });
 
   const { supaInhalers } = useInhalers();
-  console.log("location", supaInhalers);
   
   const data:any[] = supaInhalers;
   /*[
@@ -191,13 +190,14 @@ const TabTwoScreen = () => {
         timeInterval: 3000,
         distanceInterval: 8,
     }, ({ coords }) => {
-      console.log(coords)
+      //console.log(coords)
       setLocation(coords)
     })
   }
 
   useEffect(() => {
     getPhoneLocation();
+    inhalerListModalRef.current?.present();
   }, []);
 
   useEffect(() => {
@@ -444,17 +444,17 @@ const TabTwoScreen = () => {
   const handleTouchStart = useCallback(async () => {
     inhalerListModalRef.current?.collapse();
 
-    const { hasLocationEnabled } = await requestForegroundPermission();
+    /*const { hasLocationEnabled } = await requestForegroundPermission();
 
     if (hasLocationEnabled) {
-      setButtonState(ButtonLocationState.Active)
+      //setButtonState(ButtonLocationState.Active)
     } else {
-      if (buttonState === ButtonLocationState.Active || ButtonLocationState.Current)
-      setButtonState(ButtonLocationState.Inactive)
+      //if (buttonState === ButtonLocationState.Active || ButtonLocationState.Current)
+      //setButtonState(ButtonLocationState.Inactive)
     }
 
-    if (buttonState === ButtonLocationState.Current)
-      setButtonState(ButtonLocationState.Active)  
+    //if (buttonState === ButtonLocationState.Current)
+      //setButtonState(ButtonLocationState.Active) */ 
   }, []);
 
   const handleOpenPressLocate = useCallback((id:any) => {

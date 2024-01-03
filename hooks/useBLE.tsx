@@ -1,11 +1,12 @@
 /* eslint-disable no-bitwise */
-import { useMemo, useState } from "react";
+import { Dispatch, SetStateAction, useMemo, useState } from "react";
 import { PermissionsAndroid, Platform } from "react-native";
 import {
   BleError,
   BleManager,
   Characteristic,
   Device,
+  Subscription,
 } from "react-native-ble-plx";
 
 import * as ExpoDevice from "expo-device";
@@ -20,14 +21,20 @@ interface BluetoothLowEnergyApi {
   scanForPeripherals(): void;
   connectToDevice: (deviceId: Device) => Promise<void>;
   disconnectFromDevice: () => void;
+  checkBluetooth: () => Promise<boolean>;
   connectedDevice: Device | null;
   allDevices: Device[];
+  bluetoothState: string | undefined;
+  onBluetoothState: () => Subscription;
+  setAllDevices: Dispatch<SetStateAction<Device[]>>;
   heartRate: number;
+  bleManager: BleManager;
 }
 
 function useBLE(): BluetoothLowEnergyApi {
   const bleManager = useMemo(() => new BleManager(), []);
   const [allDevices, setAllDevices] = useState<Device[]>([]);
+  const [bluetoothState, setBluetoothState] = useState<string>();
 
   const [connectedDevice, setConnectedDevice] = useState<Device | null>(null);
   const [heartRate, setHeartRate] = useState<number>(0);
@@ -65,6 +72,31 @@ function useBLE(): BluetoothLowEnergyApi {
     );
   };
 
+  const checkBluetooth = async (): Promise<boolean> => {
+		try {
+			const state = await bleManager.state()
+
+			if (state === "PoweredOn")
+				return true;
+
+			return false;
+		} catch (err) {
+			console.log(err)
+			return false;
+		}
+	}
+
+  const onBluetoothState = (): Subscription => {
+      const subscription = bleManager.onStateChange((state) => {
+        setBluetoothState(state)
+
+        /*if (state === 'PoweredOff')
+          setAllDevices([]);*/
+    }, true);
+
+    return subscription;
+	}
+
   const requestPermissions = async () => {
     if (Platform.OS === "android") {
       const isAndroid31PermissionsGranted =
@@ -79,21 +111,25 @@ function useBLE(): BluetoothLowEnergyApi {
   const isDuplicteDevice = (devices: Device[], nextDevice: Device) =>
     devices.findIndex((device) => nextDevice.id === device.id) > -1;
 
-  const scanForPeripherals = () =>
-    bleManager.startDeviceScan(null, null, (error, device) => {
-      if (error) {
-        console.log(error);
-      }
+  const scanForPeripherals = async () => {
+    if (bluetoothState === "PoweredOn")
+      bleManager.startDeviceScan(null, null, (error, device) => {
+        if (error) {
+          console.log(error);
+        }
 
-      if (device && device.name?.includes("inhaLux")) {
-        setAllDevices((prevState: Device[]) => {
-          if (!isDuplicteDevice(prevState, device)) {
-            return [...prevState, device];
-          }
-          return prevState;
-        });
+        if (device && device.name?.includes("Xiaomi Smart Band 7 3410")) {
+          bleManager.stopDeviceScan();
+          
+          setAllDevices((prevState: Device[]) => {
+            if (!isDuplicteDevice(prevState, device)) {
+              return [...prevState, device];
+            }
+            return prevState;
+          });
+        }
       }
-    });
+  )};
 
   const connectToDevice = async (device: Device) => {
     try {
@@ -169,10 +205,15 @@ function useBLE(): BluetoothLowEnergyApi {
     scanForPeripherals,
     requestPermissions,
     connectToDevice,
+    checkBluetooth,
+    onBluetoothState,
     allDevices,
+    bluetoothState,
+    setAllDevices,
     connectedDevice,
     disconnectFromDevice,
     heartRate,
+    bleManager
   };
 }
 
