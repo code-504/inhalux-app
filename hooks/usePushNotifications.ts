@@ -65,14 +65,14 @@ export const usePushNotifications = (): PushNotificationState => {
     return token;
   }
 
-  async function schedulePushNotification() {
+  async function schedulePushNotification(day:any, hour:any, minute:any) {
     await Notifications.scheduleNotificationAsync({
       content: {
-        title: "Te voy a matar",
-        body: 'Yo también te voy a matar',
+        title: `Inhalux - ¡Son la ${hour}:${minute < 10 ? "0"+minute : minute}!`,
+        body: '¡Es hora de medicarse!',
         data: { data: 'goes here' },
       },
-      trigger: { seconds: 3, repeats: true },
+      trigger: {weekday: day, hour:hour, minute: minute, repeats: true}
     });
   }
 

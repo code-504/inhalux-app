@@ -75,8 +75,8 @@ export function InhalerProvider({ children }: Props) {
                   address: inhaler.inhaler_ubication.address,
                 }));
           setSupaInhalers(transformedData);
-          console.log("inhalersData", inhalersData);
-          console.log("transformedData", transformedData);
+          //console.log("inhalersData", inhalersData);
+          //console.log("transformedData", transformedData);
       } 
 
   };

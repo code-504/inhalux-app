@@ -14,8 +14,7 @@ const index = () => {
   
   const auth = useAuth();
   const { expoPushToken } = usePushNotifications();
-  console.log("expoPushToken: ", expoPushToken);
-  
+  //console.log("expoPushToken: ", expoPushToken);
 
   if (!auth.session) {
     return <Redirect href="/(auth)/login" />;
