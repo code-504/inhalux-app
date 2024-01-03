@@ -7,7 +7,7 @@ interface Props {
 }
 
 export interface TreatmentContextType {
-  supaTreatment: any[] | null;
+  supaTreatment: Object | null;
   setSupaTreatment: Dispatch<SetStateAction<any[] | null>>;
 }
 
@@ -31,8 +31,16 @@ export function TreatmentProvider({ children }: Props) {
         .select("*")
         .eq('fk_user_id', user.id)
 
-      setSupaTreatment(treatmentData ? treatmentData[0] : null);
-  
+      if(!treatmentData) return;
+      console.log("treatmentData", treatmentData[0].treatment);  
+      setSupaTreatment(treatmentData?.length > 0 
+        ? 
+          {
+            days: treatmentData[0].treatment.days,
+            hours: treatmentData[0].treatment.hours,
+          } 
+        : 
+          null);
     };
 
     fetchSupaTreatment();

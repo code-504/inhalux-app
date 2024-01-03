@@ -31,9 +31,9 @@ export function NotificationProvider({ children }: Props) {
             .select("*")
             .eq('fk_user_id', user.id)
               
-        console.log("Notifications", NotificationsData);
+        //console.log("Notifications", NotificationsData);
         setSupaNotifications(NotificationsData ? NotificationsData : []);
-            // console.log("new supaNotifications", supaNotifications); 
+        // console.log("new supaNotifications", supaNotifications); 
     };
 
     fetchSupaNotifications();

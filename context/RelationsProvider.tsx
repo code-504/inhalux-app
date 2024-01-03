@@ -54,7 +54,7 @@ export function RelationProvider({ children }: Props) {
 
         const { data, error } = await query;
 
-        console.log("pacients", data)
+        //console.log("pacients", data)
 
         if (error)
           throw error;
@@ -114,7 +114,7 @@ export function RelationProvider({ children }: Props) {
 
       const { data, error } = await query;
 
-      console.log("monitor", data)
+      //console.log("monitor", data)
 
       if (error)
         throw error;
