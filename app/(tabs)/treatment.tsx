@@ -105,6 +105,7 @@ export default function TabFourScreen() {
       return;
     }
 
+    cancelAllNotifications();
     if(supaTreatment === null){
       setSupaTreatment({
         days: daysState,
