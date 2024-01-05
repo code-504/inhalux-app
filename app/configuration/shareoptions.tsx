@@ -1,4 +1,4 @@
-import { View, StyleSheet, ImageBackground, Dimensions, Animated } from 'react-native'
+import { View, StyleSheet, ImageBackground, Dimensions, Animated, Alert } from 'react-native'
 import React, { useRef, useState } from 'react'
 import Colors from '@/constants/Colors'
 import { AlertDialog, Button, ScrollView } from 'tamagui'
@@ -11,9 +11,15 @@ import OptionsList from '@/components/OptionsList'
 import BackgroundImage from "@/assets/images/background.png"
 import RegenerateIcon from "@/assets/icons/key.svg"
 import DeleteIcon from "@/assets/icons/delete_forever.svg"
+import { useAuth } from '@/context/Authprovider'
+import { supabase } from '@/services/supabase'
+import uuid from 'react-native-uuid';
+import { useRelations } from '@/context/RelationsProvider'
 
 const ShareOptionsPage = () => {
   
+    const { supaUser, setSupaUser } = useAuth();
+    const { setShareState, shareState } = useRelations();
     const [openDialog, setOpenDialog] = useState({
         openOption1: false,
         openOption2: false
@@ -21,19 +27,77 @@ const ShareOptionsPage = () => {
     
     let scrollOffsetY = useRef(new Animated.Value(0)).current;
 
-    const handleGenerateNewKey = () => {
+    const handleGenerateNewKey = async() => {
+        
+        let codigoAleatorio;
+        let flag = false;
+        
+        do {
+            codigoAleatorio = uuid.v4();
+            
+            let { data: users, error } = await supabase
+                .from('users')
+                .select("token")
+                .eq('token', codigoAleatorio);
+
+                console.log("retrieved: ", users);
+                
+            if(!users || users?.length == 0){
+                setSupaUser({ ...supaUser, token: codigoAleatorio });
+
+                const { data, error } = await supabase
+                    .from('users')
+                    .update({ token: codigoAleatorio })
+                    .eq('id', supaUser?.id)
+                    .select()
+                
+                if(error) Alert.alert("Algo salió mal");
+                else Alert.alert("Clave regenerada con éxito");
+                console.log(data, error);
+
+                flag = true;
+            }
+
+        } while (flag == false);
+
         setOpenDialog({
             ...openDialog,
             openOption1: false
         })
-    }
 
-    const handleDeleteUsers = () => {
+    }//handleRegen
+
+    const handleDeleteUsers = async() => {
+        if( shareState.data.length === 0 ){
+            Alert.alert("No hay usuarios que eliminar");
+            setOpenDialog({
+                ...openDialog,
+                openOption2: false
+            })
+            return;
+        }
+        
+        const { error } = await supabase
+            .from('user_relations')
+            .delete()
+            .eq('fk_user_patient', supaUser?.id)
+
+        if(error) Alert.alert("Algo salió mal");
+        else{
+            setShareState({
+                ...shareState,
+                data: [],
+                loading: false
+              })
+            
+              Alert.alert("Relaciones eliminadas con éxito");
+        } 
+        
         setOpenDialog({
             ...openDialog,
             openOption2: false
         })
-    }
+    }//handleDelete
     
     return (
         <View style={styles.safeArea}>
@@ -60,7 +124,7 @@ const ShareOptionsPage = () => {
                                 <RegenerateIcon />
                                 <OptionsList.TextView>
                                     <OptionsList.ItemText>Regenerar clave</OptionsList.ItemText>
-                                    <OptionsList.ItemDescription>Consectetur adipiscing elit. In sagittis felis sed tempor.</OptionsList.ItemDescription>
+                                    <OptionsList.ItemDescription>¿Esta recibiendo solicitudes de personas que no conoce? Regenere su clave para acabar con el problema.</OptionsList.ItemDescription>
                                 </OptionsList.TextView>
                             </OptionsList.ItemView>
 
@@ -68,7 +132,7 @@ const ShareOptionsPage = () => {
                                 <DeleteIcon />
                                 <OptionsList.TextView>
                                     <OptionsList.ItemText>Eliminar usuarios compartidos</OptionsList.ItemText>
-                                    <OptionsList.ItemDescription>Consectetur adipiscing elit. In sagittis felis sed tempor.</OptionsList.ItemDescription>
+                                    <OptionsList.ItemDescription>Esta opción eliminará TODOS los usuarios a los que has compartido tu cuenta.</OptionsList.ItemDescription>
                                 </OptionsList.TextView>
                             </OptionsList.ItemView>
                         </OptionsList>
