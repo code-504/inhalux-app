@@ -4,7 +4,8 @@ import { Dispatch, SetStateAction } from "react"
 export interface ListMonitor {
     avatar: string;
     kindred: string;
-    name: string
+    name: string;
+    pending_state: boolean;
 }
 
 export interface ListMonitorState {

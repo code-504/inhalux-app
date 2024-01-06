@@ -15,7 +15,7 @@ import { Avatar, Input, ScrollView, Spinner } from 'tamagui'
 import pacientBackground from "@/assets/images/pacients-empty.png"
 import AddIcon from "@/assets/icons/add.svg"
 import SearchIcon from "@/assets/icons/search.svg"
-import ContactCard from '@/components/Card/ContactCard'
+import ContactCardPatient from '@/components/Card/ContactCardPacients'
 import { FlashList } from '@shopify/flash-list'
 import { PacientsTabProps } from '@/interfaces/Monitor'
 
@@ -84,7 +84,8 @@ const PacientsTab = ({ pacientState, setPacientState, onFunction }: PacientsTabP
                         <FlashList 
                             data={pacientState.data}
                             keyExtractor={(_, index) => index.toString()}
-                            renderItem={({ item }) => (<ContactCard name={item.name} kindred={item.kindred} avatar={item.avatar} />)}
+                            renderItem={({ item }) => 
+                                (<ContactCardPatient name={item.name} kindred={item.kindred} avatar={item.avatar} pending_state={item.pending_state} />)}
                             estimatedItemSize={96}
                         />
                     </View>

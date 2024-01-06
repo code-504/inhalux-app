@@ -1,6 +1,6 @@
 import TabBar from '@/components/TabBar';
 import Colors from '@/constants/Colors'
-import { View, StyleSheet, ImageBackground, BackHandler, Pressable, Dimensions, Keyboard } from 'react-native';
+import { View, StyleSheet, ImageBackground, BackHandler, Pressable, Dimensions, Keyboard, Alert } from 'react-native';
 
 // Resources
 import BackgroundImage from "@/assets/images/background.png"
@@ -25,6 +25,9 @@ import { Camera, useCameraDevices } from "react-native-vision-camera"
 import QRScannerIcon from "@/assets/icons/qr_code_scanner.svg"
 import LinkIcon from "@/assets/icons/link.svg"
 import { useIsFocused } from '@react-navigation/native';
+import { z } from 'zod';
+import { useAuth } from '@/context/Authprovider';
+import { supabase } from '@/services/supabase';
 
 export default function TabThreeScreen() {
 
@@ -33,13 +36,22 @@ export default function TabThreeScreen() {
 		option2: false
 	});
 
+	const [addCode , setAddCode] = useState("");
+	const [addCodeError, setAddCodeError] = useState("");
+	const { supaUser } = useAuth();
 	const { optionsOpen, setOptionsOpen } = useMonitor();
 	const { pacientState, setPacientState, shareState, setShareState } = useRelations();
-
 	const screenIsFocused = useIsFocused();
-
 	const bottomSheetRef = useRef<BottomSheetModal>(null);
 	const addPacientModalRef  = useRef<BottomSheetModal>(null);
+
+	const formSchema = z.object({
+		addCode: z.string().min(36, { message: "El código debe tener 36 carácteres" })
+	})
+
+	const formData = {
+		addCode
+	}
 	
 	const addSnapPoints = useMemo(
 		() => [
@@ -56,6 +68,77 @@ export default function TabThreeScreen() {
 		if (index === -1)
 			setOptionsOpen(false)
 	}, [])
+
+	const handleAddPatient = async() => {
+		console.log("pacientState: ", pacientState);
+		
+		const validationResults = formSchema.safeParse(formData);
+
+		if(!validationResults.success){
+			const errors = validationResults.error.format()
+			setAddCodeError(
+				errors.addCode ? errors.addCode._errors.join(",") : ""
+			  );
+			return;
+		}
+			
+		setAddCodeError("");
+		setAddCode("");
+		setOpenDialog({ ...openDialog, option1: false });
+
+		if(addCode === supaUser?.token){ //same code scenario
+			Alert.alert("¡No puede agregarse a usted mismo!");
+			return;
+		}
+
+		let { data: userNewRelation, error: userNewRelationError} = await supabase
+			.from('users')
+			.select("id, name, last_name, avatar")
+			.eq('token', addCode)
+
+		console.log(userNewRelation, userNewRelationError);
+		if(userNewRelation === null || userNewRelation.length === 0){ //code doesn't exist scenario
+			Alert.alert("¡El token proporcionado NO existe!");
+			return;
+		}
+		
+		let { data: relationAlreadyExists, error: relationAlreadyExistsError} = await supabase
+			.from('user_relations')
+			.select("*")
+			.eq('fk_user_monitor', supaUser?.id)
+			.eq('fk_user_patient', userNewRelation[0].id)
+
+		if(relationAlreadyExists !== null && relationAlreadyExists.length !== 0){ //code doesn't exist scenario
+			Alert.alert("¡Ya tienes a esta persona agregada!");
+			return;
+		}
+
+		const { data, error } = await supabase
+			.from('user_relations')
+			.insert([
+			{ fk_user_monitor: supaUser?.id, fk_user_patient: userNewRelation[0].id },
+			])
+			.select()
+		
+		if(error){ //code doesn't exist scenario
+			Alert.alert("¡Uh oh! Algo salió mal...");
+			console.log(error);
+			return;
+		}
+
+		setPacientState({
+			...pacientState,
+			filterText: "",
+			data: [ ...pacientState.data, {
+				name: userNewRelation[0].name + ( userNewRelation[0].last_name ? " " + userNewRelation[0].last_name : ""),
+				avatar: userNewRelation[0].avatar,
+				kindred: "Relativo", 
+				pending_state: true
+			}]
+		})
+		
+		Alert.alert("¡Solicitud de Relación enviada!");
+	}//handleAddPatient
 
 	/*const pacients:PacientsInfo[] = [
 		{ 
@@ -250,8 +333,11 @@ export default function TabThreeScreen() {
 									secureTextEntry={true}
 									placeholder='Colocalo aquí'
 									style={stylesDialog.input}
+									value={addCode}
+									onChangeText={e => setAddCode(e)}
 								/>
-								
+								{addCodeError != "" && <MontserratText style={styles.errorMessage}>{addCodeError}</MontserratText>}
+
 							</View>
 
 							<View style={stylesDialog.buttonsView}>
@@ -259,7 +345,7 @@ export default function TabThreeScreen() {
 									<Button onPress={() => setOpenDialog({ ...openDialog, option1: false })} backgroundColor={ Colors.white }>Cancelar</Button>
 								</AlertDialog.Cancel>
 								<AlertDialog.Action asChild>
-									<Button onPress={() => setOpenDialog({ ...openDialog, option1: false })} backgroundColor={Colors.redLight} color={Colors.red}>Eliminar</Button>
+									<Button onPress={() => handleAddPatient()} backgroundColor={Colors.blueLight} color={Colors.black}>Agregar</Button>
 								</AlertDialog.Action>
 							</View>
 						</View>
@@ -293,6 +379,12 @@ const stylesDialog = StyleSheet.create({
 })
 
 const styles = StyleSheet.create({
+	errorMessage: {
+		fontSize: 10,
+		textAlign: "center",
+		marginBottom: 0,
+		paddingBottom: 0
+	},
 	viewArea: {
 		flex: 1,
         backgroundColor: Colors.lightGrey
