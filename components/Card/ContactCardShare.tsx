@@ -57,7 +57,7 @@ const ContactCardShare = ({ name, kindred, avatar, pending_state }: ListMonitor)
     )
 }
 
-export default ContactCard
+export default ContactCardShare
 
 const styles = StyleSheet.create({
     cardView: {

@@ -56,7 +56,7 @@ const ContactCardPatient = ({ name, kindred, avatar, pending_state }: ListMonito
     )
 }
 
-export default ContactCard
+export default ContactCardPatient
 
 const styles = StyleSheet.create({
     cardView: {
