@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Dimensions, ImageBackground } from 'react-native'
+import { View, Text, StyleSheet, Dimensions, ImageBackground, Alert } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Camera, Code, useCameraDevice, useCameraPermission, useCodeScanner, VisionCameraProxy } from 'react-native-vision-camera';
 import Colors from '@/constants/Colors';
@@ -6,11 +6,18 @@ import { MontserratBoldText, MontserratSemiText } from '@/components/StyledText'
 
 import BackgroundImage from "@/assets/images/background.png"
 import { Spinner } from 'tamagui';
+import { useRelations } from '@/context/RelationsProvider';
+import { supabase } from '@/services/supabase';
+import { useAuth } from '@/context/Authprovider';
+import { router } from 'expo-router';
 
 const ScanPacientPage = () => {
 
     const device = useCameraDevice("back")
     const [isActive, setIsActive] = useState<boolean>(false);
+	const { pacientState, setPacientState } = useRelations();
+    const { supaUser } = useAuth();
+	const [onLoading, setOnLoading] = useState(false)
 
     const checkPermission = async () => {
         const newCameraPermission = await Camera.requestCameraPermission();
@@ -32,16 +39,82 @@ const ScanPacientPage = () => {
         }
 	}, []);
 
+    const handleAddPatient = async(addCode: any) => {
+		console.log("pacientState: ", pacientState);
+
+		if(addCode === supaUser?.token){ //same code scenario
+			Alert.alert("¡No puede agregarse a usted mismo!");
+			router.back();
+			return;
+		}
+
+		let { data: userNewRelation, error: userNewRelationError} = await supabase
+			.from('users')
+			.select("id, name, last_name, avatar")
+			.eq('token', addCode)
+
+		console.log(userNewRelation, userNewRelationError);
+		if(userNewRelation === null || userNewRelation.length === 0){ //code doesn't exist scenario
+			Alert.alert("¡El token proporcionado NO existe!");
+			router.back();
+			return;
+		}
+		
+		let { data: relationAlreadyExists, error: relationAlreadyExistsError} = await supabase
+			.from('user_relations')
+			.select("*")
+			.eq('fk_user_monitor', supaUser?.id)
+			.eq('fk_user_patient', userNewRelation[0].id)
+
+		if(relationAlreadyExists !== null && relationAlreadyExists.length !== 0){ //code doesn't exist scenario
+			Alert.alert("¡Ya tienes a esta persona agregada!");
+			router.back();
+			return;
+		}
+
+		const { data, error } = await supabase
+			.from('user_relations')
+			.insert([
+			{ fk_user_monitor: supaUser?.id, fk_user_patient: userNewRelation[0].id },
+			])
+			.select()
+		
+		if(error){ //code doesn't exist scenario
+			Alert.alert("¡Uh oh! Algo salió mal...");
+			router.back();
+			console.log(error);
+			return;
+		}
+
+		setPacientState({
+			...pacientState,
+			filterText: "",
+			data: [ ...pacientState.data, {
+				name: userNewRelation[0].name + ( userNewRelation[0].last_name ? " " + userNewRelation[0].last_name : ""),
+				avatar: userNewRelation[0].avatar,
+				kindred: "Relativo", 
+				pending_state: true
+			}]
+		})
+		
+		Alert.alert("¡Solicitud de Relación enviada!");
+		router.back();
+	}//handleAddPatient
+
     const codeScanner = useCodeScanner({
         codeTypes: ['qr', 'ean-13'],
-        onCodeScanned: (codes: Code[]) => {
-          console.log(`Scanned ${codes[0].value} codes!`)
+        onCodeScanned: async(codes: Code[]) => {
+			if(!onLoading){
+				setOnLoading(true);
+				console.log(`Scanned ${codes[0].value} codes!`)
+				await handleAddPatient(codes[0].value);
+				//router.back();
+			}
         }
     })
     
     if (device == null) return <Spinner />
     
-
         return (
             <View style={styles.safeArea}>
 			    <ImageBackground source={BackgroundImage} style={styles.imageBackground} />
@@ -52,7 +125,7 @@ const ScanPacientPage = () => {
 						</View>
 
 						<View style={styles.downView}>
-							<MontserratSemiText style={styles.subTitle}>Escanear dispositivo</MontserratSemiText>
+							<MontserratSemiText style={styles.subTitle}>Escanear Código QR</MontserratSemiText>
 							
                             <View style={{ position: "relative",width: "100%", height: "80%", borderRadius: 38, overflow: "hidden", marginBottom: 32 }}>
             

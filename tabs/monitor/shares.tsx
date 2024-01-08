@@ -10,7 +10,7 @@ import { Avatar, Input, ScrollView, Spinner } from 'tamagui'
 import sharesBackground from "@/assets/images/shares-empty.png"
 import AddIcon from "@/assets/icons/add.svg"
 import SearchIcon from "@/assets/icons/search.svg"
-import ContactCard from '@/components/Card/ContactCard'
+import ContactCardShare from '@/components/Card/ContactCardPacients'
 import { SharesTabProps } from '@/interfaces/Monitor'
 import { FlashList } from '@shopify/flash-list'
 import { router } from 'expo-router'
@@ -74,7 +74,7 @@ const SharesTab = ({ shareState, setShareState }: SharesTabProps) => {
                         <FlashList 
                             data={shareState.data}
                             keyExtractor={(_, index) => index.toString()}
-                            renderItem={({ item }) => (<ContactCard name={item.name} kindred={item.kindred} avatar={item.avatar} />)}
+                            renderItem={({ item }) => (<ContactCardShare name={item.name} kindred={item.kindred} avatar={item.avatar} />)}
                             estimatedItemSize={96}
                         />
                     </View>

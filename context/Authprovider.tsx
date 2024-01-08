@@ -14,6 +14,7 @@ export type InitializedUser = {
   name: string;
   email: string;
   avatar: string | undefined;
+  token: string;
 }
 
 export interface AuthContextType {
@@ -71,7 +72,7 @@ export function AuthProvider({ children }: Props) {
 
       let { data: users, error } = await supabase
         .from('users')
-        .select("name, last_name, avatar")
+        .select("name, last_name, avatar, token")
         .eq('id', user.id)
 
         if(!users) return;
@@ -80,7 +81,8 @@ export function AuthProvider({ children }: Props) {
           id: user.id,
           name: users[0].name + " " + (users[0].last_name == null ? "" : users[0].last_name),
           email: user.email ? user.email : "",
-          avatar: users[0].avatar == null ? "https://ckcwfpbvhbstslprlbgr.supabase.co/storage/v1/object/public/avatars/default_avatar.png?t=2023-12-19T02%3A43%3A15.423Z" : users[0].avatar
+          avatar: users[0].avatar == null ? "https://ckcwfpbvhbstslprlbgr.supabase.co/storage/v1/object/public/avatars/default_avatar.png?t=2023-12-19T02%3A43%3A15.423Z" : users[0].avatar,
+          token: users[0].token
         };
 
         setSupaUser(initializedUser);

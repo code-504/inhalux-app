@@ -8,14 +8,16 @@ import { Button, Spinner } from 'tamagui';
 
 import BackgroundImage from "@/assets/images/background.png"
 import QRLogo from "@/assets/images/qr-logo.png"
+import { useAuth } from '@/context/Authprovider';
 
 const ScanPacientPage = () => {
+    const { supaUser } = useAuth();
     
     const onShare = async () => {
         try {
           const result = await Share.share({
             message:
-              'React Native | A framework for building native apps using React',
+              `Monitorea mi cuenta de Inhalux usando el siguiente código: ${supaUser?.token}`,
           });
           if (result.action === Share.sharedAction) {
             if (result.activityType) {
@@ -47,7 +49,7 @@ const ScanPacientPage = () => {
                     <View style={styles.qrContent}>
             
                         <QRCode
-                            value="http://awesome.link.qr"
+                            value={supaUser?.token}
                             logo={QRLogo}
                             size={220}
                         />
