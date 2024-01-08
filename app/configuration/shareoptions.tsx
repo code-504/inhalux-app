@@ -47,9 +47,9 @@ const ShareOptionsPage = () => {
                     [{ nativeEvent: { contentOffset: { y: scrollOffsetY}}}],
                     {useNativeDriver: false}
                 )}
+                contentContainerStyle={{ flex: 1 }}
             >
 
-                <View style={{ minHeight: Dimensions.get('window').height - 73}}>
                     <View style={styles.upView}>
                         <MontserratSemiText style={styles.title}>Opciones de compartir cuenta</MontserratSemiText>
                     </View>
@@ -73,7 +73,6 @@ const ShareOptionsPage = () => {
                             </OptionsList.ItemView>
                         </OptionsList>
                     </View>
-                </View>
             </ScrollView>
 
             <AlertDialog open={openDialog.openOption1}>
@@ -223,16 +222,16 @@ const styles = StyleSheet.create({
         flexDirection: "column",
     },
     upView: {
-        flex: 0.15,
+        flex: 0.35,
         display: "flex",
         flexDirection: "column",
+        justifyContent: "flex-end",
         gap: 12,
-        paddingTop: 48,
-        paddingBottom: 24,
-        paddingHorizontal: 24
+        paddingVertical: 48,
+        paddingHorizontal: 24,
     },
     downView: {
-        flex: 0.85,
+        flex: 0.65,
         backgroundColor: Colors.white,
         borderTopLeftRadius: 38,
         borderTopRightRadius: 38,

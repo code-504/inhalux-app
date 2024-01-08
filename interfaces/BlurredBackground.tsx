@@ -5,6 +5,8 @@ export interface BlurredBackground extends BottomSheetBackdropProps {
     pressBehavior      ?: BackdropPressBehavior;
     disappearsOnIndex  ?: number;
     appearsOnIndex     ?: number;
-    enableTouchThrough ?: boolean
-    onPress            ?: (() => void) | undefined
+    enableTouchThrough ?: boolean;
+    backgroundColor    ?: string;
+    opacity            ?: number;
+    onPress            ?: (() => void) | undefined;
 }

@@ -53,15 +53,6 @@ const SharesTab = ({ shareState, setShareState }: SharesTabProps) => {
 
     return (
         <View>
-            <View style={styles.headerView}>
-            <HeaderAction 
-                title="Lista de compartidos"
-                subtitle="Compartiste tu inhaLux"
-                Icon={AddIcon}
-                action={addShare}
-            />
-            </View>
-
             {
                 hasData ? 
                 (
@@ -134,7 +125,7 @@ const styles = StyleSheet.create({
     listView: {
         display: "flex",
         flexDirection: "column",
-        marginTop: 28,
+        marginTop: 0,
         paddingHorizontal: 24,
     },
     listContent: {

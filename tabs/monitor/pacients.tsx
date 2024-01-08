@@ -50,19 +50,11 @@ const PacientsTab = ({ pacientState, setPacientState, onFunction }: PacientsTabP
             setHasData(false)
         else
             setHasData(true)
+
     }, [])
 
     return (
         <View>
-            <View style={styles.headerView}>
-                <HeaderAction 
-                    title="Lista de pacientes"
-                    subtitle="Información de sus inhaLux"
-                    Icon={AddIcon}
-                    action={onFunction}
-                />
-            </View>
-
             {
                 hasData ? 
                 (
@@ -129,7 +121,7 @@ const styles = StyleSheet.create({
     listView: {
         display: "flex",
         flexDirection: "column",
-        marginTop: 28,
+        marginTop: 0,
         paddingHorizontal: 24,
     },
     listContent: {

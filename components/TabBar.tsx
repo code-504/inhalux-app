@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
 	marginTop: 16,
     marginBottom: 8,
 	borderRadius: 100,
-	backgroundColor: Colors.white
+	backgroundColor: Colors.lightGrey
   },
   tabView: {
 	width: "100%",
@@ -150,9 +150,6 @@ const styles = StyleSheet.create({
 	borderRadius: 100,
 	overflow: "hidden",
 	gap: 8
-  },
-  activeTab: {
-    borderBottomColor: 'blue', // Cambia el color activo según tus preferencias
   },
   tabText: {
     fontSize: 14,

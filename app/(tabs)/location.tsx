@@ -469,7 +469,7 @@ const TabTwoScreen = () => {
       secondSheetActive: true
     })
 		inhalerModalRef.current?.present();
-    inhalerListModalRef.current?.close();
+    inhalerListModalRef.current?.dismiss();
 	}, []);
   //#endregion
 
@@ -481,7 +481,7 @@ const TabTwoScreen = () => {
 
   const handleCloseButton = () => {
     inhalerListModalRef.current?.present();
-    inhalerModalRef.current?.close();
+    inhalerModalRef.current?.dismiss();
 
     setInhaler(null)
 
@@ -544,8 +544,9 @@ const TabTwoScreen = () => {
       const onBackPress = () => {
         if (bottomSheetState.secondSheetActive) {
           inhalerListModalRef.current?.present();
-          inhalerModalRef.current?.close();
-          storesModalRef.current?.close();
+
+          inhalerModalRef.current?.dismiss();
+          storesModalRef.current?.dismiss();
 
           if (inhaler)
             setInhaler(null)

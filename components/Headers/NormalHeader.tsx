@@ -11,10 +11,11 @@ import { MontserratSemiText } from '../StyledText'
 
 interface HeaderProps {
     title: string;
-    animHeaderValue ?: Animated.Value
+    animHeaderValue ?: Animated.Value;
+    positionHeader ?: "static" | "relative" | "absolute" | "fixed" | "sticky" | undefined
 }
 
-export default function NormalHeader({ title, animHeaderValue }: HeaderProps) {
+export default function NormalHeader({ title, animHeaderValue, positionHeader }: HeaderProps) {
 
     const navigation = useNavigation();
 
@@ -26,42 +27,57 @@ export default function NormalHeader({ title, animHeaderValue }: HeaderProps) {
         inputRange: [0, 200],
         outputRange: [0, 1],
         extrapolate: 'clamp'
-      })
+    })
+
+    const animateHeaderBackground = animHeaderValue?.interpolate({
+        inputRange: [0, 210],
+        outputRange: ["#FFFFFF00", Colors.lightGrey],
+        extrapolate: 'clamp'
+    })
+
+    const animatedStyle = {
+        backgroundColor: animateHeaderBackground
+    }
 
     return (
-        <SafeAreaView style={styles.safeAre}>
+        <Animated.View style={[ styles.header, animatedStyle, { position: positionHeader ? positionHeader : "absolute" }]}>
+            <SafeAreaView>  
+                
+                    <View style={{         
+                        position: "relative",
+                        display: "flex",
+                        flexDirection: "row",
+                        justifyContent: "center",
+                        alignItems: "center",
+                    }}>
+                        <Button style={styles.backButton} alignSelf="center" size="$6" circular onPress={handleBackPress}>
+                            <ArrowBackIcon />
+                        </Button>
 
-            <View style={ styles.header}>
-                <Button style={styles.backButton} alignSelf="center" size="$6" circular onPress={handleBackPress}>
-                    <ArrowBackIcon />
-                </Button>
-
-                <Animated.Text style={[
-                    styles.headerTitle,
-                    {
-                        opacity: animateHeaderOpacity
-                    }
-                ]}>{ title }</Animated.Text>
-            </View>
-        </SafeAreaView>
+                        <Animated.Text style={[
+                            styles.headerTitle,
+                            {
+                                opacity: animateHeaderOpacity
+                            }
+                        ]}>{ title }</Animated.Text>
+                    </View>
+            </SafeAreaView>
+        </Animated.View>
     )
 }
 
 const styles = StyleSheet.create({
-    safeAre: {
-        position: "relative",
-        paddingVertical: 24,
-        paddingHorizontal: 24,
-        backgroundColor: Colors.lightGrey,
-    },
     header: {
-        display: "flex",
-        flexDirection: "row",
-        justifyContent: "center",
-        alignItems: "center"
+        width: "100%",
+        paddingHorizontal: 24,
+        paddingVertical: 32,
+        backgroundColor: "transparent"
     },
     headerTitle: {
+        width: "100%",
+        maxWidth: 180,
         fontSize: 16,
+        textAlign: "center",
         fontFamily: "Montserrat-Semibold"
     },
     backButton: {

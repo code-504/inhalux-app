@@ -272,6 +272,7 @@ export default function TabOneScreen() {
 				refreshControl={
 					<RefreshControl refreshing={refresh} onRefresh={pullRequest}></RefreshControl>
 				}
+				showsVerticalScrollIndicator={false}
 			>
 				<View style={styles.content}>
 					<HeaderAction 
@@ -478,7 +479,7 @@ const styles = StyleSheet.create({
     content: {
         display: 'flex',
         flexDirection: 'column',
-        marginTop: 22,
+        marginTop: 24,
 		marginBottom: 12,
         paddingHorizontal: 24,
     },

@@ -6,12 +6,13 @@ import { BottomSheetBackdrop, BottomSheetBackdropProps } from '@gorhom/bottom-sh
 import { BlurredBackground } from '@/interfaces/BlurredBackground';
 
 const BlurredBackgroundNew = (props: BlurredBackground) => {
+
   const containerStyle = useMemo(
     () => [
       styles.container,
       {
-        backgroundColor: Colors.black,
-        opacity: 0.2,
+        backgroundColor: props.backgroundColor ? props.backgroundColor : Colors.black,
+        opacity: props.opacity ? props.opacity : 0.2,
       },
     ],
     [Colors.black]

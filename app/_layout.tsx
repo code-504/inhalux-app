@@ -33,7 +33,7 @@ export const unstable_settings = {
   initialRouteName: '/(tabs)',
 };
 
-import EditIcon from "@/assets/icons/edit.svg"
+
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import SimpleHeader from '@/components/Headers/SimpleHeader';
 
@@ -90,22 +90,22 @@ function RootLayoutNav() {
         <SafeAreaProvider>
           <MonitorProvider>
           <BottomSheetModalProvider>
-          <Stack initialRouteName='page_test'>
+          <Stack initialRouteName='index'>
             <Stack.Screen name='index' options={{ headerShown: false }} />
             <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
             <Stack.Screen name="(auth)/signup" options={{ headerShown: false }} />
-            <Stack.Screen name="(tabs)" options={{ headerShown: false, animation: "none" }} />
-            <Stack.Screen name="device/[inhaler_id]" options={{ header: () => <SimpleHeader title="Información general" actionButton={{ fn: () => console.log("adios"), Icon: EditIcon }} />, presentation: "containedTransparentModal", animation: "none" }} />
-            <Stack.Screen name="configuration/index" options={{ header: () => <NormalHeader title="Configuración" />, presentation: 'transparentModal' }} />
-            <Stack.Screen name="configuration/profile" options={{ header: () => <NormalHeader title="Perfil de usuario" />, presentation: 'transparentModal' }} />
-            <Stack.Screen name="configuration/password" options={{ presentation: 'transparentModal' }} />
-            <Stack.Screen name="configuration/notifications" options={{ presentation: 'transparentModal' }} />
-            <Stack.Screen name="configuration/shareoptions" options={{ presentation: 'transparentModal' }} />
-            <Stack.Screen name="device/search_device" options={{ presentation: 'transparentModal' }} />
-            <Stack.Screen name="device/connect_device" options={{ presentation: 'transparentModal' }} />
-            <Stack.Screen name="monitor/scan_pacient" options={{ header: () => <NormalHeader title="Escanear" />, presentation: 'transparentModal' }}  />
-            <Stack.Screen name="monitor/share_link" options={{ header: () => <NormalHeader title="Compartir" />, presentation: 'transparentModal' }}  />
-            <Stack.Screen name="notification" options={{ header: () => <NormalHeader title="Notificaciones" />, presentation: 'transparentModal' }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="device/[inhaler_id]" />
+            <Stack.Screen name="configuration/index" options={{ header: () => <NormalHeader positionHeader='relative' title="Configuración" /> }} />
+            <Stack.Screen name="configuration/profile" options={{ header: () => <NormalHeader positionHeader='relative' title="Perfil de usuario" /> }} />
+            <Stack.Screen name="configuration/password" />
+            <Stack.Screen name="configuration/notifications" />
+            <Stack.Screen name="configuration/shareoptions" />
+            <Stack.Screen name="device/search_device" />
+            <Stack.Screen name="device/connect_device" />
+            <Stack.Screen name="monitor/scan_pacient" options={{ header: () => <NormalHeader title="Escanear" /> }}  />
+            <Stack.Screen name="monitor/share_link" options={{ header: () => <NormalHeader title="Compartir" /> }}  />
+            <Stack.Screen name="notification" options={{ header: () => <NormalHeader title="Notificaciones" /> }} />
           </Stack>
           </BottomSheetModalProvider>
           </MonitorProvider>

@@ -6,10 +6,10 @@ import { View, StyleSheet, ImageBackground, BackHandler, Pressable, Dimensions, 
 import BackgroundImage from "@/assets/images/background.png"
 import PersonIcon from "@/assets/icons/person.svg"
 import ShreIcon from "@/assets/icons/share.svg"
-import { MontserratBoldText, MontserratText } from '@/components/StyledText';
+import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/components/StyledText';
 import PacientsTab from '@/tabs/monitor/pacients';
 import SharesTab from '@/tabs/monitor/shares';
-import { BottomSheetBackdropProps, BottomSheetModal } from '@gorhom/bottom-sheet';
+import { BottomSheetBackdropProps, BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useMonitor } from '@/context/MonitorProvider';
 import BlurredDeviceBackground from '@/components/blurredBackground/BlurredDeviceBackground';
@@ -20,11 +20,15 @@ import MonitorHeader from '@/components/Headers/MonitorHeader';
 import BlurredBackgroundNew from '@/components/blurredBackground/BlurredBackgroundNew';
 import { AlertDialog, Button, Input } from 'tamagui';
 import { Camera, useCameraDevices } from "react-native-vision-camera"
+import HeaderAction from '@/components/HeaderAction';
 
 // Resources
 import QRScannerIcon from "@/assets/icons/qr_code_scanner.svg"
 import LinkIcon from "@/assets/icons/link.svg"
-import { useIsFocused } from '@react-navigation/native';
+import AddIcon from "@/assets/icons/add.svg"
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
+import {useKeyboard} from '@react-native-community/hooks'
 
 export default function TabThreeScreen() {
 
@@ -33,13 +37,16 @@ export default function TabThreeScreen() {
 		option2: false
 	});
 
+	const [statusColor, setStatusColor] = useState<boolean>(false);
+
 	const { optionsOpen, setOptionsOpen } = useMonitor();
 	const { pacientState, setPacientState, shareState, setShareState } = useRelations();
+	const keyboardHook = useKeyboard();
+	const navigator = useNavigation();
 
-	const screenIsFocused = useIsFocused();
-
-	const bottomSheetRef = useRef<BottomSheetModal>(null);
 	const addPacientModalRef  = useRef<BottomSheetModal>(null);
+	const monitorListModalRef = useRef<BottomSheetModal>(null);
+	const monitorIndex = useRef<number>(0);
 	
 	const addSnapPoints = useMemo(
 		() => [
@@ -49,12 +56,16 @@ export default function TabThreeScreen() {
 	);
 
 	// variables
-	const snapPoints = useMemo(() => ['35%'], []);
+	const { bottom: bottomSafeArea, top: topSafeArea } = useSafeAreaInsets();
+	
+	const monitorSnapPoints = useMemo(() => ['74%', '100%'], []);
 
 	// callbacks
-	const handleSheetChange = useCallback((index: number) => {
-		if (index === -1)
-			setOptionsOpen(false)
+	const handleMonitorSheetChange = useCallback((index: number) => {
+		monitorIndex.current = index;
+
+		if (index === 0) 
+			Keyboard.dismiss()
 	}, [])
 
 	/*const pacients:PacientsInfo[] = [
@@ -96,22 +107,42 @@ export default function TabThreeScreen() {
 
 	useFocusEffect(
 		useCallback(() => {
-		  return () => {
-			addPacientModalRef.current?.close();
-			bottomSheetRef.current?.close();
-		  };
+
+			monitorListModalRef.current?.present();
+
+			return () => {
+				addPacientModalRef.current?.close();
+				monitorListModalRef.current?.collapse();
+			};
 		}, [])
-	  );
+	);
+
+	useEffect(() => {
+		if (!keyboardHook.keyboardShown) {
+			Keyboard.dismiss()
+		} else {
+			monitorListModalRef.current?.expand()
+		}
 		
-	/*useFocusEffect(
+	}, [keyboardHook.keyboardShown])
+		
+	useFocusEffect(
 		useCallback(() => {
 		  const onBackPress = () => {
-			if (optionsOpen) {
+
+			if (monitorIndex.current === 1) {
+				monitorListModalRef.current?.collapse();
+			} else {
+				if (navigator.canGoBack())
+					navigator.goBack()
+			}
+
+			/*if (optionsOpen) {
 				setOptionsOpen(false)
 				addPacientModalRef.current?.close()
 			} else
 				if (navigator.canGoBack())
-					navigator.goBack()
+					navigator.goBack()*/
 
 			return true;
 		  };
@@ -125,43 +156,56 @@ export default function TabThreeScreen() {
 			  'hardwareBackPress', onBackPress
 			);
 		}, [optionsOpen])
-	);*/
+	);
 
 	return (
 		<View style={styles.viewArea}>
 
 			<ImageBackground source={BackgroundImage} style={styles.imageBackground} />
-			
-			<Tabs.Screen
-				options={{
-					header: () => <MonitorHeader />,
-				}}
-			/>
 
-			<View style={styles.container}>
-				<TabBar tabs={tabs} />
-			</View>
-				
-			<BottomSheetModal
-				ref={bottomSheetRef}
-				key="OptionsList"
-				name="OptionsList"
-				index={0}
-				enableContentPanningGesture={false}
-				enableOverDrag={false}
-				onChange={handleSheetChange}
-				snapPoints={snapPoints}
-				enablePanDownToClose
-				backdropComponent={BlurredMonitorBackground}
-			>
-				<View style={stylesBottom.container}>
-					<View>
-						<MontserratBoldText style={stylesBottom.title}>Cambiar opciones de compartir</MontserratBoldText>
-					</View>
+			<BottomSheetModalProvider>
+
+				<MonitorHeader />
+					
+				<View style={[ styles.container, styles.headerView]}>
+					<HeaderAction 
+						title="Monitoreo"
+						subtitle="Comparte y mira la cuenta de otros"
+						Icon={AddIcon}
+						action={()=> console.log("Add")}
+					/>
 				</View>
-			</BottomSheetModal>
 
+				<BottomSheetModal
+					ref={monitorListModalRef}
+					key="MonitorListSheet"
+					name="MonitorListSheet"
+					index={0}
+					topInset={topSafeArea}
+					snapPoints={monitorSnapPoints}
+					enablePanDownToClose={false}
+					onChange={handleMonitorSheetChange}
+					enableHandlePanningGesture={false}
+					enableOverDrag={false}
+					enableContentPanningGesture={false}
+					handleIndicatorStyle={{ height: 0 }}
+					backdropComponent={(backdropProps: BottomSheetBackdropProps) => (
+						<BlurredBackgroundNew
+						  {...backdropProps}
+						  appearsOnIndex={1}
+						  disappearsOnIndex={0}
+						  backgroundColor={Colors.white}
+						  opacity={1}
+						  pressBehavior={'collapse'}
+						/>
+					  )}
+				>
 
+					<TabBar tabs={tabs} />
+
+				</BottomSheetModal>
+			</BottomSheetModalProvider>
+				
 			<BottomSheetModal
 				ref={addPacientModalRef}
 				key="addPacientSheet"
@@ -299,7 +343,10 @@ const styles = StyleSheet.create({
 	},
 	container: {
 		flex: 1,
-		paddingHorizontal: 0,
+		paddingHorizontal: 24,
+	},
+	headerView: {
+		marginTop: 24
 	},
 	imageBackground: {
 		position: "absolute",
@@ -315,7 +362,8 @@ const stylesBottom = StyleSheet.create({
 	  display: "flex",
 	  flexDirection: "column",
 	  gap: 32,
-	  paddingHorizontal: 24
+	  paddingHorizontal: 24,
+	  paddingTop: 16
 	},
 	titleContent: {
 	  display: "flex",
@@ -324,8 +372,9 @@ const stylesBottom = StyleSheet.create({
 	  alignItems: "center"
 	},
 	title: {
-	  marginTop: 4,
-	  fontSize: 18
+		fontSize: 20,
+		lineHeight: 26,
+		marginBottom: 16
 	},
 	buttonsView: {
 	  display: "flex",

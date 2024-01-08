@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, Dimensions, ImageBackground } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { Camera, Code, useCameraDevice, useCameraPermission, useCodeScanner } from 'react-native-vision-camera';
+import { Camera, Code, useCameraDevice, useCameraPermission, useCodeScanner, VisionCameraProxy } from 'react-native-vision-camera';
 import Colors from '@/constants/Colors';
 import { MontserratBoldText, MontserratSemiText } from '@/components/StyledText';
 
@@ -28,7 +28,7 @@ const ScanPacientPage = () => {
         }, 600)
 
         return () => {
-            clearInterval(timer)
+            clearInterval(timer);
         }
 	}, []);
 
