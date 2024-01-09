@@ -92,7 +92,7 @@ export default function TabLayout() {
                 <Tabs.Screen
                     name="monitor"
                     options={{
-                        header: () => <MonitorHeader />,
+                        headerShown: false,
                         tabBarIcon: ({ color, focused }) => <TabBarIcon Icon={MonitorIcon} color={color} focused={focused} title='Monitoreo' />,
                         tabBarHideOnKeyboard: true
                     }}

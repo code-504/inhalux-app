@@ -122,10 +122,9 @@ const ProfilePage = () => {
 					[{ nativeEvent: { contentOffset: { y: scrollOffsetY}}}],
 					{useNativeDriver: false}
 				)}
+				contentContainerStyle={{ flex: 1 }}
 			>
-				<View style={{ minHeight: Dimensions.get('window').height - 73}}>
-
-					<View style={styles.upView}>
+				<View style={styles.upView}>
 						<MontserratSemiText style={styles.title}>Configurar contraseña</MontserratSemiText>
 					</View>
 
@@ -168,7 +167,6 @@ const ProfilePage = () => {
 							</Button>
 						</View>
 					</View>
-				</View>
 
 				<AlertDialog open={openDialog}>
 
@@ -274,22 +272,22 @@ const styles = StyleSheet.create({
         display: "flex",
         flexDirection: "column",
     },
-    upView: {
-        flex: 0.15,
+	upView: {
+        flex: 0.35,
         display: "flex",
         flexDirection: "column",
+        justifyContent: "flex-end",
         gap: 12,
-        paddingTop: 48,
-        paddingBottom: 24,
-        paddingHorizontal: 24
+        paddingVertical: 48,
+        paddingHorizontal: 24,
     },
     downView: {
-        flex: 0.85,
+        flex: 0.65,
         backgroundColor: Colors.white,
         borderTopLeftRadius: 38,
         borderTopRightRadius: 38,
-        paddingHorizontal: 24,
-        paddingVertical: 42
+        paddingVertical: 42,
+        paddingHorizontal: 24
     },
 	title: {
         fontSize: 32,

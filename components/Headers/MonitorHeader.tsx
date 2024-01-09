@@ -4,10 +4,11 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { Avatar, Button, XStack } from 'tamagui'
 import Colors from '@/constants/Colors'
 import { MontserratBoldText, MontserratText } from '../StyledText'
+import { router } from 'expo-router'
+import { useAuth } from '@/context/Authprovider'
 
 // Resources
-import MoreIcon from "@/assets/icons/more_vert.svg";
-import { useAuth } from '@/context/Authprovider'
+import ShareOptionsIcon from "@/assets/icons/share_options.svg"
 
 export default function MonitorHeader() {
     const {supaUser} = useAuth();
@@ -16,7 +17,7 @@ export default function MonitorHeader() {
     <SafeAreaView style={styles.safeAre}>
         <View style={styles.header}>
             <View style={styles.containerView}>
-                <Avatar size="$6" circular>
+                <Avatar size="$6" circular onPress={() => router.push("/configuration/")}>
                     <Avatar.Image
                         accessibilityLabel="Cam"
                         src={supaUser?.avatar}
@@ -25,13 +26,14 @@ export default function MonitorHeader() {
                 </Avatar>
 
                 <View style={styles.headerTitleView}>
-                <MontserratText style={styles.headerTitleWellcomeText}>Bienvenido 👋</MontserratText>
+                    <MontserratText style={styles.headerTitleWellcomeText}>Bienvenido 👋</MontserratText>
                     <MontserratBoldText style={styles.headerTitleNameText}>{supaUser?.name || "Conectando..."}</MontserratBoldText>
                 </View>
+
             </View>
 
-            <Button style={styles.notificationButton} alignSelf="center" size="$6" circular>
-                <MoreIcon />
+            <Button onPress={() => router.push("/configuration/shareoptions")} style={styles.notificationButton} alignSelf="center" size="$6" circular>
+                <ShareOptionsIcon />
             </Button>
         </View>
     </SafeAreaView>

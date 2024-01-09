@@ -129,71 +129,70 @@ const ProfilePage = () => {
   
   return (
     <View style={styles.safeArea}>
-      <ScrollView style={styles.content} contentContainerStyle={ { minHeight: "100%" } }>
       <ImageBackground source={BackgroundImage} style={styles.imageBackground} />
+      <ScrollView style={styles.content} contentContainerStyle={ { minHeight: "100%", } }>
+    <View style={{ minHeight: Dimensions.get("window").height - 86 }}>
+      <View style={styles.upView}>
 
-        <View style={{ minHeight: Dimensions.get('window').height - 73}}>
-          <View style={styles.upView}>
+        <View style={styles.avatarContent }>
+          <View style={styles.avatarView}>
+            <Animated.Image source={{ uri: supaUser?.avatar }} style={{
+              width: 220,
+              height: 220,
+              borderRadius: 1000
+            }} />
 
-            <View style={styles.avatarContent }>
-              <View style={styles.avatarView}>
-                <Animated.Image source={{ uri: supaUser?.avatar }} style={{
-                  width: 220,
-                  height: 220,
-                  borderRadius: 1000
-                }} />
+            <Button circular size="$6" style={styles.pictureButton} onPress={openModal}>
+              <PictureIcon />
+            </Button>
+          </View>
+          
+          <MontserratText style={{ color: Colors.darkGray }} >Cambiar foto de perfil</MontserratText>
+        </View>
+        </View>
+          
+        <View style={styles.downView}>
+        <View style={styles.inputContainerView}>
+          <View style={styles.inputView}>
+            <Label style={styles.inputLabel} htmlFor="name"><MontserratSemiText>Nombre</MontserratSemiText></Label>
+            <Input
+              id="name"
+              borderRadius={32}
+              borderWidth={0}
+              onChange={(e) => setUserName(e.nativeEvent.text)}
+              value={userName}
+              style={styles.input}
+            />
+          </View>
+          <View style={styles.inputView}>
+            <Label style={styles.inputLabel} htmlFor="last_name"><MontserratSemiText>Apellidos</MontserratSemiText></Label>
+            <Input
+              id="last_name"
+              borderRadius={32}
+              borderWidth={0}
+              onChange={(e) => setUserLastName(e.nativeEvent.text)}
+              paddingHorizontal={24}
+              value={userLastName}
+              style={styles.input}
+            />
+          </View>
 
-                <Button circular size="$6" style={styles.pictureButton} onPress={openModal}>
-                  <PictureIcon />
-                </Button>
-              </View>
-              
-              <MontserratText style={{ color: Colors.darkGray }} >Cambiar foto de perfil</MontserratText>
+          <View style={styles.inputView}>
+            <View style={styles.infoContent}>
+              <InfoIcon fill={Colors.darkGray} />
+              <MontserratText style={styles.infoText}>Tu foto, nombre y apellido de perfil solo podrá ser visto por alguien más si has decido ser el monitor o paciente.</MontserratText>
             </View>
           </View>
-              
-          <View style={styles.downView}>
-            <View style={styles.inputContainerView}>
-              <View style={styles.inputView}>
-                <Label style={styles.inputLabel} htmlFor="name"><MontserratSemiText>Nombre</MontserratSemiText></Label>
-                <Input
-                  id="name"
-                  borderRadius={32}
-                  borderWidth={0}
-                  onChange={(e) => setUserName(e.nativeEvent.text)}
-                  value={userName}
-                  style={styles.input}
-                />
-              </View>
-              <View style={styles.inputView}>
-                <Label style={styles.inputLabel} htmlFor="last_name"><MontserratSemiText>Apellidos</MontserratSemiText></Label>
-                <Input
-                  id="last_name"
-                  borderRadius={32}
-                  borderWidth={0}
-                  onChange={(e) => setUserLastName(e.nativeEvent.text)}
-                  paddingHorizontal={24}
-                  value={userLastName}
-                  style={styles.input}
-                />
-              </View>
 
-              <View style={styles.inputView}>
-                <View style={styles.infoContent}>
-                  <InfoIcon fill={Colors.darkGray} />
-                  <MontserratText style={styles.infoText}>Tu foto, nombre y apellido de perfil solo podrá ser visto por alguien más si has decido ser el monitor o paciente.</MontserratText>
-                </View>
-              </View>
+        </View>
 
-            </View>
-
-            <View style={styles.loginButtonView}>
-              <Button onPress={handleUpdateUserName} style={styles.loginButton} borderRadius={32} height={52}>
-                <MontserratSemiText style={styles.loginText}>Guardar cambios</MontserratSemiText>
-              </Button>
-            </View>
-          </View>
-          </View>
+        <View style={styles.loginButtonView}>
+          <Button onPress={handleUpdateUserName} style={styles.loginButton} borderRadius={32} height={52}>
+            <MontserratSemiText style={styles.loginText}>Guardar cambios</MontserratSemiText>
+          </Button>
+        </View>
+        </View>
+        </View>
       </ScrollView>
 
       <BottomSheetModal
@@ -368,14 +367,14 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   upView: {
-    flex: 0.8,
+    flex: 0.45,
     display: "flex",
     flexDirection: "row",
     justifyContent: "center",
     height: "100%",
   },
   downView: {
-    flex: 0.2,
+    flex: 0.55,
     height: "100%",
     backgroundColor: Colors.white,
     borderTopLeftRadius: 38,

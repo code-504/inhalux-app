@@ -1,10 +1,10 @@
-import { View, ImageBackground, StyleSheet, ScrollView } from 'react-native'
+import { View, ImageBackground, StyleSheet, ScrollView, Animated } from 'react-native'
 import Colors from '@/constants/Colors'
 import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/components/StyledText'
 import Card from '@/components/Card/Card'
 import { Avatar, Button, Input } from 'tamagui'
 import CardOptionsList from '@/components/Card/CardOptionsList'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { BottomSheetBackdropProps, BottomSheetModal } from '@gorhom/bottom-sheet'
 import { StatusBar } from 'expo-status-bar'
 import { RefreshControl } from 'react-native-gesture-handler'
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
@@ -26,10 +26,26 @@ import HelpIcon from "@/assets/icons/help.svg"
 import AqIcon from "@/assets/icons/aq.svg"
 import HumIcon from "@/assets/icons/humidity_percentage.svg"
 import BlurredDeviceBackground from '@/components/blurredBackground/BlurredDeviceBackground'
-import { router, useLocalSearchParams, useNavigation } from 'expo-router'
+import { Stack, router, useLocalSearchParams, useNavigation } from 'expo-router'
 import { useInhalers } from '@/context/InhalerProvider'
 import { supabase } from '@/services/supabase'
+import SimpleHeader from '@/components/Headers/SimpleHeader'
+import NormalHeader from '@/components/Headers/NormalHeader'
 
+//	Resources
+import InhalerBackground from "@/assets/images/inhaler_background.png"
+import EditIcon from "@/assets/icons/edit.svg"
+import BluetoothIcon from "@/assets/icons/bluetooth.svg"
+import InhalerImage from "@/assets/images/inhaler-img.png"
+import { BottomSheetProvider } from '@gorhom/bottom-sheet/lib/typescript/contexts'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import BlurredBackgroundNew from '@/components/blurredBackground/BlurredBackgroundNew'
+import PersonIcon from "@/assets/icons/person.svg"
+import ShreIcon from "@/assets/icons/share.svg"
+import PacientsTab from '@/tabs/monitor/pacients'
+import SharesTab from '@/tabs/monitor/shares'
+import { useRelations } from '@/context/RelationsProvider'
+import TabBar from '@/components/TabBar'
 
 const Page = () => {
   const [ refresh, setRefresh ] = useState<boolean>(false);
@@ -40,6 +56,7 @@ const Page = () => {
   const {supaInhalers, setSupaInhalers} = useInhalers();
   const [ inhalerName, setInhalerName ] = useState<string>("");
   const navigation = useNavigation();
+  const { pacientState, setPacientState, shareState, setShareState } = useRelations();
 
   /*const getInhaler = async () => {
     setIsLoading(true)
@@ -55,6 +72,8 @@ const Page = () => {
 	//console.log("found inhaler, ", foundInhaler);
 	setItem(clonedInhaler);
 	setInhalerName(foundInhaler.title);
+
+	stadisticListModalRef.current?.present();
   }, [])
 
   	const pullRequest = async () => {
@@ -117,147 +136,195 @@ const Page = () => {
 	const handleOpenPress = useCallback(() => {
 		bottomSheetRef.current?.present();
 	}, []);
-  
-  return (
-    <>
+
+	let scrollOffsetY = useRef(new Animated.Value(0)).current;
+
+	const stadisticListModalRef = useRef<BottomSheetModal>(null);
+
+	// variables
+	const { bottom: bottomSafeArea, top: topSafeArea } = useSafeAreaInsets();
+	const stadisticSnapPoints = useMemo(() => ['27%', '100%'], []);
+	
+	const tabs = [
+		{
+			id: 1,
+			name: 'Pacientes',
+			Icon: PersonIcon,
+			Component: <PacientsTab pacientState={pacientState} setPacientState={setPacientState} onFunction={() => console.log("hola")} />
+		},
+		{
+			id: 2,
+			name: 'Compartidos',
+			Icon: ShreIcon,
+			Component: <SharesTab shareState={shareState} setShareState={setShareState} />
+		}
+	]
+
+  	return (
+		<>
 		<View style={styles.safeAre}>
-			
-			<ImageBackground source={BackgroundImage} style={styles.imageBackground}>
+
+			<Stack.Screen options={{
+				header: () => <NormalHeader title={ item?.title || "" } animHeaderValue={scrollOffsetY} />
+			}} />
+		
 			<ScrollView style={styles.scrollView}
 				refreshControl={
 					<RefreshControl refreshing={refresh} onRefresh={pullRequest}></RefreshControl>
 				}
+				contentContainerStyle={{ flex: 1 }}
+
+				scrollEventThrottle={16}
+                onScroll={Animated.event(
+                    [{ nativeEvent: { contentOffset: { y: scrollOffsetY}}}],
+                    {useNativeDriver: false}
+                )}
 			>
+
 				<View style={styles.content}>
+					<View style={styles.inhalerTop}>
+						<View style={styles.inhalerView}>
+							<Image style={styles.inahlerImage} source={InhalerImage} />
+							<Image style={styles.inahlerShadowImage} source={inhalerShadow} />	
+						</View>
+					</View>
 
-          { item ? <RenderItem item={item} /> : null }
+					<View style={styles.inhalerInfoView}>
+						<MontserratBoldText style={styles.inhalerTitle}>{ item?.title }</MontserratBoldText>
+						<MontserratText style={styles.inhalerTime}>{ item?.connection }</MontserratText>
 
-		  <Input
-			id="inhaler_name"
-			onChangeText={(text) => setInhalerName(text)}
-			value={inhalerName}
-			borderRadius={32}
-			borderWidth={0}
-			style={styles.input}/>
+						<View style={styles.inahlerStatus}>
+								<View style={styles.inahlerStatusInfo}>
+									<BatteryIcon style={styles.inahlerStatusIcon} />
+									<MontserratSemiText>{ item?.battery }%</MontserratSemiText>
+								</View>
 
-			<View style={styles.twoBlock}>
-				<Button style={styles.whiteButton} alignSelf="center" size="$6" onPress={handleUpdateInhaler}>Actualizar</Button>
-				<Button style={styles.whiteButton} alignSelf="center" size="$6" onPress={handleDeleteInhaler}>Eliminar</Button>
-			</View>
-
-					<View style={styles.timeView}>
-						<View style={styles.timeTitleView}>
-							<View style={styles.timeTitle}>
-								<MontserratSemiText style={styles.timeText}>Datos del último análisis</MontserratSemiText>
-								<MontserratText style={styles.timeLocationText}>Hace 6 minutos</MontserratText>
+								<View style={styles.inahlerStatusInfo}>
+									<DoseIcon style={styles.inahlerStatusIcon} />
+									<MontserratSemiText>{ item?.dosis } dosis</MontserratSemiText>
+								</View>
 							</View>
+					</View>
 
-							<Button style={styles.whiteButton} alignSelf="center" size="$6" circular onPress={handleOpenPress}>
-								<HelpIcon />
+					<View style={styles.buttonView}>
+						<View style={styles.inhalerButtonsView}>
+							<Button style={styles.inhalerButton} size="$6" borderRadius={'$radius.10'}>
+								<VolumenUpIcon />
+								<MontserratSemiText>Sonido</MontserratSemiText>
+							</Button>
+
+							<Button style={styles.inhalerButton} size="$6" borderRadius={'$radius.10'}>
+								<BluetoothIcon />
+								<MontserratSemiText>Bluetooth</MontserratSemiText>
 							</Button>
 						</View>
 
-            <View style={styles.rowBlock}>
-              <View style={styles.twoBlock}>
-                <SimpleWeatherCard Icon={AqIcon} color={Colors.pink} title="Calidad del aire" calification="Buena" value="25 ppm" />
-                <SimpleWeatherCard Icon={HumIcon} color={Colors.cyan} title="Humedad" calification="Excelente" value="35%" />
-              </View>
-              
-              <View>
-                <SimpleWeatherCard Icon={HumIcon} color={Colors.cyan} title="Humedad" calification="Excelente" value="35%" />
-              </View>
-            </View>
+						<View style={{ height: 64 }}>
+							<Button style={styles.inhalerButtonPrimary} size="$6" borderRadius={'$radius.10'} height={64}>
+								<TrackChangesIcon />
+								<MontserratSemiText>Análisis</MontserratSemiText>
+							</Button>
+						</View>
+						
 					</View>
 				</View>
-			</ScrollView>
+				
+				<BottomSheetModal
+					ref={stadisticListModalRef}
+					key="StadisticListSheet"
+					name="StadisticListSheet"
+					index={0}
+					topInset={topSafeArea}
+					snapPoints={stadisticSnapPoints}
+					enablePanDownToClose={false}
+					backdropComponent={(backdropProps: BottomSheetBackdropProps) => (
+						<BlurredBackgroundNew
+						  {...backdropProps}
+						  appearsOnIndex={1}
+						  disappearsOnIndex={0}
+						  opacity={1}
+						  backgroundColor={Colors.white}
+						  pressBehavior={'collapse'}
+						/>
+					  )}
+				>
 
-			<BottomSheetModal
-				ref={bottomSheetRef}
-				key="PoiListSheet"
-				name="PoiListSheet"
-				index={0}
-				snapPoints={snapPoints}
-				enablePanDownToClose
-				backdropComponent={BlurredDeviceBackground}
-			>
-				<View style={stylesBottom.container}>
-					<View>
-						<MontserratBoldText style={stylesBottom.title}>Información sobre la calidad del aire</MontserratBoldText>
-						<MontserratText style={stylesBottom.infoText}>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do.</MontserratText>
+					<View style={stylesBottom.container}>
+						<MontserratSemiText style={stylesBottom.subTitle}>Estadísticas</MontserratSemiText>
 					</View>
-				</View>
-			</BottomSheetModal>
 
-			</ImageBackground>
+					
+					<ScrollView
+						automaticallyAdjustContentInsets={false}
+						horizontal={true}
+						showsHorizontalScrollIndicator={false}
+						showsVerticalScrollIndicator={false}
+						directionalLockEnabled={true}
+						bounces={false}
+						scrollsToTop={false}
+					>
+
+						<View style={stylesBottom.card}>
+
+						</View>
+
+						<View style={stylesBottom.card}>
+
+						</View>
+
+						<View style={stylesBottom.card}>
+
+						</View>
+
+						<View style={stylesBottom.card}>
+
+						</View>
+
+						<View style={stylesBottom.card}>
+
+						</View>
+
+						<View style={stylesBottom.card}>
+
+						</View>
+
+						<View style={stylesBottom.card}>
+
+						</View>
+
+						<View style={stylesBottom.card}>
+
+						</View>
+					</ScrollView>
+
+				</BottomSheetModal>
+			
+				<Image style={styles.inahlerImageBackground} source={InhalerBackground} />
+
+			</ScrollView> 
+			<StatusBar style='auto' translucent={true} />
 		</View>
-		<StatusBar style="auto" backgroundColor="transparent" />
 		</>
-  )
+  	)
 }
-
-const RenderItem = ({ item }: any) => (
-  <Card style={styles.inahlerCard} radius={44}>
-    <View style={styles.inahlerCardView}>
-      <View style={styles.inahlerCardContent}>
-        <View style={styles.inhalerCardLeft}>
-          <View style={styles.inahlerView}>
-            <View style={styles.inahlerTitleView}>
-              <MontserratBoldText style={styles.inahlerTitle}>{item.title}</MontserratBoldText>
-              <MontserratText>{ item ? item.connection : "connection" }</MontserratText>
-            </View>
-
-            <View style={styles.inahlerStatus}>
-              <View style={styles.inahlerStatusInfo}>
-                <BatteryIcon style={styles.inahlerStatusIcon} />
-                <MontserratSemiText>{item.batter}%</MontserratSemiText>
-              </View>
-
-              <View style={styles.inahlerStatusInfo}>
-                <DoseIcon style={styles.inahlerStatusIcon} />
-                <MontserratSemiText>{item.dosis} dosis</MontserratSemiText>
-              </View>
-            </View>
-          </View>
-        </View>
-
-        <View style={styles.inhalerCardRight}>
-          <Image style={styles.inahlerImage} source={inhaler} />
-          <Image style={styles.inahlerShadowImage} source={inhalerShadow} />
-        </View>
-      </View>
-
-      <View style={styles.inhalerButtonsView}>
-        <Button style={styles.inhalerButton} size="$6" borderRadius={'$radius.10'}>
-          <VolumenUpIcon />
-          <MontserratSemiText>Sonido</MontserratSemiText>
-        </Button>
-
-        <Button style={styles.inhalerButton} size="$6" borderRadius={'$radius.10'}>
-          <TrackChangesIcon />
-          <MontserratSemiText>Análisis</MontserratSemiText>
-        </Button>
-      </View>
-    </View>
-  </Card>
-);
 
 export default Page
 
 
 const stylesBottom = StyleSheet.create({
 	container: {
-		paddingTop: 16,
+		paddingTop: 12,
+		paddingBottom: 24,
 		paddingHorizontal: 24
 	},
-	title: {
-		fontSize: 26,
-		lineHeight: 36,
-		marginBottom: 16
-	},
-	infoText: {
-		fontSize: 16,
-		lineHeight: 22,
-		color: Colors.darkGray
+	subTitle: {
+        fontSize: 12,
+        color: Colors.darkGray
+    },
+	card: {
+		width: 300,
+		height: 300,
+		backgroundColor: "red"
 	}
 })
 
@@ -276,90 +343,93 @@ const styles = StyleSheet.create({
 	scrollView: {
 		width: "100%"
 	},
-  content: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 16,
-    marginTop: 22,
-		marginBottom: 12,
-    paddingHorizontal: 24,
-  },
-	noInhalersView: {
-		width: "100%",
-		minHeight: 25,
-		backgroundColor: "#FFF",
-		textAlign: "center",
-		paddingVertical: 40,
-		paddingHorizontal: 60,
-		borderRadius: 10
+	content: {
+		flex: 1,
+		display: 'flex',
+		flexDirection: 'column',
+		paddingHorizontal: 24,
 	},
-	carouselView: {
-		width: "100%",
+	inahlerImageBackground: {
+		position: "absolute",
+		top: 0,
+		left: "50%",
+		transform: [
+			{ translateX: -(300 / 2) },
+			{ translateY: -(40) }
+		],
+		width: 300,
+		height: 380,
+    	//aspectRatio: 5 / 9,
+		zIndex: -1
 	},
-	carousel: {
-		width: "100%"
-	},
-	settingsButton: {
-		backgroundColor: Colors.secondary
-	},
-	whiteButton: {
-		backgroundColor: Colors.white
-	},
-	inahlerCard: {
-		position: "relative",
-	},
-	inahlerCardView: {
+	inhalerTop: {
 		display: "flex",
-		flexDirection: "column"
+		flexDirection: "column",
+		justifyContent: "flex-end",
+		alignItems: "center",
+		height: "45%",
 	},
-	inahlerCardContent: {
+	inhalerView: {
+		position: "relative",
+		display: "flex",
+		flexDirection: "row",
+		justifyContent: "center",
+		alignItems: "flex-end",
+		height: 300
+	},
+	inahlerImage: {
+		height: '90%',
+    	aspectRatio: 16 / 26,
+		zIndex: 2,
+	},
+	inahlerShadowImage: {
+		position: "absolute",
+		top: 45,
+		left: -25,
+		height: '90%',
+    	aspectRatio: 16 / 26,
+		zIndex: 1,
+	},
+	inhalerInfoView: {
+		display: "flex",
+		flexDirection: "column",
+		alignItems: "center",
+		gap: 4,
+		width: "100%",
+	},
+	inhalerTitle: {
+		fontSize: 18
+	},
+	inhalerTime: {
+		fontSize: 14
+	},
+	buttonView: {
+		display: "flex",
+		flexDirection: "column",
+		gap: 16
+	},
+	inhalerButtonsView: {
 		display: "flex",
 		flexDirection: "row",
 		justifyContent: "space-between",
-		width: "100%",
-		height: 215
+		marginTop: 16,
+		gap: 8
 	},
-	inhalerCardLeft: {
+	inhalerButton: {
+		flex: 1,
+		backgroundColor: Colors.white
+	},
+	inhalerButtonPrimary: {
+		flex: 1,
+		backgroundColor: Colors.primary,
+		width: "100%",
+		height: 56
+	},
+	stateView: {
 		display: "flex",
 		flexDirection: "column",
-		justifyContent: 'space-between',
-		flex: 1
-	},
-	inahlerButton: {
-		display: "flex",
-		flexDirection: "row",
-		justifyContent: "flex-start"
-	},
-	inahlerImage: {
-		top: -55,
-		left: -5,
-		width: '100%',
-    	aspectRatio: 16 / 26,
-		zIndex: 1
-	},
-	inahlerShadowImage: {
-		top: -270,
-		left: -30,
-		width: '100%',
-    	aspectRatio: 16 / 26,
-		zIndex: 0
-	},
-	inhalerCardRight: {
-		position: "relative",
-		flex: 1
-	},
-	inahlerView: {
-		width: "100%"
-	},
-	inahlerTitleView: {
-		display: "flex",
-		flexDirection: "column",
-		width: "100%",
-		marginBottom: 8
-	},
-	inahlerTitle: {
-		fontSize: 18,
-		marginBottom: 8
+		gap: 16,
+		marginTop: 32
 	},
 	inahlerStatus: {
 		display: "flex",
@@ -373,62 +443,5 @@ const styles = StyleSheet.create({
 	},
 	inahlerStatusIcon: {
 		marginRight: 4
-	},
-	inhalerButtonsView: {
-		display: "flex",
-		flexDirection: "row",
-		justifyContent: "space-between",
-		marginTop: 16,
-		gap: 8
-	},
-	inhalerButton: {
-		flex: 1,
-		backgroundColor: Colors.secondary
-	},
-	dotContainer: {
-		justifyContent: 'center',
-		alignSelf: 'center',
-		height: 18
-	},
-	dotsView: {
-		top: 16
-	},
-	timeView: {
-		display: "flex",
-		flexDirection: "column"
-	},
-	timeTitleView: {
-		display: "flex",
-		flexDirection: "row",
-		alignItems: "center",
-		justifyContent: "space-between",
-		marginBottom: 16
-	},
-	timeTitle: {
-		display: "flex",
-	},
-	timeText: {
-		fontSize: 18
-	},
-	timeLocationText: {
-		marginTop: 2,
-		fontSize: 14,
-		color: Colors.darkGray
-	},
-  rowBlock: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 16
-  },
-	twoBlock: {
-		display: "flex",
-		flexDirection: "row",
-		justifyContent: "space-between",
-		gap: 16
-	},
-	input: {
-		height: 60,
-		backgroundColor: "#fff",
-		textAlign: "center"
 	}
 })

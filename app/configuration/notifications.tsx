@@ -26,9 +26,9 @@ const NotificationsPage = () => {
                     [{ nativeEvent: { contentOffset: { y: scrollOffsetY}}}],
                     {useNativeDriver: false}
                 )}
+                contentContainerStyle={{ flex: 1 }}
             >
 
-                <View style={{ minHeight: Dimensions.get('window').height - 73}}>
                     <View style={styles.upView}>
                         <MontserratSemiText style={styles.title}>Notificaciones</MontserratSemiText>
                     </View>
@@ -51,7 +51,6 @@ const NotificationsPage = () => {
                             </NotificationsList.ItemView>
                         </NotificationsList>
                     </View>
-                </View>
             </ScrollView>
         </View>
     )
@@ -78,20 +77,21 @@ const styles = StyleSheet.create({
         flexDirection: "column",
     },
     upView: {
-        flex: 0.15,
+        flex: 0.35,
         display: "flex",
-        flexDirection: "row",
-        paddingTop: 48,
-        paddingBottom: 64,
-        paddingHorizontal: 24
+        flexDirection: "column",
+        justifyContent: "flex-end",
+        gap: 12,
+        paddingVertical: 48,
+        paddingHorizontal: 24,
     },
     downView: {
-        flex: 0.85,
+        flex: 0.65,
         backgroundColor: Colors.white,
         borderTopLeftRadius: 38,
         borderTopRightRadius: 38,
-        paddingHorizontal: 24,
-        paddingVertical: 42
+        paddingVertical: 42,
+        paddingHorizontal: 24
     },
     title: {
         fontSize: 32
