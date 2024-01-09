@@ -85,7 +85,7 @@ const PacientsTab = ({ pacientState, setPacientState, onFunction }: PacientsTabP
                             data={pacientState.data}
                             keyExtractor={(_, index) => index.toString()}
                             renderItem={({ item }) => 
-                                (<ContactCardPatient name={item.name} kindred={item.kindred} avatar={item.avatar} pending_state={item.pending_state} />)}
+                                (<ContactCardPatient id={item.id} name={item.name} kindred={item.kindred} avatar={item.avatar} pending_state={item.pending_state} />)}
                             estimatedItemSize={96}
                         />
                     </View>
