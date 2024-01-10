@@ -2,6 +2,7 @@ import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/typ
 import { Dispatch, SetStateAction } from "react"
 
 export interface ListMonitor {
+    id: string;
     avatar: string;
     kindred: string;
     name: string;

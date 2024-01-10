@@ -47,7 +47,7 @@ export function RelationProvider({ children }: Props) {
           id, 
           name_from_monitor,
           pending_state,
-          user: fk_user_patient ( name, last_name, avatar )
+          user: fk_user_patient ( name, last_name, avatar, id )
         `)
         .eq('fk_user_monitor', user.id)
         .like("user.name", '%' + pacientState.filterText + '%')
@@ -71,6 +71,7 @@ export function RelationProvider({ children }: Props) {
         }
 
         let transformedPatientData = data.filter((patient: any) => patient.user !== null).map((patient: any): ListMonitor => ({
+          id: patient.user.id,
           name: patient.user.name + ( patient.user.last_name ? " " + patient.user.last_name : ""),
           avatar: patient.user.avatar,
           kindred: patient.name_from_monitor ? patient.name_from_monitor : "Relativo",
@@ -107,7 +108,7 @@ export function RelationProvider({ children }: Props) {
         id, 
         name_from_patient,
         pending_state,
-        user: fk_user_monitor ( name, last_name, avatar )
+        user: fk_user_monitor ( name, last_name, avatar, id )
       `)
       .eq('fk_user_patient', user.id)
       .like("user.name", '%' + shareState.filterText + '%')
@@ -131,6 +132,7 @@ export function RelationProvider({ children }: Props) {
       }
 
       let transformedShareData = data.filter((patient: any) => patient.user !== null).map((share: any): ListMonitor => ({
+        id: share.user.id,
         name: share.user.name + ( share.user.last_name ? " " + share.user.last_name : ""),
         avatar: share.user.avatar,
         kindred: share.name_from_monitor ? share.name_from_monitor : "Relativo",

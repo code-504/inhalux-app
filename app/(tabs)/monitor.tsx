@@ -144,6 +144,7 @@ export default function TabThreeScreen() {
 			...pacientState,
 			filterText: "",
 			data: [ ...pacientState.data, {
+				id:  userNewRelation[0].id,
 				name: userNewRelation[0].name + ( userNewRelation[0].last_name ? " " + userNewRelation[0].last_name : ""),
 				avatar: userNewRelation[0].avatar,
 				kindred: "Relativo", 
