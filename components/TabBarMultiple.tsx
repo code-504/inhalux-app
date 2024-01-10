@@ -1,6 +1,6 @@
 import Colors from '@/constants/Colors';
-import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, LayoutChangeEvent, TouchableHighlightBase, Dimensions, Keyboard } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { View, StyleSheet, LayoutChangeEvent, TouchableHighlightBase, Dimensions, Keyboard, TouchableOpacity, Pressable } from 'react-native';
 import Animated, { useSharedValue, withSpring } from 'react-native-reanimated';
 import { MontserratSemiText } from './StyledText';
 import { Button, ScrollView } from 'tamagui';
@@ -14,9 +14,8 @@ interface TabProps {
 
 interface Tab {
     title: string;
-    Icon: React.FunctionComponent<React.SVGAttributes<SVGElement>>;
+    Icon ?: React.FunctionComponent<React.SVGAttributes<SVGElement>>;
     children: JSX.Element | JSX.Element[];
-    height: number;
 }
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -24,85 +23,64 @@ const { width: screenWidth } = Dimensions.get('window');
 const SPACING = 24;
 const ITEM_WIDTH = screenWidth - (SPACING * 2);
 
-function TabBarNew({ children }: TabProps) {
+function TabBarMultiple({ children }: TabProps) {
 
-	const [activeTab, setActiveTab] = useState<number>(0);
-    const [heightScroll, setHeightScroll] = useState<number>(0);
-	const [ width, setWidth ] = useState<number>(0);
-	const translateX = useSharedValue(2);
+	const [activeTab, setActiveTab] = useState(0);
 	const scrollViewRef = useRef<ScrollView>();
-
-    useEffect(() => {
-        const selectedTab = React.Children.toArray(children)[0] as React.ReactElement<Tab>;
-
-        setHeightScroll(selectedTab.props.height)
-
-    }, [])
+    const scrollViewTabRef = useRef<ScrollView>();
+    const [buttonLayout, setButtonLayout] = useState<Array<number>>([]);
 
 	const handleTabPress = (index: number) => {
 		Keyboard.dismiss();
 
 		setActiveTab(index);
-
+        //scrollToIndexTab(index);
 		scrollToIndex(index)
-
-        const selectedTab = React.Children.toArray(children)[index] as React.ReactElement<Tab>;
-
-        setHeightScroll(selectedTab.props.height)
-		
-		translateX.value = withSpring(index * width + (index === 0 ? + 4 : 4), {
-			duration: 1800,
-			dampingRatio: 0.9,
-			stiffness: 100,
-			overshootClamping: false,
-			restDisplacementThreshold: 0.01,
-			restSpeedThreshold: 0.01,
-		  })
 	};
 
-	const handleLayout = (event: LayoutChangeEvent) => {
-		const { width } = event.nativeEvent.layout;
-		setWidth(width);
-	};
+    /*const scrollToIndexTab = (index:number) => {
+        let newScrollX = buttonLayout[index];
+        scrollViewTabRef.current?.scrollTo({x: newScrollX - 24, y: 0, animated: true,});
+	};*/
 
 	const scrollToIndex = (index:number) => {
-        let newScrollX = index > 0 ? ITEM_WIDTH * index + 24 : ITEM_WIDTH * index;
+        let newScrollX = ITEM_WIDTH * index + (24 * index);
         scrollViewRef.current?.scrollTo({x: newScrollX, y: 0, animated: true,});
 	};
 
+    /*const handleLayout = (event: LayoutChangeEvent) => {
+		const { x } = event.nativeEvent.layout;
+        let numbers = buttonLayout;
+        numbers.push(x)
+		setButtonLayout(numbers)
+	};*/
+
 	return (
 		<View>
-			<View style={styles.tabView}>
-				<View style={styles.container}>
-					<View style={styles.tabsContainer}>
+            <View style={{ borderRadius: 100 }}>
+                <ScrollView 
+                    ref={scrollViewTabRef}
+                    style={{ borderRadius: 1000 }}
+                    contentContainerStyle={styles.container}
+                    horizontal={true}
+                    showsHorizontalScrollIndicator={false}
+                >
+                    <View style={styles.tabsContainer}>
                         {
                             React.Children.map(children, (child, index) => (
                                 <Ripple
                                     key={index}
                                     onTouchEnd={() => handleTabPress(index)}
-                                    style={[styles.tab]}
+                                    style={[styles.tab, { backgroundColor: activeTab === index ? Colors.white : Colors.lightGrey }]}
                                 >
-                                        <child.props.Icon fill={Colors.black} />
+                                        { child.props.Icon && <child.props.Icon fill={Colors.black} /> }
                                         <MontserratSemiText>{child.props.title}</MontserratSemiText>
                                 </Ripple>
                             ))
                         }
-					</View>
-
-					<Animated.View
-						onLayout={handleLayout}
-						style={{
-							width: "50%",
-							height: 56,
-							borderRadius: 100,
-							backgroundColor: Colors.white,
-							position: 'absolute',
-							zIndex: -1,
-							transform: [{ translateX }]
-						}}
-					/>
-				</View>
-			</View>
+                    </View>
+                </ScrollView>
+            </View>
 
             <ScrollView
                 ref={scrollViewRef}
@@ -114,9 +92,6 @@ function TabBarNew({ children }: TabProps) {
 				scrollsToTop={false}
 				scrollEnabled={false}
 				contentContainerStyle={styles.scrollContainer}
-                style={{
-                    height: heightScroll
-                }}
 			>
                 
                 {
@@ -126,43 +101,35 @@ function TabBarNew({ children }: TabProps) {
                 }
 				
 			</ScrollView>
-		
-			{ /*tabComponents[activeTab] && tabComponents[activeTab]*/ }
 		</View>
 	);
 };
 
-const Item = ({ children, height }: Tab) => {
+const Item = ({ children }: Tab) => {
 	return (
-        <View style={{ width: ITEM_WIDTH }}>
+        <View style={{ width: ITEM_WIDTH, marginTop: 32 }}>
             {children}
         </View>
     )
 }
 
-TabBarNew.Item = Item;
+TabBarMultiple.Item = Item;
 
-export default TabBarNew;
+export default TabBarMultiple;
 
 const styles = StyleSheet.create({
     container: {
         flexDirection: "row",
         alignItems: "center",
-        width: "100%",
         height: 64,
-        padding: 4,
-        marginTop: 16,
-        marginBottom: 8,
-        borderRadius: 100,
-        backgroundColor: Colors.lightGrey
-    },
-    tabView: {
-        width: "100%",
     },
     tabsContainer: {
         display: "flex",
         flexDirection: "row",
         gap: 4,
+        padding: 4,
+        borderRadius: 1000,
+        backgroundColor: Colors.lightGrey
     },
     tab: {
         flex: 1,
@@ -172,6 +139,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         height: 56,
         borderRadius: 100,
+        paddingHorizontal: 16,
         overflow: "hidden",
         gap: 16
     },
@@ -193,6 +161,6 @@ const styles = StyleSheet.create({
         display: "flex",
         flexDirection: "row",
         gap: 24,
-        height: "auto"
+        height: "auto",
     },
 });

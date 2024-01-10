@@ -29,6 +29,8 @@ export default {
   focus: '#F2F6FC',
   pink: "#F9EDFF",
   cyan: "#DEF6F5",
+  cyanLight: "#F2FBFF",
+  blue: "#3165A3",
   blueLight: "#F1F8FF",
   dotsGray: '#E2E2E2',
   buttonGray: "#F8F8F8",
@@ -40,7 +42,9 @@ export default {
   redLight: "#FFF2F2",
   orangeLight: "#FFF8F2",
   purple: "#AD0FB0",
+  brown: "#A69465",
   brownLight: "#FFF6DE",
   purpleLight: "#FFF2FF",
-  greenLight: "#F2FFF6"
+  greenLight: "#F2FFF6",
+  borderColor: "#EDEDED"
 };
