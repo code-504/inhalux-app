@@ -33,6 +33,7 @@ import { z } from 'zod';
 import { useAuth } from '@/context/Authprovider';
 import { supabase } from '@/services/supabase';
 import { useIsFocused } from '@react-navigation/native';
+import TrackChangesIcon from "@/assets/icons/track_changes.svg"
 
 export default function TabThreeScreen() {
 
@@ -51,8 +52,6 @@ export default function TabThreeScreen() {
 	const keyboardHook = useKeyboard();
 	const navigator = useNavigation();
 
-	const addPacientModalRef  = useRef<BottomSheetModal>(null);
-
 	const formSchema = z.object({
 		addCode: z.string().min(36, { message: "El código debe tener 36 carácteres" })
 	})
@@ -60,20 +59,21 @@ export default function TabThreeScreen() {
 	const formData = {
 		addCode
 	}
+
+	//refs
 	const monitorListModalRef = useRef<BottomSheetModal>(null);
+	const addPacientModalRef  = useRef<BottomSheetModal>(null);
+	const bottomSheetRef = useRef<BottomSheetModal>(null);//El general
 	const monitorIndex = useRef<number>(0);
 	
-	const addSnapPoints = useMemo(
-		() => [
-		"24%",
-		],
-		[]
-	);
+	//variables
+	const addSnapPoints = useMemo(() => ["28%",],[]);
 
-	// variables
-	const { bottom: bottomSafeArea, top: topSafeArea } = useSafeAreaInsets();
-	
+	const generalSnapPoints = useMemo(() => ['40%',], []);
+
 	const monitorSnapPoints = useMemo(() => ['74%', '100%'], []);
+	
+	const { bottom: bottomSafeArea, top: topSafeArea } = useSafeAreaInsets();
 
 	// callbacks
 	const handleMonitorSheetChange = useCallback((index: number) => {
@@ -82,6 +82,24 @@ export default function TabThreeScreen() {
 		if (index === 0) 
 			Keyboard.dismiss()
 	}, [])
+
+	const handleOpenPress = () => {
+		bottomSheetRef.current?.present();
+	};
+
+	const openAddPacientSheet = () => {
+		bottomSheetRef.current?.dismiss();
+		addPacientModalRef.current?.present();
+		Keyboard.dismiss();
+		setOptionsOpen(true)
+	}
+
+	const openShareCodeSheet = () => {
+		router.push("/monitor/share_link")
+		bottomSheetRef.current?.close();
+	}
+
+	//Funcs
 
 	const handleAddPatient = async() => {
 		console.log("pacientState: ", pacientState);
@@ -171,12 +189,6 @@ export default function TabThreeScreen() {
 	const pacients:PacientsInfo[] = []
 	*/	
 
-	const openAddPacientSheet = () => {
-		addPacientModalRef.current?.present();
-		Keyboard.dismiss();
-		setOptionsOpen(true)
-	}
-
 	const tabs = [
 		{
 			id: 1,
@@ -259,7 +271,7 @@ export default function TabThreeScreen() {
 						title="Monitoreo"
 						subtitle="Comparte y mira la cuenta de otros"
 						Icon={AddIcon}
-						action={()=> console.log("Add")}
+						action={()=> handleOpenPress()}
 					/>
 				</View>
 
@@ -292,6 +304,24 @@ export default function TabThreeScreen() {
 
 				</BottomSheetModal>
 			</BottomSheetModalProvider>
+
+			<BottomSheetModal
+				ref={bottomSheetRef}
+				snapPoints={generalSnapPoints}
+				index={0}
+				backdropComponent={BlurredDeviceBackground}
+			>
+				<View style={stylesBottom.container}>
+					<MontserratSemiText style={stylesBottom.title}>{`¿Qué deseas hacer?`}</MontserratSemiText>
+					<Button onPress={() => openShareCodeSheet()} style={styles.addButton} size="$6" borderRadius={'$radius.10'}>
+						<MontserratSemiText style={{color: Colors.black}}>Compartir mi Cuenta</MontserratSemiText>
+					</Button>
+					<Button onPress={() => openAddPacientSheet()} style={styles.addButton} size="$6" borderRadius={'$radius.10'}>
+						<MontserratSemiText>Agregar una Cuenta</MontserratSemiText>
+					</Button>
+				</View>
+
+			</BottomSheetModal>
 				
 			<BottomSheetModal
 				ref={addPacientModalRef}
@@ -311,7 +341,7 @@ export default function TabThreeScreen() {
 			>
 				<View style={stylesBottom.container}>
 					<View style={stylesBottom.titleContent}>
-						<MontserratBoldText style={stylesBottom.title}>Agregar paciente</MontserratBoldText>
+						<MontserratBoldText style={stylesBottom.title}>Agregar paciente usando...</MontserratBoldText>
 					</View>
 
 					<View style={stylesBottom.buttonsView}>
@@ -372,7 +402,7 @@ export default function TabThreeScreen() {
 							<View>
 								<AlertDialog.Title style={stylesDialog.titleDialog}>Link para agregar paciente</AlertDialog.Title>
 								<AlertDialog.Description>
-									Es el link que te mando la persona.
+									Usa el link que te mando tu relativo.
 								</AlertDialog.Description>
 								<Input
 									id="test"
@@ -427,6 +457,11 @@ const stylesDialog = StyleSheet.create({
 })
 
 const styles = StyleSheet.create({
+	addButton: {
+		flex: 1,
+		backgroundColor: Colors.primary,
+		minHeight: 60
+	},
 	errorMessage: {
 		fontSize: 10,
 		textAlign: "center",
@@ -454,6 +489,12 @@ const styles = StyleSheet.create({
 })
 
 const stylesBottom = StyleSheet.create({
+	description: {
+		fontSize: 14,
+		lineHeight: 20,
+		color: Colors.darkGray,
+		marginBottom: 16
+	},
 	container: {
 	  display: "flex",
 	  flexDirection: "column",
@@ -470,7 +511,8 @@ const stylesBottom = StyleSheet.create({
 	title: {
 		fontSize: 20,
 		lineHeight: 26,
-		marginBottom: 16
+		marginBottom: 16,
+		textAlign: "center"
 	},
 	buttonsView: {
 	  display: "flex",

@@ -169,8 +169,9 @@ const styles = StyleSheet.create({
         display: "flex",
         flexDirection: "column",
         gap: 12,
+		marginTop: 80,
         paddingTop: 48,
-        paddingBottom: 24,
+        //paddingBottom: 24,
         paddingHorizontal: 24
     },
     downView: {
