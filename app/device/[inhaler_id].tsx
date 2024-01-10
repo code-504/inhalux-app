@@ -1,51 +1,45 @@
-import { View, ImageBackground, StyleSheet, ScrollView, Animated } from 'react-native'
+import { View, StyleSheet, ScrollView, Animated, Dimensions, Pressable } from 'react-native'
 import Colors from '@/constants/Colors'
 import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/components/StyledText'
-import Card from '@/components/Card/Card'
-import { Avatar, Button, Input } from 'tamagui'
-import CardOptionsList from '@/components/Card/CardOptionsList'
-import { BottomSheetBackdropProps, BottomSheetModal } from '@gorhom/bottom-sheet'
+import { Button } from 'tamagui'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { StatusBar } from 'expo-status-bar'
 import { RefreshControl } from 'react-native-gesture-handler'
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
-import SimpleWeatherCard from '@/components/Card/SimpleWeatherCard'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import SimpleWeatherCard, { FillType } from '@/components/Card/SimpleWeatherCard'
 import { Image } from 'expo-image';
 import { inhalerProps } from '@/context/InhalerProvider'
+import { BarChart, yAxisSides } from "react-native-gifted-charts";
+import TabBarNew from '@/components/TabBarNew'
+import { Stack, router, useLocalSearchParams, useNavigation } from 'expo-router'
+import { useInhalers } from '@/context/InhalerProvider'
+import { supabase } from '@/services/supabase'
+import NormalHeader from '@/components/Headers/NormalHeader'
 
 // Resources
-import BackgroundImage from "@/assets/images/background.png"
-import AddIcon from "@/assets/icons/add.svg"
-import SettingsIcon from "@/assets/icons/settings.svg"
-import inhaler from "@/assets/images/inhaler-img.png"
 import inhalerShadow from "@/assets/images/inhaler-shadow-img.png"
 import BatteryIcon from "@/assets/icons/battery.svg"
 import DoseIcon from "@/assets/icons/dose.svg"
 import VolumenUpIcon from "@/assets/icons/volume_up.svg"
 import TrackChangesIcon from "@/assets/icons/track_changes.svg"
+import InhalerBackground from "@/assets/images/inhaler_background.png"
+import BluetoothIcon from "@/assets/icons/bluetooth.svg"
+import InhalerImage from "@/assets/images/inhaler-img.png"
+import PillIcon from "@/assets/icons/pill.svg"
+import InhalerIcon from "@/assets/icons/inhaler.svg";
+import AirWareIcon from "@/assets/icons/airware.svg";
 import HelpIcon from "@/assets/icons/help.svg"
 import AqIcon from "@/assets/icons/aq.svg"
 import HumIcon from "@/assets/icons/humidity_percentage.svg"
-import BlurredDeviceBackground from '@/components/blurredBackground/BlurredDeviceBackground'
-import { Stack, router, useLocalSearchParams, useNavigation } from 'expo-router'
-import { useInhalers } from '@/context/InhalerProvider'
-import { supabase } from '@/services/supabase'
-import SimpleHeader from '@/components/Headers/SimpleHeader'
-import NormalHeader from '@/components/Headers/NormalHeader'
-
-//	Resources
-import InhalerBackground from "@/assets/images/inhaler_background.png"
-import EditIcon from "@/assets/icons/edit.svg"
-import BluetoothIcon from "@/assets/icons/bluetooth.svg"
-import InhalerImage from "@/assets/images/inhaler-img.png"
-import { BottomSheetProvider } from '@gorhom/bottom-sheet/lib/typescript/contexts'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import BlurredBackgroundNew from '@/components/blurredBackground/BlurredBackgroundNew'
-import PersonIcon from "@/assets/icons/person.svg"
-import ShreIcon from "@/assets/icons/share.svg"
-import PacientsTab from '@/tabs/monitor/pacients'
-import SharesTab from '@/tabs/monitor/shares'
-import { useRelations } from '@/context/RelationsProvider'
-import TabBar from '@/components/TabBar'
+import CoIcon from "@/assets/icons/co.svg"
+import TempIcon from "@/assets/icons/device_thermostat.svg"
+import GasIcon from "@/assets/icons/gas_meter.svg"
+import VOCIcon from "@/assets/icons/total_dissolved_solids.svg"
+import MoreIcon from "@/assets/icons/more_vert.svg"
+import AirUnit from "@/assets/icons/ac_unit.svg"
+import TabBarMultiple from '@/components/TabBarMultiple'
+import { Divider, Menu } from 'react-native-paper'
+import Ripple from 'react-native-material-ripple'
 
 const Page = () => {
   const [ refresh, setRefresh ] = useState<boolean>(false);
@@ -56,7 +50,6 @@ const Page = () => {
   const {supaInhalers, setSupaInhalers} = useInhalers();
   const [ inhalerName, setInhalerName ] = useState<string>("");
   const navigation = useNavigation();
-  const { pacientState, setPacientState, shareState, setShareState } = useRelations();
 
   /*const getInhaler = async () => {
     setIsLoading(true)
@@ -72,8 +65,6 @@ const Page = () => {
 	//console.log("found inhaler, ", foundInhaler);
 	setItem(clonedInhaler);
 	setInhalerName(foundInhaler.title);
-
-	stadisticListModalRef.current?.present();
   }, [])
 
   	const pullRequest = async () => {
@@ -123,7 +114,7 @@ const Page = () => {
 			prevSupaInhalers.filter((inhaler) => inhaler.id !== inhaler_id)
 		);
 
-		navigation.navigate('(tabs)');
+		router.back();
 	}
 
 	// ref
@@ -141,44 +132,68 @@ const Page = () => {
 
 	const stadisticListModalRef = useRef<BottomSheetModal>(null);
 
-	// variables
-	const { bottom: bottomSafeArea, top: topSafeArea } = useSafeAreaInsets();
-	const stadisticSnapPoints = useMemo(() => ['27%', '100%'], []);
-	
-	const tabs = [
-		{
-			id: 1,
-			name: 'Pacientes',
-			Icon: PersonIcon,
-			Component: <PacientsTab pacientState={pacientState} setPacientState={setPacientState} onFunction={() => console.log("hola")} />
-		},
-		{
-			id: 2,
-			name: 'Compartidos',
-			Icon: ShreIcon,
-			Component: <SharesTab shareState={shareState} setShareState={setShareState} />
-		}
-	]
+	const barData = [
+		{value: 3, label: '27 nov'},
+		{value: 7, label: '28 nov'},
+		{value: 5, label: '29 nov'},
+		{value: 12, label: '30 nov'},
+	];
+
+	/*
+		const barData = [
+		{value: 30, label: '27 nov'},
+		{value: 50, label: '28 nov'},
+		{value: 10, label: '29 nov'},
+		{value: 50, label: '30 nov'},
+	];
+	*/
+
+	const screenWidth = Dimensions.get("window").width - 48;
+
+	const [visible, setVisible] = useState(false);
+
+	const openMenu = () => setVisible(true);
+
+	const closeMenu = () => setVisible(false);
 
   	return (
 		<>
 		<View style={styles.safeAre}>
 
 			<Stack.Screen options={{
-				header: () => <NormalHeader title={ item?.title || "" } animHeaderValue={scrollOffsetY} />
+				header: () => 
+					<NormalHeader title={ item?.title || "" } animHeaderValue={scrollOffsetY}>
+						
+						<Menu
+							visible={visible}
+							onDismiss={closeMenu}
+							contentStyle={{ backgroundColor: Colors.white, borderRadius: 18 }}
+							anchor={
+								<Ripple style={{ overflow: "hidden", height: 64, width: 64, backgroundColor: Colors.white, borderRadius: 60, display: "flex", justifyContent: "center", alignItems: "center" }}  onPress={openMenu}>
+									<MoreIcon />
+								</Ripple>
+							}>
+							<Menu.Item leadingIcon="pencil" onPress={() => {}} title="Editar" />
+							<Divider />
+							<Menu.Item leadingIcon="delete" onPress={() => {}} title="Eliminar" />
+						</Menu>
+				
+
+	
+					</NormalHeader>
 			}} />
 		
 			<ScrollView style={styles.scrollView}
 				refreshControl={
 					<RefreshControl refreshing={refresh} onRefresh={pullRequest}></RefreshControl>
 				}
-				contentContainerStyle={{ flex: 1 }}
-
+			
 				scrollEventThrottle={16}
                 onScroll={Animated.event(
                     [{ nativeEvent: { contentOffset: { y: scrollOffsetY}}}],
                     {useNativeDriver: false}
                 )}
+				showsVerticalScrollIndicator={false}
 			>
 
 				<View style={styles.content}>
@@ -228,76 +243,290 @@ const Page = () => {
 						
 					</View>
 				</View>
-				
-				<BottomSheetModal
-					ref={stadisticListModalRef}
-					key="StadisticListSheet"
-					name="StadisticListSheet"
-					index={0}
-					topInset={topSafeArea}
-					snapPoints={stadisticSnapPoints}
-					enablePanDownToClose={false}
-					backdropComponent={(backdropProps: BottomSheetBackdropProps) => (
-						<BlurredBackgroundNew
-						  {...backdropProps}
-						  appearsOnIndex={1}
-						  disappearsOnIndex={0}
-						  opacity={1}
-						  backgroundColor={Colors.white}
-						  pressBehavior={'collapse'}
-						/>
-					  )}
-				>
 
-					<View style={stylesBottom.container}>
-						<MontserratSemiText style={stylesBottom.subTitle}>Estadísticas</MontserratSemiText>
+				<View style={styles.stadisticContent}>
+					<View style={styles.stadisticView}>
+
+					<MontserratSemiText style={styles.sectionTitle}>Estadísticas</MontserratSemiText>
+
+					<TabBarNew>
+						<TabBarNew.Item Icon={InhalerIcon} title='Inhalux' height={730}>
+							<View style={stylesTab.content}>
+
+								<View style={stylesTab.sectionView}>
+									<View style={stylesTab.titleView}>
+										<MontserratSemiText style={stylesTab.title}>Uso del inhalador</MontserratSemiText>
+										<MontserratText style={stylesTab.description}>Ultima conexión hace 10 segundos</MontserratText>
+									</View>
+
+									<View style={stylesTab.oneBlock}>
+										<SimpleWeatherCard Icon={PillIcon} color={Colors.greenLight} title='Inhalaciones desde la última recarga' value={132} type={FillType.outline} valueStyle={{ fontWeight: "bold", color: Colors.black }} />
+									</View>
+								</View>
+
+								<View style={stylesTab.sectionView}>
+									<View style={stylesTab.titleView}>
+										<MontserratSemiText style={stylesTab.title}>Resumen de uso</MontserratSemiText>
+									</View>
+
+									<View>
+										<View style={{ display: "flex", flexDirection: "row", gap: 8 }}>
+											<View style={{ marginTop: 14, width: 8, height: 8, borderRadius: 10, backgroundColor: "rgb(0, 106, 38)" }}></View>
+											<View>
+												<MontserratSemiText style={{ fontSize: 24 }}>10</MontserratSemiText>
+												<MontserratText style={{ color: Colors.darkGray }}>Inhalaciones</MontserratText>
+											</View>
+										</View>
+									</View>
+
+									<View style={stylesTab.containerChart}>
+						
+										<BarChart
+											data={barData}
+											barWidth={42}
+											cappedBars
+											capColor={'rgb(0, 106, 38)'}
+											capThickness={2}
+											showGradient
+											gradientColor={'rgba(0, 106, 38, 0.2)'}
+											frontColor={'rgba(0, 106, 38, 0)'}
+											width={screenWidth - 48}
+											yAxisSide={yAxisSides.RIGHT}
+											yAxisThickness={0}
+											xAxisThickness={0}
+											dashGap={15}
+											dashWidth={7}
+											maxValue={Math.max(...barData.map(item => item.value)) + 1}
+											stepHeight={65}
+											initialSpacing={30}
+											spacing={35}
+											noOfSections={5}
+											rulesColor={Colors.borderColor}
+											rulesThickness={1}
+											disablePress
+										/>
+									</View>
+								</View>
+							</View>
+						</TabBarNew.Item>
+
+						<TabBarNew.Item Icon={AirWareIcon} title='Análisis' height={1310}>
+							<View style={stylesTab.content}>
+								<View style={stylesTab.sectionView}>
+									<View style={stylesTab.titleContent}>
+										<View style={stylesTab.titleView}>
+											<MontserratSemiText style={stylesTab.title}>{`Información de\nla calidad del aire`}</MontserratSemiText>
+											<MontserratText style={stylesTab.description}>Último análisis hace 1 minuto</MontserratText>
+										</View>
+
+										<Button style={stylesTab.grayButton} alignSelf="center" size="$6" circular onPress={handleOpenPress}>
+											<HelpIcon fill={Colors.black} />
+										</Button>
+									</View>
+								</View>
+
+								<View style={stylesTab.sectionView}>
+									<View style={stylesTab.twoBlock}>
+										<SimpleWeatherCard Icon={AirUnit} color={Colors.blueLight} title="Estado del aire" calification="Excelente" type={FillType.outline} />
+									</View>
+
+									<View style={stylesTab.twoBlock}>
+										<SimpleWeatherCard Icon={AqIcon} color={Colors.pink} title="Calidad del aire" calification="Buena" value={25} medition='ppm' type={FillType.outline} />
+										<SimpleWeatherCard Icon={CoIcon} color={Colors.blueLight} title="Monóxido de carbono" calification="Excelente" value={300} medition='ppm' type={FillType.outline} />
+									</View>
+
+									<View style={stylesTab.twoBlock}>
+										<SimpleWeatherCard Icon={GasIcon} color={Colors.purpleLight} title="Gas" calification="Regular" value={125} medition='ppm' type={FillType.outline} />
+										<SimpleWeatherCard Icon={VOCIcon} color={Colors.greenLight} title="VOC" calification="Bueno" value={50} medition='ppm' type={FillType.outline} />
+									</View>
+
+									<View style={stylesTab.twoBlock}>
+										<SimpleWeatherCard Icon={TempIcon} color={Colors.brownLight} title="Temperatura" calification="Regluar" value={25} medition='°C' type={FillType.outline} />
+										<SimpleWeatherCard Icon={HumIcon} color={Colors.blueLight} title="Humedad" calification="Excelente" value={35} medition='%' type={FillType.outline} />
+									</View>
+								</View>
+
+								<View style={stylesTab.sectionView}>
+									<View style={stylesTab.titleView}>
+										<MontserratSemiText style={stylesTab.title}>Resumen del análisis</MontserratSemiText>
+									</View>
+
+									<TabBarMultiple>
+										<TabBarMultiple.Item title='Calidad del aire'>
+
+											<BarChart
+												data={barData}
+												barWidth={42}
+												cappedBars
+												capColor={Colors.purple}
+												capThickness={2}
+												showGradient
+												gradientColor={Colors.purpleLight}
+												frontColor={'rgba(0, 0, 0, 0)'}
+												width={screenWidth - 48}
+												yAxisSide={yAxisSides.RIGHT}
+												yAxisThickness={0}
+												xAxisThickness={0}
+												dashGap={15}
+												dashWidth={7}
+												maxValue={Math.max(...barData.map(item => item.value)) + 1}
+												stepHeight={65}
+												initialSpacing={30}
+												spacing={35}
+												noOfSections={5}
+												rulesColor={Colors.borderColor}
+												rulesThickness={1}
+												disablePress
+											/>
+										</TabBarMultiple.Item>
+
+										<TabBarMultiple.Item title='CO2'>
+
+											<BarChart
+												data={barData}
+												barWidth={42}
+												cappedBars
+												capColor={Colors.blue}
+												capThickness={2}
+												showGradient
+												gradientColor={Colors.blueLight}
+												frontColor={'rgba(0, 0, 0, 0)'}
+												width={screenWidth - 48}
+												yAxisSide={yAxisSides.RIGHT}
+												yAxisThickness={0}
+												xAxisThickness={0}
+												dashGap={15}
+												dashWidth={7}
+												maxValue={Math.max(...barData.map(item => item.value)) + 1}
+												stepHeight={65}
+												initialSpacing={30}
+												spacing={35}
+												noOfSections={5}
+												rulesColor={Colors.borderColor}
+												rulesThickness={1}
+												disablePress
+											/>
+										</TabBarMultiple.Item>
+
+										<TabBarMultiple.Item title='Gas'>
+
+											<BarChart
+												data={barData}
+												barWidth={42}
+												cappedBars
+												capColor={Colors.purple}
+												capThickness={2}
+												showGradient
+												gradientColor={Colors.pink}
+												frontColor={'rgba(0, 0, 0, 0)'}
+												width={screenWidth - 48}
+												yAxisSide={yAxisSides.RIGHT}
+												yAxisThickness={0}
+												xAxisThickness={0}
+												dashGap={15}
+												dashWidth={7}
+												maxValue={Math.max(...barData.map(item => item.value)) + 1}
+												stepHeight={65}
+												initialSpacing={30}
+												spacing={35}
+												noOfSections={5}
+												rulesColor={Colors.borderColor}
+												rulesThickness={1}
+												disablePress
+											/>
+										</TabBarMultiple.Item>
+
+										<TabBarMultiple.Item title='VOC'>
+
+											<BarChart
+												data={barData}
+												barWidth={42}
+												cappedBars
+												capColor={Colors.green}
+												capThickness={2}
+												showGradient
+												gradientColor={Colors.greenLight}
+												frontColor={'rgba(0, 0, 0, 0)'}
+												width={screenWidth - 48}
+												yAxisSide={yAxisSides.RIGHT}
+												yAxisThickness={0}
+												xAxisThickness={0}
+												dashGap={15}
+												dashWidth={7}
+												maxValue={Math.max(...barData.map(item => item.value)) + 1}
+												stepHeight={65}
+												initialSpacing={30}
+												spacing={35}
+												noOfSections={5}
+												rulesColor={Colors.borderColor}
+												rulesThickness={1}
+												disablePress
+											/>
+										</TabBarMultiple.Item>
+
+										<TabBarMultiple.Item title='Temperatura'>
+
+											<BarChart
+												data={barData}
+												barWidth={42}
+												cappedBars
+												capColor={Colors.brown}
+												capThickness={2}
+												showGradient
+												gradientColor={Colors.brownLight}
+												frontColor={'rgba(0, 0, 0, 0)'}
+												width={screenWidth - 48}
+												yAxisSide={yAxisSides.RIGHT}
+												yAxisThickness={0}
+												xAxisThickness={0}
+												dashGap={15}
+												dashWidth={7}
+												maxValue={Math.max(...barData.map(item => item.value)) + 1}
+												stepHeight={65}
+												initialSpacing={30}
+												spacing={35}
+												noOfSections={5}
+												rulesColor={Colors.borderColor}
+												rulesThickness={1}
+												disablePress
+											/>
+										</TabBarMultiple.Item>
+
+										<TabBarMultiple.Item title='Humedad'>
+
+											<BarChart
+												data={barData}
+												barWidth={42}
+												cappedBars
+												capColor={Colors.blue}
+												capThickness={2}
+												showGradient
+												gradientColor={Colors.cyanLight}
+												frontColor={'rgba(0, 0, 0, 0)'}
+												width={screenWidth - 48}
+												yAxisSide={yAxisSides.RIGHT}
+												yAxisThickness={0}
+												xAxisThickness={0}
+												dashGap={15}
+												dashWidth={7}
+												maxValue={Math.max(...barData.map(item => item.value)) + 1}
+												stepHeight={65}
+												initialSpacing={30}
+												spacing={35}
+												noOfSections={5}
+												rulesColor={Colors.borderColor}
+												rulesThickness={1}
+												disablePress
+											/>
+										</TabBarMultiple.Item>
+									</TabBarMultiple>
+								</View>
+							</View>
+						</TabBarNew.Item>
+
+					</TabBarNew>
 					</View>
-
-					
-					<ScrollView
-						automaticallyAdjustContentInsets={false}
-						horizontal={true}
-						showsHorizontalScrollIndicator={false}
-						showsVerticalScrollIndicator={false}
-						directionalLockEnabled={true}
-						bounces={false}
-						scrollsToTop={false}
-					>
-
-						<View style={stylesBottom.card}>
-
-						</View>
-
-						<View style={stylesBottom.card}>
-
-						</View>
-
-						<View style={stylesBottom.card}>
-
-						</View>
-
-						<View style={stylesBottom.card}>
-
-						</View>
-
-						<View style={stylesBottom.card}>
-
-						</View>
-
-						<View style={stylesBottom.card}>
-
-						</View>
-
-						<View style={stylesBottom.card}>
-
-						</View>
-
-						<View style={stylesBottom.card}>
-
-						</View>
-					</ScrollView>
-
-				</BottomSheetModal>
+				</View>
 			
 				<Image style={styles.inahlerImageBackground} source={InhalerBackground} />
 
@@ -310,22 +539,60 @@ const Page = () => {
 
 export default Page
 
-
-const stylesBottom = StyleSheet.create({
-	container: {
-		paddingTop: 12,
-		paddingBottom: 24,
-		paddingHorizontal: 24
+const stylesTab = StyleSheet.create({
+	content: {
+		display: "flex",
+		flexDirection: "column",
+		width: "100%",
+		paddingVertical: 24,
+		gap: 32,
 	},
-	subTitle: {
-        fontSize: 12,
-        color: Colors.darkGray
-    },
-	card: {
-		width: 300,
-		height: 300,
-		backgroundColor: "red"
-	}
+	sectionView: {
+		display: "flex",
+		flexDirection: "column",
+		gap: 16,
+	},
+	titleView: {
+		display: "flex",
+		flexDirection: "column",
+		gap: 4
+	},
+	titleContent: {
+		display: "flex",
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center"
+	},
+	title: {
+		fontSize: 18
+	},
+	description: {
+		fontSize: 14,
+		color: Colors.darkGray
+	},
+	oneBlock: {
+		display: "flex",
+		flexDirection: "row",
+		backgroundColor: Colors.white,
+		borderRadius: 28,
+		gap: 16
+	},
+	twoBlock: {
+		display: "flex",
+		flexDirection: "row",
+		justifyContent: "space-between",
+		gap: 16
+	},
+	containerChart: {
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+	chart: {
+		marginVertical: 8,
+	},
+	grayButton: {
+		backgroundColor: Colors.lightGrey
+	},
 })
 
 const styles = StyleSheet.create({
@@ -367,7 +634,7 @@ const styles = StyleSheet.create({
 		flexDirection: "column",
 		justifyContent: "flex-end",
 		alignItems: "center",
-		height: "45%",
+		height: 400,
 	},
 	inhalerView: {
 		position: "relative",
@@ -398,7 +665,7 @@ const styles = StyleSheet.create({
 		width: "100%",
 	},
 	inhalerTitle: {
-		fontSize: 18
+		fontSize: 24
 	},
 	inhalerTime: {
 		fontSize: 14
@@ -413,7 +680,7 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		justifyContent: "space-between",
 		marginTop: 16,
-		gap: 8
+		gap: 16
 	},
 	inhalerButton: {
 		flex: 1,
@@ -425,11 +692,17 @@ const styles = StyleSheet.create({
 		width: "100%",
 		height: 56
 	},
-	stateView: {
-		display: "flex",
-		flexDirection: "column",
-		gap: 16,
-		marginTop: 32
+	stadisticContent: {
+		borderRadius: 38,
+		marginTop: 32,
+		backgroundColor: Colors.white,
+		paddingHorizontal: 24,
+	},
+	stadisticView: {
+		marginTop: 32,
+	},
+	sectionTitle: {
+		fontSize: 16
 	},
 	inahlerStatus: {
 		display: "flex",
@@ -443,5 +716,5 @@ const styles = StyleSheet.create({
 	},
 	inahlerStatusIcon: {
 		marginRight: 4
-	}
+	},
 })

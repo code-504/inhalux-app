@@ -12,10 +12,11 @@ import { MontserratSemiText } from '../StyledText'
 interface HeaderProps {
     title: string;
     animHeaderValue ?: Animated.Value;
-    positionHeader ?: "static" | "relative" | "absolute" | "fixed" | "sticky" | undefined
+    positionHeader ?: "static" | "relative" | "absolute" | "fixed" | "sticky" | undefined;
+    children ?: JSX.Element | JSX.Element[]
 }
 
-export default function NormalHeader({ title, animHeaderValue, positionHeader }: HeaderProps) {
+export default function NormalHeader({ title, animHeaderValue, positionHeader, children }: HeaderProps) {
 
     const navigation = useNavigation();
 
@@ -50,9 +51,19 @@ export default function NormalHeader({ title, animHeaderValue, positionHeader }:
                         justifyContent: "center",
                         alignItems: "center",
                     }}>
+
                         <Button style={styles.backButton} alignSelf="center" size="$6" circular onPress={handleBackPress}>
                             <ArrowBackIcon />
                         </Button>
+
+                        {
+                            children && 
+                            <View style={styles.actionButton}>
+                                {
+                                    children
+                                }
+                            </View>
+                        }
 
                         <Animated.Text style={[
                             styles.headerTitle,
@@ -84,5 +95,12 @@ const styles = StyleSheet.create({
         position: "absolute",
         left: 0,
         backgroundColor: Colors.light.background
+    },
+    actionButton: {
+        position: "absolute",
+        right: 0,
+        display: "flex",
+        flexDirection: "row",
+        gap: 16
     }
 })

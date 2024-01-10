@@ -36,6 +36,7 @@ export const unstable_settings = {
 
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import SimpleHeader from '@/components/Headers/SimpleHeader';
+import { PaperProvider } from 'react-native-paper';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -87,6 +88,7 @@ function RootLayoutNav() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <TamaguiProvider config={appConfig}>
+        <PaperProvider>
         <SafeAreaProvider>
           <MonitorProvider>
           <BottomSheetModalProvider>
@@ -110,6 +112,7 @@ function RootLayoutNav() {
           </BottomSheetModalProvider>
           </MonitorProvider>
         </SafeAreaProvider>
+        </PaperProvider>
       </TamaguiProvider>
     </ThemeProvider>
   );
