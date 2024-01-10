@@ -11,10 +11,14 @@ import { Image } from 'expo-image';
 import { inhalerProps } from '@/context/InhalerProvider'
 import { BarChart, yAxisSides } from "react-native-gifted-charts";
 import TabBarNew from '@/components/TabBarNew'
-import { Stack, router, useLocalSearchParams, useNavigation } from 'expo-router'
+import { Stack, router, useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
 import { useInhalers } from '@/context/InhalerProvider'
 import { supabase } from '@/services/supabase'
 import NormalHeader from '@/components/Headers/NormalHeader'
+import * as NavigationBar from 'expo-navigation-bar';
+import TabBarMultiple from '@/components/TabBarMultiple'
+import { Dialog, Divider, Menu, Portal } from 'react-native-paper'
+import Ripple from 'react-native-material-ripple'
 
 // Resources
 import inhalerShadow from "@/assets/images/inhaler-shadow-img.png"
@@ -37,9 +41,10 @@ import GasIcon from "@/assets/icons/gas_meter.svg"
 import VOCIcon from "@/assets/icons/total_dissolved_solids.svg"
 import MoreIcon from "@/assets/icons/more_vert.svg"
 import AirUnit from "@/assets/icons/ac_unit.svg"
-import TabBarMultiple from '@/components/TabBarMultiple'
-import { Divider, Menu } from 'react-native-paper'
-import Ripple from 'react-native-material-ripple'
+
+NavigationBar.setBackgroundColorAsync("transparent")
+NavigationBar.setButtonStyleAsync("dark")
+NavigationBar.setPositionAsync("absolute");
 
 const Page = () => {
   const [ refresh, setRefresh ] = useState<boolean>(false);
@@ -49,7 +54,7 @@ const Page = () => {
   //const [ isLoading, setIsLoading ] = useState<boolean>(false);
   const {supaInhalers, setSupaInhalers} = useInhalers();
   const [ inhalerName, setInhalerName ] = useState<string>("");
-  const navigation = useNavigation();
+  const router = useRouter();
 
   /*const getInhaler = async () => {
     setIsLoading(true)
@@ -114,6 +119,8 @@ const Page = () => {
 			prevSupaInhalers.filter((inhaler) => inhaler.id !== inhaler_id)
 		);
 
+		setDialog(false);
+
 		router.back();
 	}
 
@@ -156,6 +163,15 @@ const Page = () => {
 
 	const closeMenu = () => setVisible(false);
 
+	const [dialog, setDialog] = useState(false);
+
+	const showDialog = () => {
+		setVisible(false)
+		setDialog(true);
+	}
+
+	const hideDialog = () => setDialog(false);
+
   	return (
 		<>
 		<View style={styles.safeAre}>
@@ -173,9 +189,18 @@ const Page = () => {
 									<MoreIcon />
 								</Ripple>
 							}>
-							<Menu.Item leadingIcon="pencil" onPress={() => {}} title="Editar" />
+							<Menu.Item leadingIcon="pencil" 
+								onPress={() => {
+										if (item) {
+											setVisible(false);
+											router.push({ pathname: "/device/edit_name", params: { name: item.id } })
+										}
+									}
+								} 
+								title="Editar" 
+							/>
 							<Divider />
-							<Menu.Item leadingIcon="delete" onPress={() => {}} title="Eliminar" />
+							<Menu.Item leadingIcon="delete" onPress={showDialog} title="Eliminar" />
 						</Menu>
 				
 
@@ -531,7 +556,20 @@ const Page = () => {
 				<Image style={styles.inahlerImageBackground} source={InhalerBackground} />
 
 			</ScrollView> 
-			<StatusBar style='auto' translucent={true} />
+			<StatusBar style='auto' translucent={true} backgroundColor='transparent' />
+
+			<Portal>
+			<Dialog visible={dialog} onDismiss={hideDialog} style={{ backgroundColor: Colors.white }}>
+				<Dialog.Title>Eliminar inhalador</Dialog.Title>
+				<Dialog.Content>
+				<MontserratText>Esta acción no se puede deshacer</MontserratText>
+				</Dialog.Content>
+				<Dialog.Actions>
+					<Button onPress={hideDialog} backgroundColor={Colors.lightGrey} borderRadius={100}>Cancelar</Button>
+					<Button onPress={handleDeleteInhaler} backgroundColor={Colors.redLight} color={Colors.red} borderRadius={100}>Eliminar</Button>
+				</Dialog.Actions>
+			</Dialog>
+			</Portal>
 		</View>
 		</>
   	)
@@ -599,7 +637,7 @@ const styles = StyleSheet.create({
     safeAre: {
         flex: 1,
 		width: "100%",
-        backgroundColor: Colors.lightGrey,
+        backgroundColor: Colors.white,
     },
 	imageBackground: {
 		flex: 1,
@@ -684,7 +722,7 @@ const styles = StyleSheet.create({
 	},
 	inhalerButton: {
 		flex: 1,
-		backgroundColor: Colors.white
+		backgroundColor: Colors.secondary
 	},
 	inhalerButtonPrimary: {
 		flex: 1,
