@@ -101,7 +101,7 @@ export function AuthProvider({ children }: Props) {
     );
 
     return () => {
-      authListener.subscription.unsubscribe();
+      authListener.subscription.unsubscribe(); //.unsuscribe() added
     };
   }, []);
 
