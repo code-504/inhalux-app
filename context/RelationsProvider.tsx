@@ -2,6 +2,7 @@ import React, { Dispatch, SetStateAction, useCallback } from 'react';
 import { useContext, useEffect, useState, createContext } from 'react';
 import { supabase } from '@/services/supabase';
 import { ListMonitor, ListMonitorState } from '@/interfaces/Monitor';
+import { useAuth } from './Authprovider';
 
 interface Props {
   children?: React.ReactNode;
@@ -31,6 +32,8 @@ export function RelationProvider({ children }: Props) {
       filterText: "",
       loading: true
     });
+
+    const auth = useAuth();
 
     const fetchPacientsData = useCallback(async () => {
       try {
@@ -158,11 +161,11 @@ export function RelationProvider({ children }: Props) {
 
   useEffect(() => {
     fetchPacientsData()
-  }, [pacientState.filterText]);
+  }, [pacientState.filterText, auth.session]);
 
   useEffect(() => {
     fetchShareData()
-  }, [shareState.filterText]);
+  }, [shareState.filterText, auth.session]);
     
   return (
     <RelationContext.Provider value={
