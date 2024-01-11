@@ -25,6 +25,7 @@ export default {
   white: '#FFFFFF',
   black: '#000000',
   lightGrey: '#FAFAFA',
+  midGray: '#F5F5F5',
   darkGray: "#8E8E8E",
   focus: '#F2F6FC',
   pink: "#F9EDFF",

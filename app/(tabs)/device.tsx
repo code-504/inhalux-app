@@ -54,8 +54,9 @@ import {
 } from '@gorhom/bottom-sheet';
 
 
-NavigationBar.setBackgroundColorAsync(Colors.white);
-NavigationBar.setButtonStyleAsync("dark");
+NavigationBar.setBackgroundColorAsync("transparent")
+NavigationBar.setButtonStyleAsync("dark")
+NavigationBar.setPositionAsync("absolute");
 
 export default function TabOneScreen() {
 
@@ -198,7 +199,6 @@ export default function TabOneScreen() {
 		}, []
 	);
 
-
 	const RenderItem = ({ item }: any) => (
 		<Card style={styles.inahlerCard} radius={44}>
 			<View style={styles.inahlerCardView}>
@@ -224,7 +224,7 @@ export default function TabOneScreen() {
 
 								<View style={styles.inahlerStatusInfo}>
 									<DoseIcon style={styles.inahlerStatusIcon} />
-									<MontserratSemiText>{ item.dose } dosis</MontserratSemiText>
+									<MontserratSemiText>{ item.dosis } dosis</MontserratSemiText>
 								</View>
 							</View>
 						</View>

@@ -98,6 +98,7 @@ function RootLayoutNav() {
             <Stack.Screen name="(auth)/signup" options={{ headerShown: false }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="device/[inhaler_id]" />
+            <Stack.Screen name="device/edit_name" />
             <Stack.Screen name="configuration/index" options={{ header: () => <NormalHeader positionHeader='relative' title="Configuración" /> }} />
             <Stack.Screen name="configuration/profile" options={{ header: () => <NormalHeader positionHeader='relative' title="Perfil de usuario" /> }} />
             <Stack.Screen name="configuration/password" />

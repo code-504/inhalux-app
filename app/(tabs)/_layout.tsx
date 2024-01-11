@@ -111,7 +111,8 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
     navigationStyle: {
-        height: 74,
+        paddingTop: 12,
+        height: 94,
         backgroundColor: Colors.white,
         borderTopWidth: 0,
         elevation: 0
