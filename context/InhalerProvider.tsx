@@ -5,6 +5,7 @@ import { WeatherAPI, WeatherData } from '@/interfaces/Device';
 import axios from 'axios';
 import publicIP from 'react-native-public-ip';
 import * as Location from 'expo-location'
+import { useAuth } from './Authprovider';
 
 interface Props {
   children?: React.ReactNode;
@@ -37,6 +38,7 @@ export function InhalerProvider({ children }: Props) {
 
   const [supaInhalers, setSupaInhalers] = useState<any[]>([]);
   const [weatherData, setWeatherData] = useState<WeatherData>()
+  const auth = useAuth();
 
   const calculateDaysAgo = (lastSeen: string): string => {
     const today = new Date();
@@ -92,7 +94,7 @@ export function InhalerProvider({ children }: Props) {
         id, 
         name,
         inhaler_state ( dosis, battery ),
-        inhaler_ubication ( latitude, longitude, altitude, last_seen )
+        inhaler_ubication ( latitude, longitude, altitude, last_seen, address)
       `)
       .eq('fk_user_id', user.id)
       .eq('id', id)
@@ -105,6 +107,7 @@ export function InhalerProvider({ children }: Props) {
           connection: String(`Hace ${calculateDaysAgo(inhalersData.inhaler_ubication.last_seen)}`),
           battery: String(inhalersData.inhaler_state.battery),
           dosis: String(inhalersData.inhaler_state.dosis),
+          latitude: String(inhalersData.inhaler_ubication.latitude),
         }
 
         console.log(transformedData)
@@ -140,7 +143,7 @@ export function InhalerProvider({ children }: Props) {
   useEffect(() => {
     fetchSupaInhalers();
     fetchWeatherData();
-  }, []);
+  }, [auth.session]);
 
   return (
     <InhalerContext.Provider value={

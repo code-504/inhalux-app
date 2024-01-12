@@ -40,6 +40,29 @@ export function AuthProvider({ children }: Props) {
 
   const navigationState = useRootNavigationState();
 
+  const fetchSupaUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if(!user) return;
+
+    let { data: users, error } = await supabase
+      .from('users')
+      .select("name, last_name, avatar, token")
+      .eq('id', user.id)
+
+      if(!users) return;
+
+      const initializedUser: InitializedUser = {
+        id: user.id,
+        name: users[0].name + " " + (users[0].last_name == null ? "" : users[0].last_name),
+        email: user.email ? user.email : "",
+        avatar: users[0].avatar == null ? "https://ckcwfpbvhbstslprlbgr.supabase.co/storage/v1/object/public/avatars/default_avatar.png?t=2023-12-19T02%3A43%3A15.423Z" : users[0].avatar,
+        token: users[0].token
+      };
+
+      setSupaUser(initializedUser);
+  };
+
   useEffect(() => {
     if (!navigationState?.key || !authInitialized) return;
     
@@ -65,29 +88,6 @@ export function AuthProvider({ children }: Props) {
       setIsLoading(false);
     });
 
-    const fetchSupaUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-  
-      if(!user) return;
-
-      let { data: users, error } = await supabase
-        .from('users')
-        .select("name, last_name, avatar, token")
-        .eq('id', user.id)
-
-        if(!users) return;
-
-        const initializedUser: InitializedUser = {
-          id: user.id,
-          name: users[0].name + " " + (users[0].last_name == null ? "" : users[0].last_name),
-          email: user.email ? user.email : "",
-          avatar: users[0].avatar == null ? "https://ckcwfpbvhbstslprlbgr.supabase.co/storage/v1/object/public/avatars/default_avatar.png?t=2023-12-19T02%3A43%3A15.423Z" : users[0].avatar,
-          token: users[0].token
-        };
-
-        setSupaUser(initializedUser);
-    };
-
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         setSession(session);
@@ -100,12 +100,14 @@ export function AuthProvider({ children }: Props) {
       }
     );
 
-    fetchSupaUser();
-
     return () => {
-      authListener.subscription;
+      authListener.subscription.unsubscribe(); //.unsuscribe() added
     };
   }, []);
+
+  useEffect(() => {
+    fetchSupaUser();
+  }, [session])
 
   return (
     <AuthContext.Provider value={{ session, authInitialized, isLoading, supaUser, setSupaUser }}>

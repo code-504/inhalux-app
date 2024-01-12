@@ -41,7 +41,7 @@ export default function NormalHeader({ title, animHeaderValue, positionHeader, c
     }
 
     return (
-        <Animated.View style={[ styles.header, animatedStyle, { position: positionHeader ? positionHeader : "absolute" }]}>
+        <Animated.View style={[ styles.header, animatedStyle, { position: positionHeader ? positionHeader : "absolute", }]}>
             <SafeAreaView>  
                 
                     <View style={{         
