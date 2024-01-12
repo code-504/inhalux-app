@@ -1,4 +1,3 @@
-/* eslint-disable no-bitwise */
 import { Dispatch, SetStateAction, useMemo, useState } from "react";
 import { PermissionsAndroid, Platform } from "react-native";
 import {
@@ -8,8 +7,6 @@ import {
   Device,
   Subscription,
 } from "react-native-ble-plx";
-
-import * as ExpoDevice from "expo-device";
 
 import base64 from "react-native-base64";
 

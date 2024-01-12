@@ -1,12 +1,13 @@
 {
   "expo": {
     "name": "inhalux",
-    "slug": "inhalux",
+    "slug": "inhaLux",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
+    "jsEngine": "hermes",
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
@@ -19,7 +20,9 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.inhalabs.inhalux",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Necesitamos acceder a tu ubicación para mostrar el mapa."
+        "NSLocationWhenInUseUsageDescription": "Necesitamos acceder a tu ubicación para mostrar el mapa.",
+        "NSCameraUsageDescription": "$(PRODUCT_NAME) needs access to your Camera.",
+        "NSMicrophoneUsageDescription": "$(PRODUCT_NAME) needs access to your Microphone."
       }
     },
     "androidStatusBar": {
@@ -32,7 +35,12 @@
     "android": {
       "permissions": [
         "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION"
+        "ACCESS_COARSE_LOCATION",
+        "android.permission.BLUETOOTH",
+        "android.permission.BLUETOOTH_ADMIN",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
       ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
@@ -40,11 +48,6 @@
       },
       "package": "com.inhalabs.inhalux",
       "googleServicesFile": "./google-services.json"
-    },
-    "web": {
-      "bundler": "metro",
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
       "@react-native-google-signin/google-signin",
@@ -58,6 +61,14 @@
           "enableCodeScanner": true,
           "microphonePermissionText": "$(PRODUCT_NAME) needs access to your Microphone."
         }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "flipper": true
+          }
+        }
       ]
     ],
     "experiments": {
@@ -69,9 +80,9 @@
         "origin": false
       },
       "eas": {
-        "projectId": "37fe2c7d-6c78-44c2-93df-e4daa805c8f6"
+        "projectId": "f9822285-6761-48ff-9ba7-2562be1e4cba"
       }
     },
-    "owner": "rogelioexpo"
+    "owner": "code-504"
   }
 }

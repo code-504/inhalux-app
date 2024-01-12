@@ -1,11 +1,11 @@
 import { View, StyleSheet, ScrollView, Animated, Dimensions, Pressable } from 'react-native'
 import Colors from '@/constants/Colors'
 import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/components/StyledText'
-import { Button } from 'tamagui'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { Button, Spinner } from 'tamagui'
+import BottomSheet, { BottomSheetBackdropProps, BottomSheetModal } from '@gorhom/bottom-sheet'
 import { StatusBar } from 'expo-status-bar'
 import { RefreshControl } from 'react-native-gesture-handler'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, lazy } from 'react'
 import SimpleWeatherCard, { FillType } from '@/components/Card/SimpleWeatherCard'
 import { Image } from 'expo-image';
 import { inhalerProps } from '@/context/InhalerProvider'
@@ -19,6 +19,7 @@ import * as NavigationBar from 'expo-navigation-bar';
 import TabBarMultiple from '@/components/TabBarMultiple'
 import { Dialog, Divider, Menu, Portal } from 'react-native-paper'
 import Ripple from 'react-native-material-ripple'
+import BlurredBackgroundNew from '@/components/blurredBackground/BlurredBackgroundNew'
 
 // Resources
 import inhalerShadow from "@/assets/images/inhaler-shadow-img.png"
@@ -41,6 +42,7 @@ import GasIcon from "@/assets/icons/gas_meter.svg"
 import VOCIcon from "@/assets/icons/total_dissolved_solids.svg"
 import MoreIcon from "@/assets/icons/more_vert.svg"
 import AirUnit from "@/assets/icons/ac_unit.svg"
+import ScanImage from "@/assets/images/inhaler-check.png"
 
 NavigationBar.setBackgroundColorAsync("transparent")
 NavigationBar.setButtonStyleAsync("dark")
@@ -48,6 +50,8 @@ NavigationBar.setPositionAsync("absolute");
 
 const Page = () => {
   const [ refresh, setRefresh ] = useState<boolean>(false);
+  const [scan, setScan] = useState<boolean>(false);
+
   const { inhaler_id } = useLocalSearchParams();
   //const { fetchSupaInhalerById } = useInhalers();
   const [item, setItem] = useState<inhalerProps | null>(null);
@@ -56,31 +60,29 @@ const Page = () => {
   const [ inhalerName, setInhalerName ] = useState<string>("");
   const router = useRouter();
 
-  /*const getInhaler = async () => {
-    setIsLoading(true)
-    const inhaler = await fetchSupaInhalerById(String(inhaler_id));
+  const scanModalRef = useRef<BottomSheetModal>(null);
 
-    setItem(inhaler)
-    setIsLoading(false);
-  }*/
+  const scanSnapPoints = useMemo(
+    () => [
+      "70%",
+    ],
+    []
+  );
 
-  useEffect(() => {
-	const foundInhaler = supaInhalers?.find(inhaler => inhaler.id === inhaler_id);
-	const clonedInhaler = {...foundInhaler};
-	//console.log("found inhaler, ", foundInhaler);
-	setItem(clonedInhaler);
-	setInhalerName(foundInhaler.title);
-  }, [])
+	useEffect(() => {
+		const foundInhaler = supaInhalers?.find((inhaler) => inhaler.id === inhaler_id);
+		const clonedInhaler = { ...foundInhaler };
+		setItem(clonedInhaler);
+		setInhalerName(foundInhaler.title);
+	}, [inhaler_id, supaInhalers]);
 
-  	const pullRequest = async () => {
+	const pullRequest = useCallback(async () => {
 		setRefresh(true);
-
 		const interval = setInterval(() => {
-			setRefresh(false)
-		}, 300)
-
+		  setRefresh(false);
+		}, 300);
 		return () => clearInterval(interval);
-	}
+	}, []);
 
 	const handleUpdateInhaler = async() => {
 		const { data, error } = await supabase
@@ -202,9 +204,6 @@ const Page = () => {
 							<Divider />
 							<Menu.Item leadingIcon="delete" onPress={showDialog} title="Eliminar" />
 						</Menu>
-				
-
-	
 					</NormalHeader>
 			}} />
 		
@@ -260,7 +259,7 @@ const Page = () => {
 						</View>
 
 						<View style={{ height: 64 }}>
-							<Button style={styles.inhalerButtonPrimary} size="$6" borderRadius={'$radius.10'} height={64}>
+							<Button style={styles.inhalerButtonPrimary} size="$6" borderRadius={'$radius.10'} height={64} onPress={() => scanModalRef.current?.present()}>
 								<TrackChangesIcon />
 								<MontserratSemiText>Análisis</MontserratSemiText>
 							</Button>
@@ -275,7 +274,7 @@ const Page = () => {
 					<MontserratSemiText style={styles.sectionTitle}>Estadísticas</MontserratSemiText>
 
 					<TabBarNew>
-						<TabBarNew.Item Icon={InhalerIcon} title='Inhalux' height={730}>
+						<TabBarNew.Item Icon={InhalerIcon} title='Inhalux' height={750}>
 							<View style={stylesTab.content}>
 
 								<View style={stylesTab.sectionView}>
@@ -335,7 +334,7 @@ const Page = () => {
 							</View>
 						</TabBarNew.Item>
 
-						<TabBarNew.Item Icon={AirWareIcon} title='Análisis' height={1310}>
+						<TabBarNew.Item Icon={AirWareIcon} title='Análisis' height={1325}>
 							<View style={stylesTab.content}>
 								<View style={stylesTab.sectionView}>
 									<View style={stylesTab.titleContent}>
@@ -556,19 +555,52 @@ const Page = () => {
 				<Image style={styles.inahlerImageBackground} source={InhalerBackground} />
 
 			</ScrollView> 
+
+			<BottomSheetModal
+				ref={scanModalRef}
+				snapPoints={scanSnapPoints}
+				enablePanDownToClose
+				backdropComponent={(backdropProps: BottomSheetBackdropProps) => (
+					<BlurredBackgroundNew
+					  	{...backdropProps}
+					  	appearsOnIndex={0}
+					  	disappearsOnIndex={-1}
+					  	pressBehavior={'collapse'}
+					/>
+				)}
+			>
+				<View style={stylesBottom.conainer}>
+
+					{
+						scan ? <View style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}><Spinner /></View>
+						:
+						<View style={stylesBottom.infoView}>
+							<Image style={stylesBottom.image} source={ScanImage} />
+							
+							<View style={stylesBottom.infoTextView}>
+								<MontserratBoldText style={stylesBottom.infoTitle}>Sostén tu inhalux</MontserratBoldText>
+								<MontserratText style={stylesBottom.infoText}>Asegúrate de sostener de la siguiente forma tu inhaLux para tener una lectura apropiada.</MontserratText>
+							</View>
+						</View>
+					}
+
+					<Button style={stylesBottom.button} borderRadius={100} onPress={() => setScan(!scan)}><MontserratSemiText>Empezar escaneo</MontserratSemiText></Button>
+				</View>
+			</BottomSheetModal>
+
 			<StatusBar style='auto' translucent={true} backgroundColor='transparent' />
 
 			<Portal>
-			<Dialog visible={dialog} onDismiss={hideDialog} style={{ backgroundColor: Colors.white }}>
-				<Dialog.Title>Eliminar inhalador</Dialog.Title>
-				<Dialog.Content>
-				<MontserratText>Esta acción no se puede deshacer</MontserratText>
-				</Dialog.Content>
-				<Dialog.Actions>
-					<Button onPress={hideDialog} backgroundColor={Colors.lightGrey} borderRadius={100}>Cancelar</Button>
-					<Button onPress={handleDeleteInhaler} backgroundColor={Colors.redLight} color={Colors.red} borderRadius={100}>Eliminar</Button>
-				</Dialog.Actions>
-			</Dialog>
+				<Dialog visible={dialog} onDismiss={hideDialog} style={{ backgroundColor: Colors.white }}>
+					<Dialog.Title>Eliminar inhalador</Dialog.Title>
+					<Dialog.Content>
+					<MontserratText>Esta acción no se puede deshacer</MontserratText>
+					</Dialog.Content>
+					<Dialog.Actions>
+						<Button onPress={hideDialog} backgroundColor={Colors.lightGrey} borderRadius={100}>Cancelar</Button>
+						<Button onPress={handleDeleteInhaler} backgroundColor={Colors.redLight} color={Colors.red} borderRadius={100}>Eliminar</Button>
+					</Dialog.Actions>
+				</Dialog>
 			</Portal>
 		</View>
 		</>
@@ -576,6 +608,49 @@ const Page = () => {
 }
 
 export default Page
+
+const stylesBottom = StyleSheet.create({
+	conainer: {
+		flex: 1,
+		display: "flex",
+		flexDirection: "column",
+		justifyContent: "space-between",
+		alignItems: "center",
+		gap: 64,
+		paddingHorizontal: 24,
+		paddingVertical: 32,
+	},
+	image: {
+		width: "80%",
+		aspectRatio: 1 / 1
+	},
+	infoView: {
+		display: "flex",
+		flexDirection: "column",
+		alignItems: "center",
+		gap: 32
+	},
+	infoTextView: {
+		display: "flex",
+		flexDirection: "column",
+		alignItems: "center",
+		gap: 8
+	},
+	infoTitle: {
+		fontSize: 20
+	},
+	infoText: {
+		width: "100%",
+		maxWidth: 320,
+		textAlign: "center",
+		fontSize: 14
+	},
+	button: {
+		height: 60,
+		width: "100%",
+		backgroundColor: Colors.primary,
+	},
+})
 
 const stylesTab = StyleSheet.create({
 	content: {

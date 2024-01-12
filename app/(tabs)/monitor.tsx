@@ -71,7 +71,7 @@ export default function TabThreeScreen() {
 
 	const generalSnapPoints = useMemo(() => ['40%',], []);
 
-	const monitorSnapPoints = useMemo(() => ['74%', '100%'], []);
+	const monitorSnapPoints = useMemo(() => ['72%', '100%'], []);
 	
 	const { bottom: bottomSafeArea, top: topSafeArea } = useSafeAreaInsets();
 
