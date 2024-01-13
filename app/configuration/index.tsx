@@ -18,15 +18,45 @@ import Ripple from 'react-native-material-ripple'
 import { router } from 'expo-router'
 import * as NavigationBar from 'expo-navigation-bar';
 import { useEffect } from 'react'
+import { GoogleSignin } from '@react-native-google-signin/google-signin'
+import { useInhalers } from '@/context/InhalerProvider'
+import { useNotifications } from '@/context/NotificationsProvider'
+import { useRelations } from '@/context/RelationsProvider'
+import { useTreatment } from '@/context/TreatmentProvider'
 
 NavigationBar.setBackgroundColorAsync("transparent");
 NavigationBar.setButtonStyleAsync("dark");
 
 const ConfigurationScreen = () => {
   const { supaUser, setSupaUser} = useAuth();
+  const {setSupaInhalers} = useInhalers();
+  const {setSupaNotifications} = useNotifications();
+  const {setPacientState, setShareState} = useRelations();
+  const {setSupaTreatment} = useTreatment();
+
+  const contextCleanUp = () => {
+    setSupaUser(null);
+    setSupaInhalers([]);
+    setSupaNotifications([]);
+    setPacientState({
+      data: [],
+      filterText: "",
+      loading: true
+    });
+    setShareState({
+      data: [],
+      filterText: "",
+      loading: true
+    });
+    setSupaTreatment(null);
+  }
 
   const doLogout = async () => {
+    if(supaUser?.external_provider){
+      await GoogleSignin.signOut();
+    }
 		const { error } = await supabase.auth.signOut();
+    contextCleanUp();
 
 		if (error)
 			Alert.alert("Error", error.message)
