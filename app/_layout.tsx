@@ -96,6 +96,7 @@ function RootLayoutNav() {
             <Stack.Screen name='index' options={{ headerShown: false }} />
             <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
             <Stack.Screen name="(auth)/signup" options={{ headerShown: false }} />
+            <Stack.Screen name="(auth)/recovery" options={{ headerShown: false }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="device/[inhaler_id]" />
             <Stack.Screen name="device/edit_name" />
