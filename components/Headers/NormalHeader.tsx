@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     header: {
         width: "100%",
         paddingHorizontal: 24,
-        paddingVertical: 32,
+        //paddingVertical: 32,
         backgroundColor: "transparent"
     },
     headerTitle: {

@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { Avatar, Button, XStack } from 'tamagui'
 import Colors from '@/constants/Colors'
 import { MontserratBoldText, MontserratText } from '../StyledText'
-import { router } from 'expo-router'
+import { Link, router } from 'expo-router'
 import { useAuth } from '@/context/Authprovider'
 
 // Resources
@@ -17,13 +17,15 @@ export default function MonitorHeader() {
     <SafeAreaView style={styles.safeAre}>
         <View style={styles.header}>
             <View style={styles.containerView}>
-                <Avatar size="$6" circular onPress={() => router.push("/configuration/")}>
-                    <Avatar.Image
-                        accessibilityLabel="Cam"
-                        src={supaUser?.avatar}
-                    />
-                    <Avatar.Fallback backgroundColor="$blue10" />
-                </Avatar>
+                <Link href="/configuration">
+                    <Avatar size="$6" circular onPress={() => router.push("/configuration/")}>
+                        <Avatar.Image
+                            accessibilityLabel="Cam"
+                            src={supaUser?.avatar}
+                        />
+                        <Avatar.Fallback backgroundColor="$blue10" />
+                    </Avatar>
+                </Link>
 
                 <View style={styles.headerTitleView}>
                     <MontserratText style={styles.headerTitleWellcomeText}>Bienvenido 👋</MontserratText>

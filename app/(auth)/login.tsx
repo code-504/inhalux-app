@@ -110,14 +110,14 @@ export default function Login() {
 						</Button>
 					</View>
 
-					<Separator marginVertical={48} />
+					<Separator marginVertical={30} />
 	
 					<View style={styles.buttonThirdView}>
 						{/* <Button style={styles.loginThirdButton} borderRadius={32} height={52}  disabled={loading} onPress={() => signInWithEmail()}>
 							<GoogleIcon style={styles.buttonIcon} />
 							<MontserratSemiText>Iniciar sesión con Google</MontserratSemiText>
 						</Button> */}
-						{ /*<GoogleBtn /> */ }
+						{ <GoogleBtn /> }
 
 						<Button style={styles.loginThirdButton} borderRadius={32} height={52}  disabled={loading} onPress={() => signInWithEmail()}>
 							<FacebookIcon style={styles.buttonIcon} />
