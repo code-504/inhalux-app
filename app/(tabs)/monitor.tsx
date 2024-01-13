@@ -1,52 +1,46 @@
-import TabBar from '@/components/TabBar';
 import Colors from '@/constants/Colors'
 import { View, StyleSheet, ImageBackground, BackHandler, Pressable, Dimensions, Keyboard, Alert } from 'react-native';
-
-// Resources
-import BackgroundImage from "@/assets/images/background.png"
-import PersonIcon from "@/assets/icons/person.svg"
-import ShreIcon from "@/assets/icons/share.svg"
 import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/components/StyledText';
-import PacientsTab from '@/tabs/monitor/pacients';
-import SharesTab from '@/tabs/monitor/shares';
-import { BottomSheetBackdropProps, BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { BottomSheetBackdropProps, BottomSheetFlatList, BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useMonitor } from '@/context/MonitorProvider';
 import BlurredDeviceBackground from '@/components/blurredBackground/BlurredDeviceBackground';
-import BlurredMonitorBackground from '@/components/blurredBackground/BlurredMonitorBackground';
-import { Link, Tabs, router, useFocusEffect, useNavigation } from 'expo-router';
+import { router, useFocusEffect, useNavigation } from 'expo-router';
 import { useRelations } from '@/context/RelationsProvider';
 import MonitorHeader from '@/components/Headers/MonitorHeader';
 import BlurredBackgroundNew from '@/components/blurredBackground/BlurredBackgroundNew';
 import { AlertDialog, Button, Input } from 'tamagui';
-import { Camera, useCameraDevices } from "react-native-vision-camera"
 import HeaderAction from '@/components/HeaderAction';
-
-// Resources
-import QRScannerIcon from "@/assets/icons/qr_code_scanner.svg"
-import LinkIcon from "@/assets/icons/link.svg"
-import AddIcon from "@/assets/icons/add.svg"
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { StatusBar } from 'expo-status-bar';
 import {useKeyboard} from '@react-native-community/hooks'
 import { z } from 'zod';
 import { useAuth } from '@/context/Authprovider';
 import { supabase } from '@/services/supabase';
-import { useIsFocused } from '@react-navigation/native';
-import TrackChangesIcon from "@/assets/icons/track_changes.svg"
+import TabBar from '@/components/TabBar';
+import ContactCardPatient from '@/components/Card/ContactCardPacients';
+import ContactCardShare from '@/components/Card/ContactCardShare';
+import SearchList from '@/components/SearchList';
+
+// Resources
+import BackgroundImage from "@/assets/images/background.png"
+import PersonIcon from "@/assets/icons/person.svg"
+import ShareIcon from "@/assets/icons/share.svg"
+import QRScannerIcon from "@/assets/icons/qr_code_scanner.svg"
+import LinkIcon from "@/assets/icons/link.svg"
+import AddIcon from "@/assets/icons/add.svg"
+import pacientBackground from "@/assets/images/pacients-empty.png"
 
 export default function TabThreeScreen() {
+
+	const { supaUser } = useAuth();
 
 	const [openDialog, setOpenDialog] = useState({
 		option1: false,
 		option2: false
 	});
-
-	const [statusColor, setStatusColor] = useState<boolean>(false);
-
 	const [addCode , setAddCode] = useState("");
 	const [addCodeError, setAddCodeError] = useState("");
-	const { supaUser } = useAuth();
+
 	const { optionsOpen, setOptionsOpen } = useMonitor();
 	const { pacientState, setPacientState, shareState, setShareState } = useRelations();
 	const keyboardHook = useKeyboard();
@@ -172,37 +166,9 @@ export default function TabThreeScreen() {
 		
 		Alert.alert("¡Solicitud de Relación enviada!");
 	}//handleAddPatient
-
-	/*const pacients:PacientsInfo[] = [
-		{ 
-			name: "Jorge Palacios Dávila",
-			avatar: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-			kindred: "Primo"
-		},
-		{ 
-			name: "Susana Hernández Cortés",
-			avatar: "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-			kindred: "Mamá"
-		}
-	]
 	
-	const pacients:PacientsInfo[] = []
+	/*const pacients:PacientsInfo[] = []
 	*/	
-
-	const tabs = [
-		{
-			id: 1,
-			name: 'Pacientes',
-			Icon: PersonIcon,
-			Component: <PacientsTab pacientState={pacientState} setPacientState={setPacientState} onFunction={openAddPacientSheet} />
-		},
-		{
-			id: 2,
-			name: 'Compartidos',
-			Icon: ShreIcon,
-			Component: <SharesTab shareState={shareState} setShareState={setShareState} />
-		}
-	]
 
 	useFocusEffect(
 		useCallback(() => {
@@ -221,8 +187,7 @@ export default function TabThreeScreen() {
 			Keyboard.dismiss()
 		} else {
 			monitorListModalRef.current?.expand()
-		}
-		
+		}		
 	}, [keyboardHook.keyboardShown])
 		
 	useFocusEffect(
@@ -286,7 +251,7 @@ export default function TabThreeScreen() {
 					onChange={handleMonitorSheetChange}
 					enableHandlePanningGesture={false}
 					enableOverDrag={false}
-					enableContentPanningGesture={false}
+					bottomInset={bottomSafeArea - 24}
 					handleIndicatorStyle={{ height: 0 }}
 					backdropComponent={(backdropProps: BottomSheetBackdropProps) => (
 						<BlurredBackgroundNew
@@ -300,8 +265,60 @@ export default function TabThreeScreen() {
 					  )}
 				>
 
-					<TabBar tabs={tabs} />
+					<TabBar headerPadding={24}>
+						<TabBar.Item Icon={PersonIcon} title='Pacientes' height={(Dimensions.get("screen").height * 0.75) - bottomSafeArea + 12}>
+							
+							<SearchList 
+								title='Buscar paciente'
+								placeHolder='Buscar por nombre'
+								state={pacientState}
+								setState={setPacientState}
+								noData={{
+									title: "No hay pacientes",
+									BackgroundImage: pacientBackground,
+									message: "Monitorea el inhalador de alguien más de forma rápida y segura"
+								}}
+								ListData={
+									<BottomSheetFlatList 
+										data={pacientState.data}
+										keyExtractor={(_, i) => i.toString()}
+										renderItem={({ item }) => (
+												<ContactCardPatient 
+													id={item.id} 
+													name={item.name} 
+													kindred={item.kindred} 
+													avatar={item.avatar} 
+													pending_state={item.pending_state} 
+												/>
+										)}
+									/>
+								}
+							/>
+						</TabBar.Item>
 
+						<TabBar.Item Icon={ShareIcon} title='Monitores' height={(Dimensions.get("screen").height * 0.75) - bottomSafeArea + 12}>
+
+							<SearchList 
+								title='Buscar monitor'
+								placeHolder='Buscar por nombre'
+								state={shareState}
+								setState={setShareState}
+								noData={{
+									title: "No hay monitores",
+									BackgroundImage: pacientBackground,
+									message: "Comparte la información de tu inhaLux con los que más quieres"
+								}}
+								ListData={
+									<BottomSheetFlatList 
+										data={shareState.data}
+										keyExtractor={(_, i) => i.toString()}
+										renderItem={({ item }) => 
+										(<ContactCardShare id={item.id} name={item.name} kindred={item.kindred} avatar={item.avatar} pending_state={item.pending_state} />)}
+									/>
+								}
+							/>
+						</TabBar.Item>
+					</TabBar>
 				</BottomSheetModal>
 			</BottomSheetModalProvider>
 

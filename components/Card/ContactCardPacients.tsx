@@ -1,19 +1,21 @@
 import { View, Text } from 'react-native'
 import React, { useState } from 'react'
 import { Avatar, AlertDialog, Button } from 'tamagui'
-
-// Resources
-import ArrowIcon from "@/assets/icons/arrow_outward.svg"
-import PendingIcon from "@/assets/icons/pendingIcon.svg"
 import { StyleSheet } from 'react-native'
 import Colors from '@/constants/Colors'
 import { MontserratBoldText, MontserratSemiText, MontserratText } from '../StyledText'
 import Ripple from 'react-native-material-ripple'
 import { ListMonitor } from '@/interfaces/Monitor'
+import { useRouter } from 'expo-router'
+
+// Resources
+import ArrowIcon from "@/assets/icons/arrow_outward.svg"
+import PendingIcon from "@/assets/icons/pendingIcon.svg"
 
 const ContactCardPatient = ({ id, name, kindred, avatar, pending_state }: ListMonitor) => {
     const [openDialog, setOpenDialog] = useState(false)
-
+    const router = useRouter();
+    
     return (
         <View>
             {pending_state 
@@ -90,7 +92,7 @@ const ContactCardPatient = ({ id, name, kindred, avatar, pending_state }: ListMo
                         </AlertDialog>
                     </>
                 : 
-                    <Ripple style={styles.cardView}>
+                    <Ripple style={styles.cardView} onTouchEnd={() => router.push({ pathname: "/monitor/pacient_view", params: { pacient_id: id } })}>
                         <View style={styles.cardContent}>
                             <Avatar size="$5" circular style={styles.avatar}>
                                 <Avatar.Image

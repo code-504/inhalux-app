@@ -1,32 +1,45 @@
 import Colors from '@/constants/Colors';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, LayoutChangeEvent, TouchableHighlightBase, Dimensions, Keyboard } from 'react-native';
 import Animated, { useSharedValue, withSpring } from 'react-native-reanimated';
 import { MontserratSemiText } from './StyledText';
-import { Button } from 'tamagui';
+import { Button, ScrollView } from 'tamagui';
 import { FlatList } from 'react-native-gesture-handler';
 import Ripple from 'react-native-material-ripple';
 import { FlashList } from '@shopify/flash-list';
 
-interface Tab {
-	name: string
-	Icon: React.FunctionComponent<React.SVGAttributes<SVGElement>>
-	Component: JSX.Element
+interface TabProps {
+    children: React.ReactElement<Tab> | React.ReactElement<Tab>[],
+    headerPadding ?: number
 }
 
-interface TabBarProps {
-  tabs: Tab[]
+interface Tab {
+    title: string;
+    Icon: React.FunctionComponent<React.SVGAttributes<SVGElement>>;
+    children: JSX.Element | JSX.Element[];
+    height: number;
 }
 
 const { width: screenWidth } = Dimensions.get('window');
-const SPACING = 12;
+
+const SPACING = 24;
 const ITEM_WIDTH = screenWidth;
 
-function TabBar({ tabs }: TabBarProps) {
-	const [activeTab, setActiveTab] = useState(0);
+function TabBar({ children, headerPadding }: TabProps) {
+
+	const [activeTab, setActiveTab] = useState<number>(0);
+    const [heightScroll, setHeightScroll] = useState<number>(0);
 	const [ width, setWidth ] = useState<number>(0);
 	const translateX = useSharedValue(2);
-	const flashListRef = useRef<FlashList<any>>(null);
+	const scrollViewRef = useRef<ScrollView>();
+    const hPadding = headerPadding ? headerPadding : 0;
+
+    useEffect(() => {
+        const selectedTab = React.Children.toArray(children)[0] as React.ReactElement<Tab>;
+
+        setHeightScroll(selectedTab.props.height)
+
+    }, [])
 
 	const handleTabPress = (index: number) => {
 		Keyboard.dismiss();
@@ -34,8 +47,12 @@ function TabBar({ tabs }: TabBarProps) {
 		setActiveTab(index);
 
 		scrollToIndex(index)
+
+        const selectedTab = React.Children.toArray(children)[index] as React.ReactElement<Tab>;
+
+        setHeightScroll(selectedTab.props.height)
 		
-		translateX.value = withSpring(index * width + (index === 0 ? + 2 : 1), {
+		translateX.value = withSpring(index * width + (index === 0 ? + 4 : 4), {
 			duration: 1800,
 			dampingRatio: 0.9,
 			stiffness: 100,
@@ -51,34 +68,36 @@ function TabBar({ tabs }: TabBarProps) {
 	};
 
 	const scrollToIndex = (index:number) => {
-		flashListRef.current?.scrollToIndex({ index: index, animated: true })
+        let newScrollX = index > 0 ? ITEM_WIDTH * index + 24 : ITEM_WIDTH * index;
+        scrollViewRef.current?.scrollTo({x: newScrollX, y: 0, animated: true,});
 	};
 
 	return (
 		<View>
-			<View style={styles.tabView}>
+			<View style={[styles.tabView, { paddingHorizontal: hPadding }]}>
 				<View style={styles.container}>
 					<View style={styles.tabsContainer}>
-						{tabs.map((tab, index) => (
-		
-							<Ripple
-								key={index}
-								onTouchStart={() => handleTabPress(index)}
-								style={[styles.tab]}
-							>
-									<tab.Icon />
-									<MontserratSemiText>{tab.name}</MontserratSemiText>
-							</Ripple>
-						))}
+                        {
+                            React.Children.map(children, (child, index) => (
+                                <Ripple
+                                    key={index}
+                                    onTouchEnd={() => handleTabPress(index)}
+                                    style={[styles.tab]}
+                                >
+                                        <child.props.Icon fill={Colors.black} />
+                                        <MontserratSemiText>{child.props.title}</MontserratSemiText>
+                                </Ripple>
+                            ))
+                        }
 					</View>
 
 					<Animated.View
 						onLayout={handleLayout}
 						style={{
 							width: "50%",
-							height: 60,
+							height: 56,
 							borderRadius: 100,
-							backgroundColor: Colors.secondary, // Cambia el color del slider según tus preferencias
+							backgroundColor: Colors.white,
 							position: 'absolute',
 							zIndex: -1,
 							transform: [{ translateX }]
@@ -86,85 +105,96 @@ function TabBar({ tabs }: TabBarProps) {
 					/>
 				</View>
 			</View>
-			
-				<FlashList 
-					ref={flashListRef}
-					data={tabs}
-					keyExtractor={(item: any) => item.id}
-					horizontal
-					showsHorizontalScrollIndicator={false}
-					scrollEnabled={false}
-					pagingEnabled
-					decelerationRate={0}
-					snapToInterval={ITEM_WIDTH}
-					snapToAlignment={"center"}
-					scrollEventThrottle={16}
-					estimatedItemSize={ITEM_WIDTH}
-					renderItem={( { item, index } ) => {
-						return (
-							<View style={{ width: ITEM_WIDTH, marginTop: 20, height: "100%"}}>
-								<RenderItem item={ item } />
-							</View>
-						);
-					}}
-				/>
-				<View style={styles.background}></View>
+
+            <ScrollView
+                ref={scrollViewRef}
+				automaticallyAdjustContentInsets={false}
+				horizontal={true}
+				showsHorizontalScrollIndicator={false}
+				showsVerticalScrollIndicator={false}
+				directionalLockEnabled={true}
+				scrollsToTop={false}
+				scrollEnabled={false}
+				contentContainerStyle={styles.scrollContainer}
+                style={{
+                    height: heightScroll
+                }}
+			>
+                
+                {
+                    React.Children.map(children, (child) => (
+                        child
+                    ))
+                }
+				
+			</ScrollView>
 		
 			{ /*tabComponents[activeTab] && tabComponents[activeTab]*/ }
 		</View>
 	);
 };
 
-const RenderItem = ({ item }: any) => {
-	return item.Component
+const Item = ({ children, height }: Tab) => {
+	return (
+        <View style={{ width: ITEM_WIDTH }}>
+            {children}
+        </View>
+    )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-	alignItems: "center",
-	width: "100%",
-	height: 64,
-	padding: 2,
-	marginTop: 16,
-    marginBottom: 8,
-	borderRadius: 100,
-	backgroundColor: Colors.lightGrey
-  },
-  tabView: {
-	width: "100%",
-	paddingHorizontal: 24,
-  },
-  tabsContainer: {
-	display: "flex",
-	flexDirection: "row",
-	gap: 2,
-  },
-  tab: {
-	flex: 1,
-	display: "flex",
-	flexDirection: "row",
-	justifyContent: "center",
-	alignItems: "center",
-	height: 62,
-	borderRadius: 100,
-	overflow: "hidden",
-	gap: 8
-  },
-  tabText: {
-    fontSize: 14,
-  },
-  background: { 
-	position: "absolute",
-	top: 0,
-	width: "100%",
-	backgroundColor: Colors.white, 
-	marginTop: 200,
-	height: "100%" ,
-	zIndex: -1,
-	borderTopLeftRadius: 38,
-        borderTopRightRadius: 38,
-  }
-});
+TabBar.Item = Item;
 
 export default TabBar;
+
+const styles = StyleSheet.create({
+    container: {
+        flexDirection: "row",
+        alignItems: "center",
+        width: "100%",
+        height: 64,
+        padding: 4,
+        marginTop: 16,
+        marginBottom: 8,
+        borderRadius: 100,
+        backgroundColor: Colors.lightGrey
+    },
+    tabView: {
+        width: "100%",
+    },
+    tabsContainer: {
+        display: "flex",
+        flexDirection: "row",
+        gap: 4,
+    },
+    tab: {
+        flex: 1,
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+        height: 56,
+        borderRadius: 100,
+        overflow: "hidden",
+        gap: 16
+    },
+    tabText: {
+        fontSize: 14,
+    },
+    background: { 
+        position: "absolute",
+        top: 0,
+        width: "100%",
+        backgroundColor: Colors.white, 
+        marginTop: 200,
+        height: "100%" ,
+        zIndex: -1,
+        borderTopLeftRadius: 38,
+        borderTopRightRadius: 38,
+    },
+    scrollContainer: {
+        display: "flex",
+        flexDirection: "row",
+        gap: 24,
+        height: "auto"
+    },
+});

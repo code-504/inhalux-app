@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 		display: "flex",
 		flexDirection: "column",
-    backgroundColor: Colors.lightGrey
+    marginTop: 124,
 	},
   imageBackground: {
 		flex: 1,

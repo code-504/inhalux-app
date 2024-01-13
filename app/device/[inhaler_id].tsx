@@ -10,7 +10,7 @@ import SimpleWeatherCard, { FillType } from '@/components/Card/SimpleWeatherCard
 import { Image } from 'expo-image';
 import { inhalerProps } from '@/context/InhalerProvider'
 import { BarChart, yAxisSides } from "react-native-gifted-charts";
-import TabBarNew from '@/components/TabBarNew'
+import TabBar from '@/components/TabBar'
 import { Stack, router, useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
 import { useInhalers } from '@/context/InhalerProvider'
 import { supabase } from '@/services/supabase'
@@ -273,8 +273,8 @@ const Page = () => {
 
 					<MontserratSemiText style={styles.sectionTitle}>Estadísticas</MontserratSemiText>
 
-					<TabBarNew>
-						<TabBarNew.Item Icon={InhalerIcon} title='Inhalux' height={750}>
+					<TabBar>
+						<TabBar.Item Icon={InhalerIcon} title='Inhalux' height={750}>
 							<View style={stylesTab.content}>
 
 								<View style={stylesTab.sectionView}>
@@ -332,9 +332,9 @@ const Page = () => {
 									</View>
 								</View>
 							</View>
-						</TabBarNew.Item>
+						</TabBar.Item>
 
-						<TabBarNew.Item Icon={AirWareIcon} title='Análisis' height={1325}>
+						<TabBar.Item Icon={AirWareIcon} title='Análisis' height={1325}>
 							<View style={stylesTab.content}>
 								<View style={stylesTab.sectionView}>
 									<View style={stylesTab.titleContent}>
@@ -546,9 +546,9 @@ const Page = () => {
 									</TabBarMultiple>
 								</View>
 							</View>
-						</TabBarNew.Item>
+						</TabBar.Item>
 
-					</TabBarNew>
+					</TabBar>
 					</View>
 				</View>
 			

@@ -1,5 +1,10 @@
-import { View, Text, StyleSheet, NativeSyntheticEvent, TextInputChangeEventData } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { View, Text, StyleSheet, NativeSyntheticEvent, TextInputChangeEventData, TouchableOpacity, Pressable } from 'react-native'
+import React, {
+    Dispatch,
+    SetStateAction,
+    useEffect,
+    useState
+} from 'react'
 import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/components/StyledText'
 import HeaderAction from '@/components/HeaderAction'
 import { Image } from 'expo-image'
@@ -7,22 +12,18 @@ import Colors from '@/constants/Colors'
 import { Avatar, Input, ScrollView, Spinner } from 'tamagui'
 
 // Resources
-import sharesBackground from "@/assets/images/shares-empty.png"
+import pacientBackground from "@/assets/images/pacients-empty.png"
 import AddIcon from "@/assets/icons/add.svg"
 import SearchIcon from "@/assets/icons/search.svg"
-import { SharesTabProps } from '@/interfaces/Monitor'
+import ContactCardPatient from '@/components/Card/ContactCardPacients'
 import { FlashList } from '@shopify/flash-list'
-import { router } from 'expo-router'
-import ContactCardShare from '@/components/Card/ContactCardShare'
+import { SearchListProps } from '@/interfaces/Monitor'
 
-const SharesTab = ({ shareState, setShareState }: SharesTabProps) => {
+const SearchList = ({ title, state, setState, noData, ListData, placeHolder }: SearchListProps) => {
+
     const [hasData, setHasData] = useState<boolean>(false);
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
     const [ isLoading, setIsLoading ] = useState<boolean>(false);
-    
-    const addShare = () => {
-        router.push("/monitor/share_link")
-    }
 
     const handleChange = (e: NativeSyntheticEvent<TextInputChangeEventData>) => {
         setDebouncedSearchTerm(e.nativeEvent.text)
@@ -31,10 +32,10 @@ const SharesTab = ({ shareState, setShareState }: SharesTabProps) => {
     useEffect(() => {
         setIsLoading(true);
         const timerId = setTimeout(() => {
-            setShareState({
-                ...shareState,
+            setState(prevState => ({
+                ...prevState,
                 filterText: debouncedSearchTerm || "",
-            });
+            }));
             setIsLoading(false)
         }, 400);
     
@@ -45,10 +46,11 @@ const SharesTab = ({ shareState, setShareState }: SharesTabProps) => {
       }, [debouncedSearchTerm]);
 
     useEffect(() => {
-        if (shareState.data.length === 0)
+        if (state.data === null)
             setHasData(false)
         else
             setHasData(true)
+
     }, [])
 
     return (
@@ -60,32 +62,29 @@ const SharesTab = ({ shareState, setShareState }: SharesTabProps) => {
                     <View style={styles.listView}>
 
                         <View style={styles.searchInputView}>
-                            <MontserratSemiText style={styles.subTitle}>Buscar monitor</MontserratSemiText>
-                            <Input style={styles.searchInput} id="search-in-shares" borderRadius="$10" borderWidth={0} placeholder="Buscar por nombre" onChange={(value) => handleChange(value)} />
+                            { title && <MontserratSemiText style={styles.subTitle}>{title}</MontserratSemiText> }
+                            <Input style={styles.searchInput} borderRadius="$10" borderWidth={0} placeholder={placeHolder ? placeHolder : ""} onChange={(value) => handleChange(value)} />
                             <SearchIcon style={styles.searchIcon}/>
                         </View>
 
                         {
-                                isLoading && <Spinner />
-                            }
+                            isLoading && <Spinner />
+                        }
                     </View>
 
                     <View style={styles.listContent}>
-                        <FlashList 
-                            data={shareState.data}
-                            keyExtractor={(_, index) => index.toString()}
-                            renderItem={({ item }) => (<ContactCardShare id={item.id} name={item.name} kindred={item.kindred} avatar={item.avatar} pending_state={item.pending_state} />)}
-                            estimatedItemSize={96}
-                        />
+                        {
+                            ListData
+                        }
                     </View>
                     </>
                 ) :
                 (   
                     <View style={styles.emptyView}>
-                        <Image style={styles.imageEmpy} source={sharesBackground} />
+                        <Image style={styles.imageEmpy} source={noData.BackgroundImage} />
 
-                        <MontserratText style={styles.infoText}>Comparte la información de tu inhaLux con los que más quieres</MontserratText>
-                        <MontserratText style={styles.infoEmpty}>No has compartido tu inhaLux</MontserratText>
+                        { noData && <MontserratText style={styles.infoText}>{noData.message}</MontserratText> }
+                        <MontserratText style={styles.infoEmpty}>{noData.title}</MontserratText>
                     </View>
                 )
             }
@@ -93,7 +92,7 @@ const SharesTab = ({ shareState, setShareState }: SharesTabProps) => {
     )
 }
 
-export default SharesTab
+export default SearchList
 
 const styles = StyleSheet.create({
     emptyView: {
@@ -115,12 +114,6 @@ const styles = StyleSheet.create({
     infoEmpty: {
         textAlign: "center",
         color: Colors.darkGray
-    },
-    headerView: {
-        display: "flex",
-        flexDirection: "column",
-        paddingHorizontal: 24,
-        marginBottom: 24
     },
     listView: {
         display: "flex",
@@ -150,5 +143,11 @@ const styles = StyleSheet.create({
     subTitle: {
         fontSize: 12,
         color: Colors.darkGray
+    },
+    headerView: {
+        display: "flex",
+        flexDirection: "column",
+        paddingHorizontal: 24,
+        marginBottom: 24
     },
 })

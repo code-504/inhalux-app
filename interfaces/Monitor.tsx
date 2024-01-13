@@ -1,4 +1,6 @@
+import { BottomSheetFlatListMethods } from "@gorhom/bottom-sheet";
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
+import { ImageSource } from "expo-image";
 import { Dispatch, SetStateAction } from "react"
 
 export interface ListMonitor {
@@ -13,6 +15,19 @@ export interface ListMonitorState {
     data: ListMonitor[];
     filterText: string;
     loading: boolean;
+}
+
+export interface SearchListProps {
+    title: string;
+    placeHolder: string;
+    noData: {
+        title: string;
+        message?: string;
+        BackgroundImage: ImageSource;
+    },
+    state: ListMonitorState;
+    setState: Dispatch<SetStateAction<ListMonitorState>>;
+    ListData: React.ReactElement
 }
 
 export interface PacientsTabProps {
