@@ -2,10 +2,10 @@ import { View, ScrollView, Animated, StyleSheet, Dimensions } from 'react-native
 import React, { useRef, useState } from 'react'
 import { Stack, useLocalSearchParams } from 'expo-router';
 import NormalHeader from '@/components/Headers/NormalHeader';
-import { Divider, Menu } from 'react-native-paper';
+import { Dialog, Divider, Menu, Portal } from 'react-native-paper';
 import Ripple from 'react-native-material-ripple';
 import Colors from '@/constants/Colors';
-import { Avatar } from 'tamagui';
+import { Avatar, Button } from 'tamagui';
 import AvatarImg from "@/assets/images/default_avatar.png"
 import { MontserratSemiText, MontserratText } from '@/components/StyledText';
 import TabBar from '@/components/TabBar';
@@ -91,6 +91,15 @@ const PacientViewPage = () => {
 
 	const [selected, setSelected] = useState<Tag>({ label: "todo", value: "all" })
 	
+	const [dialog, setDialog] = useState(false);
+
+	const showDialog = () => {
+		setVisible(false)
+		setDialog(true);
+	}
+
+	const hideDialog = () => setDialog(false);
+
     return (
         <View style={styles.safeAre}>
 
@@ -107,9 +116,7 @@ const PacientViewPage = () => {
                                     <MoreIcon />
                                 </Ripple>
                             }>
-                            <Menu.Item leadingIcon="pencil" title="Editar" />
-                            <Divider />
-                            <Menu.Item leadingIcon="delete" title="Eliminar" />
+                            <Menu.Item onPress={showDialog} leadingIcon="logout" title="Dejar de monitorear" />
                         </Menu>
                     </NormalHeader>
             }} />
@@ -237,8 +244,20 @@ const PacientViewPage = () => {
 							</View>	
 						</TabBar.Item>
 					</TabBar>
-
             </ScrollView>
+
+			<Portal>
+				<Dialog visible={dialog} onDismiss={hideDialog} style={{ backgroundColor: Colors.white }}>
+					<Dialog.Title>Dejar de monitorear</Dialog.Title>
+					<Dialog.Content>
+					<MontserratText>Esta acción no se puede deshacer</MontserratText>
+					</Dialog.Content>
+					<Dialog.Actions>
+						<Button onPress={hideDialog} backgroundColor={Colors.lightGrey} borderRadius={100}>Cancelar</Button>
+						<Button onPress={hideDialog} backgroundColor={Colors.redLight} color={Colors.red} borderRadius={100}>Dejar de monitorear</Button>
+					</Dialog.Actions>
+				</Dialog>
+			</Portal>
         </View>
     )
 }
