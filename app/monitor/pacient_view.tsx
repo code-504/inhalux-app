@@ -18,6 +18,7 @@ import InhalerIcon from "@/assets/icons/inhaler_simple.svg"
 import TreatmentIcon from "@/assets/icons/prescriptions.svg" 
 import PillIcon from "@/assets/icons/pill.svg"
 import TagSelect, { Tag } from '@/components/TagSelect';
+import HistorialSearch from '@/components/HistorialSearch';
 
 const screenWidth = Dimensions.get("window").width - 48;
 
@@ -39,6 +40,54 @@ const PacientViewPage = () => {
 		{value: 5, label: '29 nov'},
 		{value: 12, label: '30 nov'},
 	];
+
+	const DATA = [
+		{
+		  title: 'Hoy',
+		  data: [
+			{
+				title: "Tratamiento aceptado",
+				message: "El tratamiento fue cumplido",
+				hour: "12:00 pm",
+				type: 0
+			},
+			{
+				title: "Tratamiento no realizado",
+				message: "No se registró la inhalación",
+				hour: "1:00 pm",
+				type: 1
+			},
+			{
+				title: "Pendiente",
+				message: "Tratamiento en espera",
+				hour: "7:00 pm",
+				type: 2
+			},
+			{
+				title: "Cancelado",
+				message: "Se canceló el uso del inhalador",
+				hour: "8:00 pm",
+				type: 3
+			}
+		  ],
+		},{
+			title: 'Ayer',
+			data: [
+			  {
+				  title: "Pendiente",
+				  message: "Tratamiento en espera",
+				  hour: "7:00 pm",
+				  type: 2
+			  },
+			  {
+				  title: "Cancelado",
+				  message: "Se canceló el uso del inhalador",
+				  hour: "8:00 pm",
+				  type: 3
+			  }
+			],
+		  },
+	  ];
 
 	const [selected, setSelected] = useState<Tag>({ label: "todo", value: "all" })
 	
@@ -65,13 +114,15 @@ const PacientViewPage = () => {
                     </NormalHeader>
             }} />
             
-            <ScrollView style={styles.scrollView}
+            <ScrollView 
+				style={styles.scrollView}
                 scrollEventThrottle={16}
                 onScroll={Animated.event(
                     [{ nativeEvent: { contentOffset: { y: scrollOffsetY}}}],
                     {useNativeDriver: false}
                 )}
                 showsVerticalScrollIndicator={false}
+				
             >
 				<View style={styles.avatarView}>
 					<Avatar size="$14" circular>
@@ -90,11 +141,22 @@ const PacientViewPage = () => {
 
 				
 					<TabBar headerPadding={24}>
-						<TabBar.Item title='Inhaladores' Icon={InhalerIcon} height={755}>
+						<TabBar.Item title='Inhaladores' Icon={InhalerIcon} height={840}>
 							<View style={stylesTab.content}>
 							<View style={stylesTab.sectionView}>
 								<View style={stylesTab.titleView}>
 									<MontserratSemiText style={stylesTab.title}>Uso del inhalador</MontserratSemiText>
+
+									<View>
+									<TagSelect 
+										tags={[
+											{label: "Inhalador casa", value: "all"},
+											{label: "Inhalador 2", value: "accepted"},
+										]}
+										selected={selected}
+										setSelected={setSelected}
+									/>
+								</View>
 									<MontserratText style={stylesTab.description}>Ultima conexión hace 10 segundos</MontserratText>
 								</View>
 
@@ -149,7 +211,7 @@ const PacientViewPage = () => {
 							</View>
 						</TabBar.Item>
 
-						<TabBar.Item title='Tratamiento' Icon={TreatmentIcon} height={500}>
+						<TabBar.Item title='Tratamiento' Icon={TreatmentIcon} height={800}>
 							<View style={stylesTab.content}>
 								<View>
 									<MontserratSemiText>Historial</MontserratSemiText>
@@ -168,6 +230,10 @@ const PacientViewPage = () => {
 										setSelected={setSelected}
 									/>
 								</View>
+
+								<HistorialSearch 
+										data={DATA}
+									/>
 							</View>	
 						</TabBar.Item>
 					</TabBar>
@@ -187,7 +253,7 @@ const styles = StyleSheet.create({
 		paddingTop: 128
     },
 	scrollView: {
-		width: "100%"
+		width: "100%",
 	},
 	content: {
 		flex: 1,
@@ -231,7 +297,7 @@ const stylesTab = StyleSheet.create({
 	titleView: {
 		display: "flex",
 		flexDirection: "column",
-		gap: 4
+		gap: 16
 	},
 	titleContent: {
 		display: "flex",

@@ -18,7 +18,7 @@ import { getTitleByDate, groupByDate } from '@/helpers/notifications'
 const NotificationScreen = () => {
   const { supaNotifications } = useNotifications();
   const groupedNotifications = groupByDate(supaNotifications);
-  //console.log("grouped", groupedNotifications);
+  console.log("grouped", groupedNotifications);
 
   return (
     

@@ -50,7 +50,6 @@ const styles = StyleSheet.create({
     safeAre: {
         position: "relative",
         paddingVertical: 24,
-        paddingHorizontal: 24,
         backgroundColor: Colors.lightGrey,
     },
     header: {

@@ -134,7 +134,8 @@ function TabBar({ children, headerPadding }: TabProps) {
 	);
 };
 
-const Item = ({ children, height }: Tab) => {
+const Item = ({ children }: Tab) => {
+
 	return (
         <View style={{ width: ITEM_WIDTH }}>
             {children}
