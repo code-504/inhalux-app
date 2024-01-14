@@ -110,6 +110,7 @@ function RootLayoutNav() {
             <Stack.Screen name="monitor/scan_pacient" options={{ header: () => <NormalHeader title="Escanear" /> }}  />
             <Stack.Screen name="monitor/share_link" options={{ header: () => <NormalHeader title="Compartir" /> }}  />
             <Stack.Screen name="monitor/pacient_view" />
+            <Stack.Screen name="monitor/monitor_view" />
             <Stack.Screen name="notification" options={{ header: () => <NormalHeader title="Notificaciones" /> }} />
           </Stack>
           </BottomSheetModalProvider>

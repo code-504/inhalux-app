@@ -72,7 +72,6 @@ export default function TabLayout() {
                     },
                     tabBarShowLabel:false,
                     tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-                    
                 }}
                 initialRouteName='device'
             >
@@ -86,15 +85,13 @@ export default function TabLayout() {
                     name="treatment"
                     options={{
                         tabBarIcon: ({ color, focused }) => <TabBarIcon Icon={TreatmentIcon} color={color} focused={focused} title='Tratamiento' />,
-                        
                     }}
                 />
                 <Tabs.Screen
                     name="monitor"
                     options={{
                         headerShown: false,
-                        tabBarIcon: ({ color, focused }) => <TabBarIcon Icon={MonitorIcon} color={color} focused={focused} title='Monitoreo' />,
-                        tabBarHideOnKeyboard: true
+                        tabBarIcon: ({ color, focused }) => <TabBarIcon Icon={MonitorIcon} color={color} focused={focused} title='Monitoreo' />,      
                     }}
                 />
                 <Tabs.Screen

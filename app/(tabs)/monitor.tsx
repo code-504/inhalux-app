@@ -5,7 +5,7 @@ import { BottomSheetBackdropProps, BottomSheetFlatList, BottomSheetModal, Bottom
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useMonitor } from '@/context/MonitorProvider';
 import BlurredDeviceBackground from '@/components/blurredBackground/BlurredDeviceBackground';
-import { router, useFocusEffect, useNavigation } from 'expo-router';
+import { Tabs, router, useFocusEffect, useNavigation } from 'expo-router';
 import { useRelations } from '@/context/RelationsProvider';
 import MonitorHeader from '@/components/Headers/MonitorHeader';
 import BlurredBackgroundNew from '@/components/blurredBackground/BlurredBackgroundNew';
@@ -59,6 +59,7 @@ export default function TabThreeScreen() {
 	const addPacientModalRef  = useRef<BottomSheetModal>(null);
 	const bottomSheetRef = useRef<BottomSheetModal>(null);//El general
 	const monitorIndex = useRef<number>(0);
+	const [showBottomBar, setShowBottomBar] = useState<number>(0);
 	
 	//variables
 	const addSnapPoints = useMemo(() => ["28%",],[]);
@@ -72,6 +73,7 @@ export default function TabThreeScreen() {
 	// callbacks
 	const handleMonitorSheetChange = useCallback((index: number) => {
 		monitorIndex.current = index;
+		setShowBottomBar(index)
 
 		if (index === 0) 
 			Keyboard.dismiss()
@@ -252,7 +254,6 @@ export default function TabThreeScreen() {
 					enableHandlePanningGesture={false}
 					enableOverDrag={false}
 					bottomInset={bottomSafeArea - 24}
-					handleIndicatorStyle={{ height: 0 }}
 					backdropComponent={(backdropProps: BottomSheetBackdropProps) => (
 						<BlurredBackgroundNew
 						  {...backdropProps}

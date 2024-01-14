@@ -13,11 +13,13 @@ import { ListMonitor } from '@/interfaces/Monitor'
 import { useRelations } from '@/context/RelationsProvider'
 import { supabase } from '@/services/supabase'
 import { useAuth } from '@/context/Authprovider'
+import { useRouter } from 'expo-router'
 
 const ContactCardShare = ({ id, name, kindred, avatar, pending_state }: ListMonitor) => {
     const [openDialog, setOpenDialog] = useState(false);
     const {shareState, setShareState} = useRelations();
     const {supaUser} = useAuth();
+    const router = useRouter();
 
     const handleAcceptUser = async() => {
         const { data, error } = await supabase
@@ -155,7 +157,7 @@ const ContactCardShare = ({ id, name, kindred, avatar, pending_state }: ListMoni
                         </AlertDialog>
                     </>
                 : 
-                    <Ripple style={styles.cardView}>
+                    <Ripple style={styles.cardView} onTouchEnd={() => router.push({ pathname: "/monitor/monitor_view", params: { monitor_id: id } })}>
                         <View style={styles.cardContent}>
                             <Avatar size="$5" circular style={styles.avatar}>
                                 <Avatar.Image

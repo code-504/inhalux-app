@@ -61,7 +61,7 @@ const EditDeviceNamePage = () => {
 			}} />
 
 			<Input style={styles.searchInput} id="inhaler-name" borderRadius="$10" borderWidth={0} placeholder="Nombre del dispositivo" value={inhalerName} onChange={(e) => setInhalerName(e.nativeEvent.text)} />
-		
+
 			<StatusBar style='auto' translucent={true} backgroundColor='transparent' />
 		</SafeAreaView>
   	)
