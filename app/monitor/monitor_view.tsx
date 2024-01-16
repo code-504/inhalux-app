@@ -1,6 +1,6 @@
-import { View, ScrollView, Animated, StyleSheet, Dimensions, TouchableOpacity } from 'react-native'
+import { View, ScrollView, Animated, StyleSheet, Dimensions, TouchableOpacity, Alert } from 'react-native'
 import React, { useRef, useState } from 'react'
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams, useNavigation } from 'expo-router';
 import NormalHeader from '@/components/Headers/NormalHeader';
 import { Dialog, Divider, Menu, Portal } from 'react-native-paper';
 import Ripple from 'react-native-material-ripple';
@@ -17,6 +17,9 @@ import { BottomSheetBackdropProps, BottomSheetFlatList, BottomSheetModal } from 
 import WarningIcon from "@/assets/icons/warning.svg"
 import EditIcon from "@/assets/icons/edit.svg"
 import BlurredBackgroundNew from '@/components/blurredBackground/BlurredBackgroundNew';
+import { supabase } from '@/services/supabase';
+import { useAuth } from '@/context/Authprovider';
+import { useRelations } from '@/context/RelationsProvider';
 
 interface ListItem {
     id: number;
@@ -27,18 +30,31 @@ const screenWidth = Dimensions.get("window").width - 48;
 
 const MonitorViewPage = () => {
 
-    const { monitor_id } = useLocalSearchParams();
+    const { 
+		monitor_id,
+		monitor_name,
+		monitor_kindred,
+		monitor_avatar, 
+	} = useLocalSearchParams();
+
+	const {supaUser} = useAuth();
+	const {shareState, setShareState} = useRelations();
+	const navigation = useNavigation();
 
     const [visible, setVisible] = useState(false);
     const kindredRef = useRef<BottomSheetModal>(null);
 
     const [data, setData] = useState<ListItem[]>([
-        { id: 1, text: 'Papá' },
-        { id: 2, text: 'Mamá' },
-        { id: 3, text: 'Hermano/a' },
+        { id: 1, text: 'Padre' },
+        { id: 2, text: 'Hijo' },
+        { id: 3, text: 'Hermano' },
+		{ id: 4, text: 'Abuelo' },
+		{ id: 5, text: 'Nieto' },
+		{ id: 6, text: 'Relativo' },
     ]);
 
-    const [selectedId, setSelectedId] = useState<ListItem>();
+    const [selectedKindred, setSelectedKindred] = useState<ListItem | string>(String(monitor_kindred));
+	const [isLoading, setIsLoading] = useState(false);
 
     const openMenu = () => setVisible(true);
 
@@ -109,21 +125,98 @@ const MonitorViewPage = () => {
 
 	const hideDialog = () => setDialog(false);
 
-    const handleSelectItem = (item: ListItem) => {
-        setSelectedId(item);
+    const handleSelectItem = async(item: ListItem) => {
+		setIsLoading(true);
+		let patientKindred = "";
+
+		switch (item.text) {
+			case 'Padre':
+			  patientKindred = "Hijo";
+			  break;
+			case 'Hijo':
+			  patientKindred = "Padre";
+			  break;
+			case 'Hermano':
+			  patientKindred = "Hermano";
+			  break;
+			case 'Abuelo':
+				patientKindred = "Nieto";
+				break;
+			case 'Nieto':
+			  patientKindred = "Abuelo";
+			  break;
+			default:
+			  patientKindred = "Relativo";
+			  break;
+		  }
+
+		const { data, error } = await supabase
+			.from('user_relations')
+			.update({ name_from_patient: item.text, name_from_monitor: patientKindred })
+			.eq('fk_user_patient', supaUser?.id)
+			.eq('fk_user_monitor', monitor_id)
+			.select()
+		
+		if(error){
+			console.log(error.message);
+			return;
+		}
+
+		const updatedShareState = shareState.data.map(elem => {
+			if (elem.id === monitor_id) {
+			  return { ...elem, kindred: item.text };
+			}
+			return elem;
+		  });
+	    
+		  setShareState({
+            ...shareState,
+			filterText: "",
+			data: updatedShareState
+        })
+		
+		console.log("monitor_kindred: ", monitor_kindred);
+		console.log("patient_kindred: ", patientKindred);
+        setSelectedKindred(item.text);
         kindredRef.current?.close()
+		setIsLoading(false);
     };
+
+	const deleteRelation = async() => {
+		
+		const { error } = await supabase
+			.from('user_relations')
+			.delete()
+			.eq('fk_user_patient', supaUser?.id)
+			.eq('fk_user_monitor', monitor_id)
+		
+		if(error){
+			console.log(error.message);
+			Alert.alert("Algo salió mal...");
+			return;
+		}
+
+		const updatedShareState = shareState.data.filter(item => item.id !== monitor_id);
+		setShareState({
+            ...shareState,
+			filterText: "",
+			data: updatedShareState
+        })
+
+		navigation.goBack();
+	}
 
     const renderItem = ({ item }: { item: ListItem }) => (
         <TouchableOpacity
           onPress={() => handleSelectItem(item)}
           style={{
-            backgroundColor: selectedId?.id === item.id ? Colors.lightGrey : Colors.white,
+            backgroundColor: selectedKindred?.id === item.id ? Colors.lightGrey : Colors.white,
             paddingHorizontal: 16,
             paddingVertical: 24,
             borderBottomWidth: 1,
             borderBottomColor: Colors.borderColor,
           }}
+		  disabled={isLoading}
         >
           <MontserratText>{item.text}</MontserratText>
         </TouchableOpacity>
@@ -142,13 +235,13 @@ const MonitorViewPage = () => {
                         <Avatar size="$14" circular>
                             <Avatar.Image
                                 accessibilityLabel="user"
-                                src={AvatarImg}
+                                src={String(monitor_avatar)}
                             />
                             <Avatar.Fallback backgroundColor={Colors.dotsGray} />
                         </Avatar>
 
                         <View style={styles.avatarTextView}>
-                            <MontserratSemiText style={styles.avatarName}>Jose Palacios Dávila</MontserratSemiText>
+                            <MontserratSemiText style={styles.avatarName}>{monitor_name}</MontserratSemiText>
                         </View>
                         
                     </View>
@@ -157,7 +250,7 @@ const MonitorViewPage = () => {
                         <View style={styles.cardItem}>
                             <View style={styles.cardTextView}>
                                 <MontserratText style={styles.cardTitle}>Parentesco</MontserratText>
-                                <MontserratBoldText style={styles.cardText}>{ selectedId?.text }</MontserratBoldText>
+                                <MontserratBoldText style={styles.cardText}>{ String(selectedKindred) }</MontserratBoldText>
                             </View>
 
                             <Button circular size="$6" backgroundColor={Colors.white} onPress={() => kindredRef.current?.present()}>
@@ -191,14 +284,14 @@ const MonitorViewPage = () => {
 					</Dialog.Content>
 					<Dialog.Actions>
 						<Button onPress={hideDialog} backgroundColor={Colors.lightGrey} borderRadius={100}>Cancelar</Button>
-						<Button onPress={hideDialog} backgroundColor={Colors.redLight} color={Colors.red} borderRadius={100}>Dejar de compartir</Button>
+						<Button onPress={deleteRelation} backgroundColor={Colors.redLight} color={Colors.red} borderRadius={100}>Dejar de compartir</Button>
 					</Dialog.Actions>
 				</Dialog>
 			</Portal>
 
             <BottomSheetModal
                 ref={kindredRef}
-                snapPoints={["50%"]}
+                snapPoints={["75%"]}
                 enablePanDownToClose
 				backdropComponent={(backdropProps: BottomSheetBackdropProps) => (
 					<BlurredBackgroundNew
