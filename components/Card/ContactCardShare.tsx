@@ -157,7 +157,16 @@ const ContactCardShare = ({ id, name, kindred, avatar, pending_state }: ListMoni
                         </AlertDialog>
                     </>
                 : 
-                    <Ripple style={styles.cardView} onTouchEnd={() => router.push({ pathname: "/monitor/monitor_view", params: { monitor_id: id } })}>
+                    <Ripple style={styles.cardView} onTouchEnd={() => 
+                                router.push({ pathname: "/monitor/monitor_view", 
+                                params: { 
+                                    monitor_id: id,
+                                    monitor_name: name,
+                                    monitor_avatar: avatar,
+                                    monitor_kindred: kindred    
+                                }
+                            })
+                        }>
                         <View style={styles.cardContent}>
                             <Avatar size="$5" circular style={styles.avatar}>
                                 <Avatar.Image
