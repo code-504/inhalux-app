@@ -30,11 +30,10 @@ import { Avatar, Button, Spinner } from 'tamagui';
 import Colors from '@/constants/Colors';
 import Ripple from 'react-native-material-ripple';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import BlurredBackgroundNew from '@/components/blurredBackground/BlurredBackgroundNew';
+import BlurredBackground from '@/components/BlurredBackground';
 import { stores } from '@/constants/Data';
 import { useFocusEffect, useNavigation } from 'expo-router';
 import { BottomSheetState, ButtonLocationState, InitLocation, LocationPermissions, LocationPoints, LocationType } from '../../interfaces/Location';
-import * as Network from 'expo-network';
 
 // Resources
 import AddIcon from "@/assets/icons/add.svg"
@@ -119,6 +118,12 @@ const TabTwoScreen = () => {
       address: "Teapan 132, San Pedrito, 45625 San Pedro Tlaquepaque, Jal."
     }
   ]*/
+
+  useFocusEffect(
+		useCallback(() => {
+      inhalerListModalRef.current?.snapToIndex(1);
+		}, [])
+	)
   
   const getPhoneLocation = async () => {
     try {
@@ -710,7 +715,7 @@ const renderStoreItem = useCallback(
         animatedPosition={buttonAnimatedPosition}
         animatedIndex={buttonAnimatedIndex}
         backdropComponent={(backdropProps: BottomSheetBackdropProps) => (
-          <BlurredBackgroundNew
+          <BlurredBackground
             {...backdropProps}
             appearsOnIndex={2}
             disappearsOnIndex={1}
@@ -748,7 +753,7 @@ const renderStoreItem = useCallback(
         animatedPosition={buttonAnimatedPosition}
         animatedIndex={buttonAnimatedIndex}
         backdropComponent={(backdropProps: BottomSheetBackdropProps) => (
-          <BlurredBackgroundNew
+          <BlurredBackground
             {...backdropProps}
             appearsOnIndex={2}
             disappearsOnIndex={1}
@@ -788,7 +793,7 @@ const renderStoreItem = useCallback(
         animatedIndex={buttonAnimatedIndex}
         enableOverDrag={false}
         backdropComponent={(backdropProps: BottomSheetBackdropProps) => (
-          <BlurredBackgroundNew
+          <BlurredBackground
             {...backdropProps}
             appearsOnIndex={1}
             disappearsOnIndex={0}

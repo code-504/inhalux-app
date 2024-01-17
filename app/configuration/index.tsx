@@ -1,4 +1,4 @@
-import { View, ImageBackground, StyleSheet, ScrollView, Alert } from 'react-native'
+import { View, ImageBackground, StyleSheet, ScrollView, Alert, Dimensions } from 'react-native'
 import Colors from '@/constants/Colors'
 import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/components/StyledText'
 import Card from '@/components/Card/Card'
@@ -83,7 +83,7 @@ const ConfigurationScreen = () => {
                       </Avatar>
 
                       <View style={styles.profileTextView}>
-                        <MontserratBoldText style={styles.profileNameText}>{supaUser?.name}</MontserratBoldText>
+                        <MontserratBoldText style={styles.profileNameText} numberOfLines={1}>{supaUser?.name}</MontserratBoldText>
                         <MontserratText style={styles.profileEmailText}>{supaUser?.email}</MontserratText>
                       </View>
                     </View>
@@ -172,7 +172,8 @@ const styles = StyleSheet.create({
     gap: 4
   },
   profileNameText: {
-    fontSize: 14
+    fontSize: 14,
+    width: Dimensions.get("window").width - 210
   },
   profileEmailText: {
     fontSize: 12

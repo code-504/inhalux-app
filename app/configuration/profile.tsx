@@ -6,7 +6,7 @@ import { AlertDialog, Button, Input, Label, ScrollView } from 'tamagui'
 import { useAuth } from '@/context/Authprovider'
 import Animated, { Easing, useSharedValue, withTiming } from 'react-native-reanimated'
 import { BottomSheetBackdropProps, BottomSheetModal } from '@gorhom/bottom-sheet'
-import BlurredBackgroundNew from '@/components/blurredBackground/BlurredBackgroundNew'
+import BlurredBackground from '@/components/BlurredBackground'
 import { handleErasePicture, handleTakePicture, handleUploadPicture } from '@/helpers/avatar'
 
 // Resources
@@ -204,7 +204,7 @@ const ProfilePage = () => {
         enableOverDrag={false}
         onChange={handleBottomChange}
         backdropComponent={(backdropProps: BottomSheetBackdropProps) => (
-          <BlurredBackgroundNew
+          <BlurredBackground
             {...backdropProps}
             appearsOnIndex={0}
             disappearsOnIndex={-1}

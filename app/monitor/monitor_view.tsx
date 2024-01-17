@@ -16,7 +16,7 @@ import { BottomSheetBackdropProps, BottomSheetFlatList, BottomSheetModal } from 
 // Resources
 import WarningIcon from "@/assets/icons/warning.svg"
 import EditIcon from "@/assets/icons/edit.svg"
-import BlurredBackgroundNew from '@/components/blurredBackground/BlurredBackgroundNew';
+import BlurredBackground from '@/components/BlurredBackground';
 
 interface ListItem {
     id: number;
@@ -201,7 +201,7 @@ const MonitorViewPage = () => {
                 snapPoints={["50%"]}
                 enablePanDownToClose
 				backdropComponent={(backdropProps: BottomSheetBackdropProps) => (
-					<BlurredBackgroundNew
+					<BlurredBackground
 					  	{...backdropProps}
 					  	appearsOnIndex={0}
 					  	disappearsOnIndex={-1}

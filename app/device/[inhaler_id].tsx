@@ -19,7 +19,7 @@ import * as NavigationBar from 'expo-navigation-bar';
 import TabBarMultiple from '@/components/TabBarMultiple'
 import { Dialog, Divider, Menu, Portal } from 'react-native-paper'
 import Ripple from 'react-native-material-ripple'
-import BlurredBackgroundNew from '@/components/blurredBackground/BlurredBackgroundNew'
+import BlurredBackground from '@/components/BlurredBackground'
 
 // Resources
 import inhalerShadow from "@/assets/images/inhaler-shadow-img.png"
@@ -273,7 +273,9 @@ const Page = () => {
 
 					<MontserratSemiText style={styles.sectionTitle}>Estadísticas</MontserratSemiText>
 
-					<TabBar>
+					</View>
+
+					<TabBar.TabBar headerPadding={24}>
 						<TabBar.Item Icon={InhalerIcon} title='Inhalux' height={750}>
 							<View style={stylesTab.content}>
 
@@ -377,7 +379,6 @@ const Page = () => {
 
 									<TabBarMultiple>
 										<TabBarMultiple.Item title='Calidad del aire'>
-
 											<BarChart
 												data={barData}
 												barWidth={42}
@@ -405,7 +406,6 @@ const Page = () => {
 										</TabBarMultiple.Item>
 
 										<TabBarMultiple.Item title='CO2'>
-
 											<BarChart
 												data={barData}
 												barWidth={42}
@@ -547,9 +547,7 @@ const Page = () => {
 								</View>
 							</View>
 						</TabBar.Item>
-
-					</TabBar>
-					</View>
+					</TabBar.TabBar>
 				</View>
 			
 				<Image style={styles.inahlerImageBackground} source={InhalerBackground} />
@@ -561,7 +559,7 @@ const Page = () => {
 				snapPoints={scanSnapPoints}
 				enablePanDownToClose
 				backdropComponent={(backdropProps: BottomSheetBackdropProps) => (
-					<BlurredBackgroundNew
+					<BlurredBackground
 					  	{...backdropProps}
 					  	appearsOnIndex={0}
 					  	disappearsOnIndex={-1}
@@ -658,6 +656,7 @@ const stylesTab = StyleSheet.create({
 		flexDirection: "column",
 		width: "100%",
 		paddingVertical: 24,
+		paddingHorizontal: 24,
 		gap: 32,
 	},
 	sectionView: {
@@ -808,11 +807,11 @@ const styles = StyleSheet.create({
 	stadisticContent: {
 		borderRadius: 38,
 		marginTop: 32,
-		backgroundColor: Colors.white,
-		paddingHorizontal: 24,
+		backgroundColor: Colors.white
 	},
 	stadisticView: {
 		marginTop: 32,
+		paddingHorizontal: 24
 	},
 	sectionTitle: {
 		fontSize: 16

@@ -16,7 +16,7 @@ const HistorialSearch = ({ data }: HistorialSearchProps) => {
         <SectionList
                 nestedScrollEnabled
                 showsVerticalScrollIndicator={false}
-                style={{ height: 630 }}
+                style={{ height: 800 }}
                 sections={data}
                 keyExtractor={(item, index) => item + index}
                 renderItem={({item}) => (

@@ -1,5 +1,5 @@
 import Colors from '@/constants/Colors';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { NamedExoticComponent, memo, useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, LayoutChangeEvent, TouchableHighlightBase, Dimensions, Keyboard } from 'react-native';
 import Animated, { useSharedValue, withSpring } from 'react-native-reanimated';
 import { MontserratSemiText } from './StyledText';
@@ -25,8 +25,8 @@ const { width: screenWidth } = Dimensions.get('window');
 const SPACING = 24;
 const ITEM_WIDTH = screenWidth;
 
-function TabBar({ children, headerPadding }: TabProps) {
-
+const TabBar = memo(({ children, headerPadding }: TabProps) => {
+    
 	const [activeTab, setActiveTab] = useState<number>(0);
     const [heightScroll, setHeightScroll] = useState<number>(0);
 	const [ width, setWidth ] = useState<number>(0);
@@ -36,9 +36,7 @@ function TabBar({ children, headerPadding }: TabProps) {
 
     useEffect(() => {
         const selectedTab = React.Children.toArray(children)[0] as React.ReactElement<Tab>;
-
         setHeightScroll(selectedTab.props.height)
-
     }, [])
 
 	const handleTabPress = (index: number) => {
@@ -116,6 +114,7 @@ function TabBar({ children, headerPadding }: TabProps) {
 				scrollsToTop={false}
 				scrollEnabled={false}
 				contentContainerStyle={styles.scrollContainer}
+                scrollEventThrottle={16}
                 style={{
                     height: heightScroll
                 }}
@@ -132,20 +131,21 @@ function TabBar({ children, headerPadding }: TabProps) {
 			{ /*tabComponents[activeTab] && tabComponents[activeTab]*/ }
 		</View>
 	);
-};
+});
 
-const Item = ({ children }: Tab) => {
+const Item = memo(({ children }: Tab) => {
 
 	return (
         <View style={{ width: ITEM_WIDTH }}>
             {children}
         </View>
     )
-}
+})
 
-TabBar.Item = Item;
-
-export default TabBar;
+export default {
+    TabBar: TabBar,
+    Item: Item
+};
 
 const styles = StyleSheet.create({
     container: {

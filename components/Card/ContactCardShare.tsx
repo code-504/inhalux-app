@@ -1,5 +1,5 @@
 import { View, Text, Alert } from 'react-native'
-import React, { useState } from 'react'
+import React, { memo, useState } from 'react'
 import { Avatar, Button, AlertDialog } from 'tamagui'
 
 // Resources
@@ -181,7 +181,7 @@ const ContactCardShare = ({ id, name, kindred, avatar, pending_state }: ListMoni
     )
 }
 
-export default ContactCardShare
+export default memo(ContactCardShare)
 
 const stylesDialog = StyleSheet.create({
     content: {

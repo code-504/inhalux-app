@@ -7,9 +7,11 @@ import 'react-native-gesture-handler';
 import { gestureHandlerRootHOC } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
+import { enableFreeze } from "react-native-screens";
 
 enableLatestRenderer();
-
+enableFreeze(true);
+console.log("hhheee")
 const index = () => {
   
   const auth = useAuth();

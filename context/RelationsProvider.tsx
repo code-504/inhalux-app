@@ -10,9 +10,10 @@ interface Props {
 
 export interface RelationContextType {
     shareState: ListMonitorState;
-    setShareState: Dispatch<React.SetStateAction<ListMonitorState>>
+    setShareState: Dispatch<React.SetStateAction<ListMonitorState>>;
     pacientState: ListMonitorState;
-    setPacientState: Dispatch<React.SetStateAction<ListMonitorState>>
+    setPacientState: Dispatch<React.SetStateAction<ListMonitorState>>;
+    fetchPacientsDataTest: (filterText: string) => Promise<ListMonitor[] | undefined>
 }
 
 export const RelationContext = createContext<RelationContextType | undefined>(
@@ -167,13 +168,58 @@ export function RelationProvider({ children }: Props) {
     fetchShareData()
   }, [shareState.filterText, auth.session]);
     
+
+  const fetchPacientsDataTest = async (filterText: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if(!user) return;
+
+      const query = supabase.from('user_relations').select(`
+        id, 
+        name_from_monitor,
+        pending_state,
+        user: fk_user_patient ( name, last_name, avatar, id )
+      `)
+      .eq('fk_user_monitor', user.id)
+      .like("user.name", '%' + filterText + '%')
+      .order('name_from_monitor', { ascending: true });
+
+      const { data, error } = await query;
+
+      //console.log("pacients", data)
+
+      if (error)
+        throw error;
+
+      if (!data) {
+
+        return
+      }
+
+      let transformedPatientData = data.filter((patient: any) => patient.user !== null).map((patient: any): ListMonitor => ({
+        id: patient.user.id,
+        name: patient.user.name + ( patient.user.last_name ? " " + patient.user.last_name : ""),
+        avatar: patient.user.avatar,
+        kindred: patient.name_from_monitor ? patient.name_from_monitor : "Relativo",
+        pending_state: patient.pending_state
+      }));
+
+      return transformedPatientData;
+      
+    } catch(error) {
+      console.log(error)
+    }
+}
+
   return (
     <RelationContext.Provider value={
         {
           pacientState,
           setPacientState,
           shareState,
-          setShareState
+          setShareState,
+          fetchPacientsDataTest
         }
       }>
       {children}

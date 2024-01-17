@@ -1,5 +1,5 @@
 import { View, Text } from 'react-native'
-import React, { useState } from 'react'
+import React, { memo, useState } from 'react'
 import { Avatar, AlertDialog, Button } from 'tamagui'
 import { StyleSheet } from 'react-native'
 import Colors from '@/constants/Colors'
@@ -116,7 +116,7 @@ const ContactCardPatient = ({ id, name, kindred, avatar, pending_state }: ListMo
     )
 }
 
-export default ContactCardPatient
+export default memo(ContactCardPatient)
 
 const stylesDialog = StyleSheet.create({
     content: {

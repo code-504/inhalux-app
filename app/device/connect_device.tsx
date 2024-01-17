@@ -2,17 +2,14 @@ import { View, Text, StyleSheet, ImageBackground, ScrollView, Animated, Dimensio
 import React, { useEffect, useRef, useState } from 'react'
 import useBLE from '@/hooks/useBLE'
 import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/components/StyledText'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import { Button, Input, Label, Spinner } from 'tamagui'
 import Colors from '@/constants/Colors'
-import { Stack, router } from 'expo-router'
+import { Stack } from 'expo-router'
 import * as NavigationBar from 'expo-navigation-bar';
 import NormalHeader from '@/components/Headers/NormalHeader'
 
 // Resources
 import BackgroundImage from "@/assets/images/background.png"
-
-import { Picker, DatePicker } from 'react-native-wheel-datepicker';
 
 NavigationBar.setBackgroundColorAsync(Colors.white);
 NavigationBar.setButtonStyleAsync("dark");

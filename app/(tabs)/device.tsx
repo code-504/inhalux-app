@@ -1,27 +1,33 @@
-import { ImageBackground, View, StyleSheet, Dimensions, Alert, NativeSyntheticEvent, NativeScrollEvent, Animated as AnimatedReact, ViewToken, Pressable, Image } from 'react-native'
+import { ImageBackground, View, StyleSheet, Dimensions, Animated as AnimatedReact, Image } from 'react-native'
 import { FlashList } from "@shopify/flash-list";
-import { Button, ScrollView, Switch } from 'tamagui'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Button, Input, ScrollView } from 'tamagui'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
 import Colors from '@/constants/Colors'
 import Card from '@/components/Card/Card'
 import SimpleWeatherCard from '@/components/Card/SimpleWeatherCard'
 import { StatusBar } from 'expo-status-bar';
 import * as NavigationBar from 'expo-navigation-bar';
 import {ExpandingDot} from "react-native-animated-pagination-dots";
-import { supabase } from '@/services/supabase'
 import HeaderAction from '@/components/HeaderAction'
 import Animated from 'react-native-reanimated';
- 
-// Recursos
-import { MontserratText, MontserratBoldText, MontserratSemiText } from '@/components/StyledText'
-import BackgroundImage from "@/assets/images/background.png"
+import { RefreshControl } from 'react-native-gesture-handler';
+import { useInhalers } from '@/context/InhalerProvider';
+import { Tabs, router } from 'expo-router';
+import {
+	BottomSheetBackdropProps,
+	BottomSheetFlatList,
+	BottomSheetModal,
+} from '@gorhom/bottom-sheet';
+import UserHeader from '@/components/Headers/UserHeader';
+import BlurredBackground from '@/components/BlurredBackground';
 
 // Resourses
 import AddIcon from "@/assets/icons/add.svg"
 import SettingsIcon from "@/assets/icons/settings.svg"
 import inhaler from "@/assets/images/inhaler-img.png"
+import { MontserratText, MontserratBoldText, MontserratSemiText } from '@/components/StyledText'
+import BackgroundImage from "@/assets/images/background.png"
 const IMAGE = Image.resolveAssetSource(inhaler).uri;
-
 import inhalerShadow from "@/assets/images/inhaler-shadow-img.png"
 import BatteryIcon from "@/assets/icons/battery.svg"
 import DoseIcon from "@/assets/icons/dose.svg"
@@ -36,23 +42,7 @@ import CoIcon from "@/assets/icons/co.svg"
 import TempIcon from "@/assets/icons/device_thermostat.svg"
 import NitroIcon from "@/assets/icons/circles_ext.svg"
 import OzonoIcon from "@/assets/icons/radio_button_checked.svg"
-
-import { useAuth } from '@/context/Authprovider';
-import { getInhalers } from '@/services/api/device';
-import { RefreshControl } from 'react-native-gesture-handler';
-import BlurredBackground from '@/components/blurredBackground/BlurredBackground';
-import BlurredDeviceBackground from '@/components/blurredBackground/BlurredDeviceBackground';
-import { useHeaderHeight } from '@react-navigation/elements';
-import DeviceHeader from '@/components/Headers/DeviceHeader';
-import { useInhalers } from '@/context/InhalerProvider';
-import { Link, Tabs, router, useNavigation } from 'expo-router';
-
-import {
-	BottomSheetFlatList,
-	BottomSheetModal,
-	BottomSheetModalProvider,
-} from '@gorhom/bottom-sheet';
-
+import NotificationIcon from "@/assets/icons/notifications.svg";
 
 NavigationBar.setBackgroundColorAsync("transparent")
 NavigationBar.setButtonStyleAsync("dark")
@@ -109,8 +99,6 @@ export default function TabOneScreen() {
 	const handleOpenPress = useCallback(() => {
 		bottomSheetRef.current?.present();
 	}, []);
-
-	const headerHeight = useHeaderHeight();
 
 	interface WeatherDataDescriptionProps {
 		id			: string;
@@ -261,13 +249,18 @@ export default function TabOneScreen() {
 
 		<Tabs.Screen
             options={{
-                header: () => <DeviceHeader />,
+                header: () => 
+					<UserHeader showUserName>
+						<Button backgroundColor={Colors.white} alignSelf="center" size="$6" circular onPress={() => router.push("/notification/")}>
+							<NotificationIcon />
+						</Button>
+					</UserHeader>,
             }}
         />
 
 		<View style={styles.safeAre}>
 			
-			<ImageBackground source={BackgroundImage} style={styles.imageBackground}>
+			<ImageBackground source={BackgroundImage} style={styles.imageBackground} />
 			<ScrollView style={styles.scrollView}
 				refreshControl={
 					<RefreshControl refreshing={refresh} onRefresh={pullRequest}></RefreshControl>
@@ -281,6 +274,7 @@ export default function TabOneScreen() {
 						Icon={AddIcon}
 						action={()=> router.push("/device/search_device")}
 					/>
+
 				</View>
 					{/* Inicio */}
 
@@ -382,7 +376,15 @@ export default function TabOneScreen() {
 				ref={bottomSheetRef}
 				snapPoints={snapPoints}
 				index={0}
-				backdropComponent={BlurredDeviceBackground}
+				backdropComponent={(backdropProps: BottomSheetBackdropProps) => (
+					<BlurredBackground
+					  {...backdropProps}
+					  appearsOnIndex={1}
+					  disappearsOnIndex={-1}
+					  backgroundColor={Colors.black}
+					  pressBehavior={'close'}
+					/>
+				)}
 			>
 				<View style={stylesBottom.container}>
 					<MontserratSemiText style={stylesBottom.title}>{`Información \nsobre la calidad del aire`}</MontserratSemiText>
@@ -396,8 +398,6 @@ export default function TabOneScreen() {
 					contentContainerStyle={stylesBottom.container}
 				/>
 			</BottomSheetModal>
-
-			</ImageBackground>
 		</View>
 		<StatusBar style="auto" backgroundColor="transparent" />
 		</>
@@ -468,7 +468,9 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.lightGrey,
     },
 	imageBackground: {
-		flex: 1,
+		position: "absolute",
+		width: Dimensions.get("window").width,
+		height: Dimensions.get("window").height,
 		resizeMode: 'cover',
 		justifyContent: 'center',
     	alignItems: 'center'

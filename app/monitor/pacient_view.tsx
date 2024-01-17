@@ -102,10 +102,9 @@ const PacientViewPage = () => {
 
     return (
         <View style={styles.safeAre}>
-
             <Stack.Screen options={{
                 header: () => 
-                    <NormalHeader positionHeader='absolute' title={ "Nombre Paciente" } animHeaderValue={scrollOffsetY}>
+                    <NormalHeader title={ "Nombre Paciente" } animHeaderValue={scrollOffsetY}>
                             
                         <Menu
                             visible={visible}
@@ -147,7 +146,7 @@ const PacientViewPage = () => {
 				</View>
 
 				
-					<TabBar headerPadding={24}>
+					<TabBar.TabBar headerPadding={24}>
 						<TabBar.Item title='Inhaladores' Icon={InhalerIcon} height={840}>
 							<View style={stylesTab.content}>
 							<View style={stylesTab.sectionView}>
@@ -218,7 +217,7 @@ const PacientViewPage = () => {
 							</View>
 						</TabBar.Item>
 
-						<TabBar.Item title='Tratamiento' Icon={TreatmentIcon} height={800}>
+						<TabBar.Item title='Tratamiento' Icon={TreatmentIcon} height={1000}>
 							<View style={stylesTab.content}>
 								<View>
 									<MontserratSemiText>Historial</MontserratSemiText>
@@ -243,7 +242,7 @@ const PacientViewPage = () => {
 									/>
 							</View>	
 						</TabBar.Item>
-					</TabBar>
+					</TabBar.TabBar>
             </ScrollView>
 
 			<Portal>
