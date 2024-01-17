@@ -92,7 +92,14 @@ const ContactCardPatient = ({ id, name, kindred, avatar, pending_state }: ListMo
                         </AlertDialog>
                     </>
                 : 
-                    <Ripple style={styles.cardView} onTouchEnd={() => router.push({ pathname: "/monitor/pacient_view", params: { pacient_id: id } })}>
+                    <Ripple style={styles.cardView} onTouchEnd={() => router.push({ pathname: "/monitor/pacient_view", 
+                        params: { 
+                            pacient_id: id,
+                            pacient_name: name,
+                            pacient_kindred: kindred,
+                            pacient_avatar: avatar 
+                        }})}
+                    >
                         <View style={styles.cardContent}>
                             <Avatar size="$5" circular style={styles.avatar}>
                                 <Avatar.Image

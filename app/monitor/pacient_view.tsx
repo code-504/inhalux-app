@@ -1,6 +1,6 @@
-import { View, ScrollView, Animated, StyleSheet, Dimensions } from 'react-native'
-import React, { useRef, useState } from 'react'
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { View, ScrollView, Animated, StyleSheet, Dimensions, Alert } from 'react-native'
+import React, { useEffect, useRef, useState } from 'react'
+import { Stack, useLocalSearchParams, useNavigation } from 'expo-router';
 import NormalHeader from '@/components/Headers/NormalHeader';
 import { Dialog, Divider, Menu, Portal } from 'react-native-paper';
 import Ripple from 'react-native-material-ripple';
@@ -19,12 +19,35 @@ import TreatmentIcon from "@/assets/icons/prescriptions.svg"
 import PillIcon from "@/assets/icons/pill.svg"
 import TagSelect, { Tag } from '@/components/TagSelect';
 import HistorialSearch from '@/components/HistorialSearch';
+import { supabase } from '@/services/supabase';
+import { useAuth } from '@/context/Authprovider';
+import { useRelations } from '@/context/RelationsProvider';
+import { getPacientInhalers } from '@/helpers/pacient_view';
 
 const screenWidth = Dimensions.get("window").width - 48;
 
 const PacientViewPage = () => {
 
-    const { pacient_id } = useLocalSearchParams();
+    const { 
+		pacient_id,
+		pacient_avatar,
+		pacient_kindred,
+		pacient_name
+	} = useLocalSearchParams();
+
+	const {supaUser} = useAuth();
+	const {pacientState, setPacientState} = useRelations();
+	const navigation = useNavigation();
+
+	const [pacientInhalers, setPacientInhalers] = useState<any[]>([]);
+	useEffect(() => {
+		const getInhalers = async() => {
+			const data = await getPacientInhalers(String(pacient_id));
+			if(data) setPacientInhalers(data);
+		}
+	  	
+		getInhalers();
+	}, [])
 
     const [visible, setVisible] = useState(false);
     
@@ -89,7 +112,8 @@ const PacientViewPage = () => {
 		  },
 	  ];
 
-	const [selected, setSelected] = useState<Tag>({ label: "todo", value: "all" })
+	const [selectedInhaler, setSelectedInhaler] = useState<any>({ label: "todo", value: "all" })
+	const [selectedTreatment, setSelectedTreatment] = useState<Tag>({ label: "todo", value: "all" })
 	
 	const [dialog, setDialog] = useState(false);
 
@@ -99,6 +123,30 @@ const PacientViewPage = () => {
 	}
 
 	const hideDialog = () => setDialog(false);
+
+	const deleteRelation = async() => {
+		
+		const { error } = await supabase
+			.from('user_relations')
+			.delete()
+			.eq('fk_user_patient', pacient_id)
+			.eq('fk_user_monitor', supaUser?.id)
+		
+		if(error){
+			console.log(error.message);
+			Alert.alert("Algo salió mal...");
+			return;
+		}
+
+		const updatedPacientState = pacientState.data.filter(item => item.id !== pacient_id);
+		setPacientState({
+            ...pacientState,
+			filterText: "",
+			data: updatedPacientState
+        })
+
+		navigation.goBack();
+	}
 
     return (
         <View style={styles.safeAre}>
@@ -135,87 +183,100 @@ const PacientViewPage = () => {
 					<Avatar size="$14" circular>
                         <Avatar.Image
                             accessibilityLabel="user"
-                            src={AvatarImg}
+                            src={String(pacient_avatar)}
                         />
                         <Avatar.Fallback backgroundColor={Colors.dotsGray} />
                     </Avatar>
 
 					<View style={styles.avatarTextView}>
-						<MontserratSemiText style={styles.avatarName}>Jose Palacios Dávila</MontserratSemiText>
-						<MontserratText>Primo</MontserratText>
+						<MontserratSemiText style={styles.avatarName}>{pacient_name}</MontserratSemiText>
+						<MontserratText>{pacient_kindred}</MontserratText>
 					</View>
 				</View>
 
 				
 					<TabBar headerPadding={24}>
 						<TabBar.Item title='Inhaladores' Icon={InhalerIcon} height={840}>
-							<View style={stylesTab.content}>
-							<View style={stylesTab.sectionView}>
-								<View style={stylesTab.titleView}>
-									<MontserratSemiText style={stylesTab.title}>Uso del inhalador</MontserratSemiText>
+							{pacientInhalers.length > 0 
+							?
+								<View style={stylesTab.content}>
+								<View style={stylesTab.sectionView}>
+									<View style={stylesTab.titleView}>
+										<MontserratSemiText style={stylesTab.title}>Uso del inhalador</MontserratSemiText>
 
-									<View>
-									<TagSelect 
-										tags={[
-											{label: "Inhalador casa", value: "all"},
-											{label: "Inhalador 2", value: "accepted"},
-										]}
-										selected={selected}
-										setSelected={setSelected}
-									/>
-								</View>
-									<MontserratText style={stylesTab.description}>Ultima conexión hace 10 segundos</MontserratText>
-								</View>
-
-								<View style={stylesTab.oneBlock}>
-									<SimpleWeatherCard Icon={PillIcon} color={Colors.greenLight} title='Inhalaciones desde la última recarga' value={132} type={FillType.outline} valueStyle={{ fontWeight: "bold", color: Colors.black }} />
-								</View>
-							</View>
-
-							<View style={stylesTab.sectionView}>
-								<View style={stylesTab.titleView}>
-									<MontserratSemiText style={stylesTab.title}>Resumen de uso</MontserratSemiText>
-								</View>
-
-								<View>
-									<View style={{ display: "flex", flexDirection: "row", gap: 8 }}>
-										<View style={{ marginTop: 14, width: 8, height: 8, borderRadius: 10, backgroundColor: "rgb(0, 106, 38)" }}></View>
 										<View>
-											<MontserratSemiText style={{ fontSize: 24 }}>10</MontserratSemiText>
-											<MontserratText style={{ color: Colors.darkGray }}>Inhalaciones</MontserratText>
-										</View>
+										<TagSelect 
+											tags={[
+												...pacientInhalers.map((inhaler) => ({
+													label: inhaler.title,
+													value: inhaler.id,
+													time: inhaler.connection,
+													inhalations: inhaler.pulsations,
+													battery: inhaler.battery  
+												})),
+											]}
+											selected={selectedInhaler}
+											setSelected={setSelectedInhaler}
+										/>
+									</View>
+										<MontserratText style={stylesTab.description}>
+											{`Ultima conexión ${selectedInhaler.time}, con un ${selectedInhaler.battery}% de batería`}
+										</MontserratText>
+									</View>
+
+									<View style={stylesTab.oneBlock}>
+										<SimpleWeatherCard Icon={PillIcon} color={Colors.greenLight} title='Inhalaciones desde la última recarga' value={selectedInhaler.inhalations} type={FillType.outline} valueStyle={{ fontWeight: "bold", color: Colors.black }} />
 									</View>
 								</View>
 
-								<View style={stylesTab.containerChart}>
+								<View style={stylesTab.sectionView}>
+									<View style={stylesTab.titleView}>
+										<MontserratSemiText style={stylesTab.title}>Resumen de uso</MontserratSemiText>
+									</View>
 
-									<BarChart
-										data={barData}
-										barWidth={42}
-										cappedBars
-										capColor={'rgb(0, 106, 38)'}
-										capThickness={2}
-										showGradient
-										gradientColor={'rgba(0, 106, 38, 0.2)'}
-										frontColor={'rgba(0, 106, 38, 0)'}
-										width={screenWidth - 48}
-										yAxisSide={yAxisSides.RIGHT}
-										yAxisThickness={0}
-										xAxisThickness={0}
-										dashGap={15}
-										dashWidth={7}
-										maxValue={Math.max(...barData.map(item => item.value)) + 1}
-										stepHeight={65}
-										initialSpacing={30}
-										spacing={35}
-										noOfSections={5}
-										rulesColor={Colors.borderColor}
-										rulesThickness={1}
-										disablePress
-									/>
+									<View>
+										<View style={{ display: "flex", flexDirection: "row", gap: 8 }}>
+											<View style={{ marginTop: 14, width: 8, height: 8, borderRadius: 10, backgroundColor: "rgb(0, 106, 38)" }}></View>
+											<View>
+												<MontserratSemiText style={{ fontSize: 24 }}>10</MontserratSemiText>
+												<MontserratText style={{ color: Colors.darkGray }}>Inhalaciones</MontserratText>
+											</View>
+										</View>
+									</View>
+
+									<View style={stylesTab.containerChart}>
+
+										<BarChart
+											data={barData}
+											barWidth={42}
+											cappedBars
+											capColor={'rgb(0, 106, 38)'}
+											capThickness={2}
+											showGradient
+											gradientColor={'rgba(0, 106, 38, 0.2)'}
+											frontColor={'rgba(0, 106, 38, 0)'}
+											width={screenWidth - 48}
+											yAxisSide={yAxisSides.RIGHT}
+											yAxisThickness={0}
+											xAxisThickness={0}
+											dashGap={15}
+											dashWidth={7}
+											maxValue={Math.max(...barData.map(item => item.value)) + 1}
+											stepHeight={65}
+											initialSpacing={30}
+											spacing={35}
+											noOfSections={5}
+											rulesColor={Colors.borderColor}
+											rulesThickness={1}
+											disablePress
+										/>
+									</View>
 								</View>
-							</View>
-							</View>
+								</View>
+							:
+								<MontserratText style={{ color: Colors.darkGray }}>¡Tu paciente NO tiene inhaladores!</MontserratText>
+							}
+							
 						</TabBar.Item>
 
 						<TabBar.Item title='Tratamiento' Icon={TreatmentIcon} height={800}>
@@ -233,8 +294,8 @@ const PacientViewPage = () => {
 											{label: "pendiente", value: "pending"},
 											{label: "rechazado", value: "denied"},
 										]}
-										selected={selected}
-										setSelected={setSelected}
+										selected={selectedTreatment}
+										setSelected={setSelectedTreatment}
 									/>
 								</View>
 
@@ -254,7 +315,7 @@ const PacientViewPage = () => {
 					</Dialog.Content>
 					<Dialog.Actions>
 						<Button onPress={hideDialog} backgroundColor={Colors.lightGrey} borderRadius={100}>Cancelar</Button>
-						<Button onPress={hideDialog} backgroundColor={Colors.redLight} color={Colors.red} borderRadius={100}>Dejar de monitorear</Button>
+						<Button onPress={deleteRelation} backgroundColor={Colors.redLight} color={Colors.red} borderRadius={100}>Dejar de monitorear</Button>
 					</Dialog.Actions>
 				</Dialog>
 			</Portal>
