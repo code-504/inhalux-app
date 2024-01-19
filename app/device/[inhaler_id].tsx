@@ -43,6 +43,8 @@ import VOCIcon from "@/assets/icons/total_dissolved_solids.svg"
 import MoreIcon from "@/assets/icons/more_vert.svg"
 import AirUnit from "@/assets/icons/ac_unit.svg"
 import ScanImage from "@/assets/images/inhaler-check.png"
+import DatePicker from '@/components/DatePicker'
+import { getDate } from '@/helpers/date'
 
 NavigationBar.setBackgroundColorAsync("transparent")
 NavigationBar.setButtonStyleAsync("dark")
@@ -84,32 +86,6 @@ const Page = () => {
 		return () => clearInterval(interval);
 	}, []);
 
-	const handleUpdateInhaler = async() => {
-		const { data, error } = await supabase
-			.from('inhalers')
-			.update({ name: inhalerName })
-			.eq('id', inhaler_id)
-			.select()
-
-		setItem((prevItem) => {
-			if (prevItem) {
-			  return { ...prevItem, title: inhalerName };
-			}
-			return prevItem;
-		});
-
-		setSupaInhalers(prevSupaInhalers => {
-			return prevSupaInhalers.map((inhaler) =>
-				inhaler.id === inhaler_id ? { ...inhaler, title: inhalerName } : inhaler
-			);
-		});
-
-		console.log("supaInhalers ANTES", supaInhalers);
-		console.log("item", item);
-		console.log("supaInhalers DESPUES", supaInhalers);
-
-	}
-
 	const handleDeleteInhaler = async() => {
 		
 		const { error } = await supabase
@@ -129,9 +105,6 @@ const Page = () => {
 	// ref
 	const bottomSheetRef = useRef<BottomSheetModal>(null);
 
-	// variables
-	const snapPoints = useMemo(() => ['50%', '80%'], []);
-  
 	// callbacks
 	const handleOpenPress = useCallback(() => {
 		bottomSheetRef.current?.present();
@@ -139,23 +112,12 @@ const Page = () => {
 
 	let scrollOffsetY = useRef(new Animated.Value(0)).current;
 
-	const stadisticListModalRef = useRef<BottomSheetModal>(null);
-
 	const barData = [
 		{value: 3, label: '27 nov'},
 		{value: 7, label: '28 nov'},
 		{value: 5, label: '29 nov'},
 		{value: 12, label: '30 nov'},
 	];
-
-	/*
-		const barData = [
-		{value: 30, label: '27 nov'},
-		{value: 50, label: '28 nov'},
-		{value: 10, label: '29 nov'},
-		{value: 50, label: '30 nov'},
-	];
-	*/
 
 	const screenWidth = Dimensions.get("window").width - 48;
 
@@ -173,6 +135,12 @@ const Page = () => {
 	}
 
 	const hideDialog = () => setDialog(false);
+
+	console.log("Santa is cumming for you")
+
+	const onDateChange = (startDate: string | null, endDate: string | null) => {
+		console.log(startDate, endDate)
+	}
 
   	return (
 		<>
@@ -293,6 +261,12 @@ const Page = () => {
 								<View style={stylesTab.sectionView}>
 									<View style={stylesTab.titleView}>
 										<MontserratSemiText style={stylesTab.title}>Resumen de uso</MontserratSemiText>
+
+										<DatePicker 
+											onDateChange={onDateChange}
+											startRange={getDate(-7)}
+											endRange={getDate(0)}
+										/>
 									</View>
 
 									<View>
@@ -667,7 +641,7 @@ const stylesTab = StyleSheet.create({
 	titleView: {
 		display: "flex",
 		flexDirection: "column",
-		gap: 4
+		gap: 16
 	},
 	titleContent: {
 		display: "flex",

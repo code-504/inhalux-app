@@ -23,6 +23,8 @@ import { supabase } from '@/services/supabase';
 import { useAuth } from '@/context/Authprovider';
 import { useRelations } from '@/context/RelationsProvider';
 import { getPacientInhalers } from '@/helpers/pacient_view';
+import DatePicker from '@/components/DatePicker';
+import { getDate } from '@/helpers/date';
 
 const screenWidth = Dimensions.get("window").width - 48;
 
@@ -148,6 +150,10 @@ const PacientViewPage = () => {
 		navigation.goBack();
 	}
 
+	const onDateChange = (startDate: string | null, endDate: string | null) => {
+		console.log(startDate, endDate)
+	}
+
     return (
         <View style={styles.safeAre}>
             <Stack.Screen options={{
@@ -231,6 +237,12 @@ const PacientViewPage = () => {
 								<View style={stylesTab.sectionView}>
 									<View style={stylesTab.titleView}>
 										<MontserratSemiText style={stylesTab.title}>Resumen de uso</MontserratSemiText>
+
+										<DatePicker 
+											onDateChange={onDateChange}
+											startRange={getDate(-7)}
+											endRange={getDate(0)}
+										/>
 									</View>
 
 									<View>
