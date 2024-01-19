@@ -235,7 +235,7 @@ const PacientViewPage = () => {
 								</View>
 
 								<View style={stylesTab.sectionView}>
-									<View style={stylesTab.titleView}>
+									<View style={stylesTab.subtitleView}>
 										<MontserratSemiText style={stylesTab.title}>Resumen de uso</MontserratSemiText>
 
 										<DatePicker 
@@ -385,10 +385,17 @@ const stylesTab = StyleSheet.create({
 		flexDirection: "column",
 		gap: 16,
 	},
+	subtitleView: {
+		display: "flex",
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center"
+	},
 	titleView: {
 		display: "flex",
-		flexDirection: "column",
-		gap: 16
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center"
 	},
 	titleContent: {
 		display: "flex",
