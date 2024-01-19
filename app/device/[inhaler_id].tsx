@@ -138,9 +138,9 @@ const Page = () => {
 
 	console.log("Santa is cumming for you")
 
-	const onDateChange = (startDate: string | null, endDate: string | null) => {
-		console.log(startDate, endDate)
-	}
+	const onDateChange = useCallback((dateRange: { start: string | null; end: string | null; }) => {
+		console.log(dateRange)
+	}, [])
 
   	return (
 		<>

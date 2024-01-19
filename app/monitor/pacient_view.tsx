@@ -150,8 +150,8 @@ const PacientViewPage = () => {
 		navigation.goBack();
 	}
 
-	const onDateChange = (startDate: string | null, endDate: string | null) => {
-		console.log(startDate, endDate)
+	const onDateChange = (dateRange: { start: string | null; end: string | null; }) => {
+		//console.log(dateRange)
 	}
 
     return (
