@@ -1,5 +1,5 @@
 import { View, Keyboard, StyleSheet } from 'react-native'
-import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
+import React, { Dispatch, SetStateAction, memo, useCallback, useEffect, useRef, useState } from 'react'
 import { ScrollView } from 'tamagui';
 import Ripple from 'react-native-material-ripple';
 import Colors from '@/constants/Colors';
@@ -7,8 +7,7 @@ import { MontserratSemiText } from '@/components/StyledText';
 
 interface TagSelectProps {
     tags: Tag[];
-    selected: Tag;
-    setSelected: Dispatch<SetStateAction<Tag>>;
+    onTabChange ?: (index: number) => void;
 }
 
 export interface Tag {
@@ -16,21 +15,18 @@ export interface Tag {
     value: string;
 }
 
-const TagSelect = ({ tags, selected, setSelected }: TagSelectProps) => {
+const TagSelect = ({ tags, onTabChange }: TagSelectProps) => {
 
     const [activeTab, setActiveTab] = useState(0);
-
-    useEffect(() => {
-        if (tags.length > 0)
-            setSelected(tags[0]);
-    }, [])
     
-    const handleTabPress = (index: number) => {
-		Keyboard.dismiss();
-
-		setActiveTab(index);
-        setSelected(tags[index])
-	};
+    const handleTabPress = useCallback(
+        (index: number) => {
+          Keyboard.dismiss();
+          setActiveTab(index);
+          onTabChange  && onTabChange(index);
+        },
+        [onTabChange]
+    );
 
     return (
         <View>
@@ -61,7 +57,7 @@ const TagSelect = ({ tags, selected, setSelected }: TagSelectProps) => {
     )
 }
 
-export default TagSelect
+export default memo(TagSelect)
 
 const styles = StyleSheet.create({
     container: {

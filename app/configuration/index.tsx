@@ -10,6 +10,7 @@ import BackgroundImage from "@/assets/images/background.png"
 import ArrowBackIcon from "@/assets/icons/arrow_back_simple.svg"
 import NotificationIcon from "@/assets/icons/notifications_active.svg"
 import PasswordIcon from "@/assets/icons/encrypted.svg"
+import CheckIcon from "@/assets/icons/check_box.svg"
 import LogoutIcon from "@/assets/icons/move_item.svg"
 import ShareIcon from "@/assets/icons/share.svg"
 import { useAuth } from '@/context/Authprovider'
@@ -105,6 +106,11 @@ const ConfigurationScreen = () => {
               <CardOptionsList.ItemView onPressFunction={() => router.push("/configuration/notifications")}>
                 <NotificationIcon />
                 <CardOptionsList.ItemText>Notificaciones</CardOptionsList.ItemText>
+              </CardOptionsList.ItemView>
+
+              <CardOptionsList.ItemView onPressFunction={() => router.push("/configuration/permissions")}>
+                <CheckIcon />
+                <CardOptionsList.ItemText>Configurar permisos</CardOptionsList.ItemText>
               </CardOptionsList.ItemView>
 
               <CardOptionsList.ItemView onPressFunction={() => router.push("/configuration/password")}>

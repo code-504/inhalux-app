@@ -36,7 +36,7 @@ import { useFocusEffect, useNavigation } from 'expo-router';
 import { BottomSheetState, ButtonLocationState, InitLocation, LocationPermissions, LocationPoints, LocationType } from '../../interfaces/Location';
 
 // Resources
-import AddIcon from "@/assets/icons/add.svg"
+import LocationOptionIcon from "@/assets/icons/location_gear.svg"
 import inhalerList from "@/assets/images/inhaler-list.png"
 import StoreIcon from "@/assets/icons/store.svg"
 import LocationUnknowIcon from "@/assets/icons/location_searching.svg"
@@ -728,7 +728,8 @@ const renderStoreItem = useCallback(
             <HeaderAction 
               title="Ubicación"
               subtitle="Encuentra tu inhaLux facilmente"
-              Icon={AddIcon}
+              Icon={LocationOptionIcon}
+              color={Colors.lightGrey}
               action={() => requestPermissions()}
             />
           </View>

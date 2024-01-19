@@ -14,7 +14,7 @@ import { BarChart, yAxisSides } from 'react-native-gifted-charts';
 
 // Resources
 import MoreIcon from "@/assets/icons/more_vert.svg"
-import InhalerIcon from "@/assets/icons/inhaler_simple.svg" 
+import InhalerIcon from "@/assets/icons/inhaler.svg";
 import TreatmentIcon from "@/assets/icons/prescriptions.svg" 
 import PillIcon from "@/assets/icons/pill.svg"
 import TagSelect, { Tag } from '@/components/TagSelect';

@@ -96,16 +96,16 @@ const styles = StyleSheet.create({
         flexDirection: "column",
     },
     upView: {
-        flex: 0.3,
+        flex: 0.35,
         display: "flex",
         flexDirection: "column",
+        justifyContent: "flex-end",
         gap: 12,
-        paddingTop: 48,
-        paddingBottom: 24,
-        paddingHorizontal: 24
+        paddingVertical: 48,
+        paddingHorizontal: 24,
     },
     downView: {
-        flex: 0.7,
+        flex: 0.65,
 		display: "flex",
 		flexDirection: "column",
 		justifyContent: "space-between",
@@ -113,8 +113,8 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 38,
         borderTopRightRadius: 38,
         paddingTop: 42,
-		paddingBottom: 12,
-		paddingHorizontal: 24
+        paddingVertical: 42,
+        paddingHorizontal: 24
     },
     title: {
         fontSize: 32,

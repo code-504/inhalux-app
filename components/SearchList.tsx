@@ -49,10 +49,10 @@ const SearchList = ({ title, state, setState, noData, ListData, placeHolder }: S
       }, [debouncedSearchTerm]);
 
     useEffect(() => {
-        if (!state.data)
-            setHasData(false)
-        else
+        if (state.data.length > 0)
             setHasData(true)
+        else
+            setHasData(false)
     }, [])
 
     const clearInput = () => {
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
     imageEmpy: {
         marginTop: 24,
         height: "100%",
-        maxHeight: '20%',
+        maxHeight: '28%',
     	aspectRatio: 1 / 1,
     },
     infoText: {

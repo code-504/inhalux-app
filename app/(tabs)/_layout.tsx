@@ -80,6 +80,7 @@ export default function TabLayout() {
                 <Tabs.Screen
                     name="treatment"
                     options={{
+                        headerShown: false,
                         tabBarIcon: ({ color, focused }) => <TabBarIcon Icon={TreatmentIcon} color={color} focused={focused} title='Tratamiento' />,
                     }}
                 />

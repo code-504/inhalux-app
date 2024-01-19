@@ -130,7 +130,7 @@ const ProfilePage = () => {
   return (
     <View style={styles.safeArea}>
       <ImageBackground source={BackgroundImage} style={styles.imageBackground} />
-      <ScrollView style={styles.content} contentContainerStyle={ { minHeight: "100%", } }>
+      <ScrollView style={styles.content} contentContainerStyle={ { flexGrow: 1 } }>
     <View style={{ minHeight: Dimensions.get("window").height - 86 }}>
       <View style={styles.upView}>
 

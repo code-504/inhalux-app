@@ -1,5 +1,5 @@
 import Colors from '@/constants/Colors'
-import { View, StyleSheet, ImageBackground, BackHandler, Pressable, Dimensions, Keyboard, Alert, NativeSyntheticEvent, TextInputChangeEventData } from 'react-native';
+import { View, StyleSheet, ImageBackground, BackHandler, Pressable, Dimensions, Keyboard, Alert, NativeSyntheticEvent, TextInputChangeEventData, Share } from 'react-native';
 import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/components/StyledText';
 import { BottomSheetBackdropProps, BottomSheetFlatList, BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -27,9 +27,10 @@ import ShareIcon from "@/assets/icons/share.svg"
 import QRScannerIcon from "@/assets/icons/qr_code_scanner.svg"
 import LinkIcon from "@/assets/icons/link.svg"
 import AddIcon from "@/assets/icons/add.svg"
+import monitorBackground from "@/assets/images/shares-empty.png"
 import pacientBackground from "@/assets/images/pacients-empty.png"
 import ShareOptionsIcon from "@/assets/icons/share_options.svg"
-import { ListMonitorState } from '@/interfaces/Monitor';
+import AddPersonIcon from "@/assets/icons/person_add.svg"
 
 export default function TabThreeScreen() {
 
@@ -61,9 +62,9 @@ export default function TabThreeScreen() {
 	const monitorIndex = useRef<number>(0);
 	
 	//variables
-	const addSnapPoints = useMemo(() => ["28%",],[]);
+	const addSnapPoints = useMemo(() => ["25%",],[]);
 
-	const generalSnapPoints = useMemo(() => ['40%',], []);
+	const generalSnapPoints = useMemo(() => ['30%',], []);
 
 	const monitorSnapPoints = useMemo(() => ['72%', '100%'], []);
 	
@@ -296,7 +297,7 @@ export default function TabThreeScreen() {
 								setState={setShareState}
 								noData={{
 									title: "No hay monitores",
-									BackgroundImage: pacientBackground,
+									BackgroundImage: monitorBackground,
 									message: "Comparte la información de tu inhaLux con los que más quieres"
 								}}
 								ListData={
@@ -328,13 +329,20 @@ export default function TabThreeScreen() {
 				)}
 			>
 				<View style={stylesBottom.container}>
-					<MontserratSemiText style={stylesBottom.title}>{`¿Qué deseas hacer?`}</MontserratSemiText>
-					<Button onPress={() => openShareCodeSheet()} style={styles.addButton} size="$6" borderRadius={'$radius.10'}>
-						<MontserratSemiText style={{color: Colors.black}}>Compartir mi Cuenta</MontserratSemiText>
-					</Button>
-					<Button onPress={() => openAddPacientSheet()} style={styles.addButton} size="$6" borderRadius={'$radius.10'}>
-						<MontserratSemiText>Agregar una Cuenta</MontserratSemiText>
-					</Button>
+					<View style={stylesBottom.titleContent}>
+						<MontserratSemiText style={stylesBottom.title}>¿Qué deseas hacer?</MontserratSemiText>
+					</View>
+					
+					<View style={{ gap: 16 }}>
+						<Button onPress={() => openShareCodeSheet()} backgroundColor={Colors.lightGrey} size="$6" borderRadius={'$radius.10'}>
+							<ShareIcon />
+							<MontserratSemiText style={{color: Colors.black}}>Compartir mi Cuenta</MontserratSemiText>
+						</Button>
+						<Button onPress={() => openAddPacientSheet()} backgroundColor={Colors.lightGrey} size="$6" borderRadius={'$radius.10'}>
+							<AddPersonIcon />
+							<MontserratSemiText>Agregar una Cuenta</MontserratSemiText>
+						</Button>
+					</View>
 				</View>
 
 			</BottomSheetModal>
@@ -515,7 +523,7 @@ const stylesBottom = StyleSheet.create({
 	container: {
 	  display: "flex",
 	  flexDirection: "column",
-	  gap: 32,
+	  gap: 16,
 	  paddingHorizontal: 24,
 	  paddingTop: 16
 	},

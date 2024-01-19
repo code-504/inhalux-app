@@ -115,9 +115,6 @@ const TabBar = memo(({ children, headerPadding }: TabProps) => {
 				scrollEnabled={false}
 				contentContainerStyle={styles.scrollContainer}
                 scrollEventThrottle={16}
-                style={{
-                    height: heightScroll
-                }}
 			>
                 
                 {

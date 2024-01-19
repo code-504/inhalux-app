@@ -100,6 +100,7 @@ function RootLayoutNav() {
             <Stack.Screen name="device/edit_name" />
             <Stack.Screen name="configuration/index" options={{ header: () => <NormalHeader positionHeader='relative' title="Configuración" /> }} />
             <Stack.Screen name="configuration/profile" options={{ header: () => <NormalHeader positionHeader='relative' title="Perfil de usuario" /> }} />
+            <Stack.Screen name="configuration/permissions" />
             <Stack.Screen name="configuration/password" />
             <Stack.Screen name="configuration/notifications" />
             <Stack.Screen name="configuration/shareoptions" />

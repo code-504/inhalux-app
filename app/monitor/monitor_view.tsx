@@ -19,6 +19,7 @@ import EditIcon from "@/assets/icons/edit.svg"
 import { supabase } from '@/services/supabase';
 import { useAuth } from '@/context/Authprovider';
 import { useRelations } from '@/context/RelationsProvider';
+import BlurredBackground from '@/components/BlurredBackground';
 
 interface ListItem {
     id: number;
