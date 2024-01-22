@@ -14,7 +14,7 @@ import { BarChart, yAxisSides } from 'react-native-gifted-charts';
 
 // Resources
 import MoreIcon from "@/assets/icons/more_vert.svg"
-import InhalerIcon from "@/assets/icons/inhaler_simple.svg" 
+import InhalerIcon from "@/assets/icons/inhaler.svg";
 import TreatmentIcon from "@/assets/icons/prescriptions.svg" 
 import PillIcon from "@/assets/icons/pill.svg"
 import TagSelect, { Tag } from '@/components/TagSelect';
@@ -22,7 +22,13 @@ import HistorialSearch from '@/components/HistorialSearch';
 import { supabase } from '@/services/supabase';
 import { useAuth } from '@/context/Authprovider';
 import { useRelations } from '@/context/RelationsProvider';
+<<<<<<< HEAD
 import { checkIfPacientHasTreatment, getHistorialData, getPacientInhalers } from '@/helpers/pacient_view';
+=======
+import { getPacientInhalers } from '@/helpers/pacient_view';
+import DatePicker from '@/components/DatePicker';
+import { getDate } from '@/helpers/date';
+>>>>>>> 6bafa90a5cda59c085cda379058ccb9350a8c295
 
 const screenWidth = Dimensions.get("window").width - 48;
 
@@ -162,12 +168,15 @@ const PacientViewPage = () => {
 		navigation.goBack();
 	}
 
+	const onDateChange = (dateRange: { start: string | null; end: string | null; }) => {
+		//console.log(dateRange)
+	}
+
     return (
         <View style={styles.safeAre}>
-
             <Stack.Screen options={{
                 header: () => 
-                    <NormalHeader positionHeader='absolute' title={ "Nombre Paciente" } animHeaderValue={scrollOffsetY}>
+                    <NormalHeader title={ "Nombre Paciente" } animHeaderValue={scrollOffsetY}>
                             
                         <Menu
                             visible={visible}
@@ -209,7 +218,7 @@ const PacientViewPage = () => {
 				</View>
 
 				
-					<TabBar headerPadding={24}>
+					<TabBar.TabBar headerPadding={24}>
 						<TabBar.Item title='Inhaladores' Icon={InhalerIcon} height={840}>
 							{pacientInhalers.length > 0 
 							?
@@ -244,8 +253,14 @@ const PacientViewPage = () => {
 								</View>
 
 								<View style={stylesTab.sectionView}>
-									<View style={stylesTab.titleView}>
+									<View style={stylesTab.subtitleView}>
 										<MontserratSemiText style={stylesTab.title}>Resumen de uso</MontserratSemiText>
+
+										<DatePicker 
+											onDateChange={onDateChange}
+											startRange={getDate(-7)}
+											endRange={getDate(0)}
+										/>
 									</View>
 
 									<View>
@@ -293,7 +308,7 @@ const PacientViewPage = () => {
 							
 						</TabBar.Item>
 
-						<TabBar.Item title='Tratamiento' Icon={TreatmentIcon} height={800}>
+						<TabBar.Item title='Tratamiento' Icon={TreatmentIcon} height={1000}>
 							<View style={stylesTab.content}>
 								<View>
 									<MontserratSemiText>Historial</MontserratSemiText>
@@ -317,7 +332,7 @@ const PacientViewPage = () => {
 									/>
 							</View>	
 						</TabBar.Item>
-					</TabBar>
+					</TabBar.TabBar>
             </ScrollView>
 
 			<Portal>
@@ -387,10 +402,17 @@ const stylesTab = StyleSheet.create({
 		flexDirection: "column",
 		gap: 16,
 	},
+	subtitleView: {
+		display: "flex",
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center"
+	},
 	titleView: {
 		display: "flex",
-		flexDirection: "column",
-		gap: 16
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center"
 	},
 	titleContent: {
 		display: "flex",

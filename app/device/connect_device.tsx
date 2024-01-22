@@ -2,17 +2,14 @@ import { View, Text, StyleSheet, ImageBackground, ScrollView, Animated, Dimensio
 import React, { useEffect, useRef, useState } from 'react'
 import useBLE from '@/hooks/useBLE'
 import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/components/StyledText'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import { Button, Input, Label, Spinner } from 'tamagui'
 import Colors from '@/constants/Colors'
-import { Stack, router } from 'expo-router'
+import { Stack } from 'expo-router'
 import * as NavigationBar from 'expo-navigation-bar';
 import NormalHeader from '@/components/Headers/NormalHeader'
 
 // Resources
 import BackgroundImage from "@/assets/images/background.png"
-
-import { Picker, DatePicker } from 'react-native-wheel-datepicker';
 
 NavigationBar.setBackgroundColorAsync(Colors.white);
 NavigationBar.setButtonStyleAsync("dark");
@@ -99,16 +96,16 @@ const styles = StyleSheet.create({
         flexDirection: "column",
     },
     upView: {
-        flex: 0.3,
+        flex: 0.35,
         display: "flex",
         flexDirection: "column",
+        justifyContent: "flex-end",
         gap: 12,
-        paddingTop: 48,
-        paddingBottom: 24,
-        paddingHorizontal: 24
+        paddingVertical: 48,
+        paddingHorizontal: 24,
     },
     downView: {
-        flex: 0.7,
+        flex: 0.65,
 		display: "flex",
 		flexDirection: "column",
 		justifyContent: "space-between",
@@ -116,8 +113,8 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 38,
         borderTopRightRadius: 38,
         paddingTop: 42,
-		paddingBottom: 12,
-		paddingHorizontal: 24
+        paddingVertical: 42,
+        paddingHorizontal: 24
     },
     title: {
         fontSize: 32,

@@ -111,7 +111,7 @@ const ShareOptionsPage = () => {
                     [{ nativeEvent: { contentOffset: { y: scrollOffsetY}}}],
                     {useNativeDriver: false}
                 )}
-                contentContainerStyle={{ flex: 1 }}
+                contentContainerStyle={{ flexGrow: 1 }}
             >
 
                     <View style={styles.upView}>
@@ -281,25 +281,24 @@ const styles = StyleSheet.create({
         height: Dimensions.get('window').height,
 	},
     content: {
-        flex: 1,
         display: "flex",
         flexDirection: "column",
     },
     upView: {
-        flex: 0.35,
         display: "flex",
         flexDirection: "column",
         justifyContent: "flex-end",
         gap: 12,
-        paddingVertical: 48,
+        paddingBottom: 48,
+        height: 350,
         paddingHorizontal: 24,
     },
     downView: {
-        flex: 0.65,
         backgroundColor: Colors.white,
         borderTopLeftRadius: 38,
         borderTopRightRadius: 38,
-        paddingVertical: 42
+        paddingVertical: 42,
+        height: "100%"
     },
     title: {
         fontSize: 32,

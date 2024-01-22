@@ -1,14 +1,12 @@
 import Colors from '@/constants/Colors'
-import { View, StyleSheet, ImageBackground, BackHandler, Pressable, Dimensions, Keyboard, Alert } from 'react-native';
+import { View, StyleSheet, ImageBackground, BackHandler, Pressable, Dimensions, Keyboard, Alert, NativeSyntheticEvent, TextInputChangeEventData, Share } from 'react-native';
 import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/components/StyledText';
 import { BottomSheetBackdropProps, BottomSheetFlatList, BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useMonitor } from '@/context/MonitorProvider';
-import BlurredDeviceBackground from '@/components/blurredBackground/BlurredDeviceBackground';
-import { Tabs, router, useFocusEffect, useNavigation } from 'expo-router';
+import { router, useFocusEffect, useNavigation } from 'expo-router';
 import { useRelations } from '@/context/RelationsProvider';
-import MonitorHeader from '@/components/Headers/MonitorHeader';
-import BlurredBackgroundNew from '@/components/blurredBackground/BlurredBackgroundNew';
+import BlurredBackground from '@/components/BlurredBackground';
 import { AlertDialog, Button, Input } from 'tamagui';
 import HeaderAction from '@/components/HeaderAction';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -20,6 +18,7 @@ import TabBar from '@/components/TabBar';
 import ContactCardPatient from '@/components/Card/ContactCardPacients';
 import ContactCardShare from '@/components/Card/ContactCardShare';
 import SearchList from '@/components/SearchList';
+import UserHeader from '@/components/Headers/UserHeader';
 
 // Resources
 import BackgroundImage from "@/assets/images/background.png"
@@ -28,7 +27,10 @@ import ShareIcon from "@/assets/icons/share.svg"
 import QRScannerIcon from "@/assets/icons/qr_code_scanner.svg"
 import LinkIcon from "@/assets/icons/link.svg"
 import AddIcon from "@/assets/icons/add.svg"
+import monitorBackground from "@/assets/images/shares-empty.png"
 import pacientBackground from "@/assets/images/pacients-empty.png"
+import ShareOptionsIcon from "@/assets/icons/share_options.svg"
+import AddPersonIcon from "@/assets/icons/person_add.svg"
 
 export default function TabThreeScreen() {
 
@@ -41,7 +43,6 @@ export default function TabThreeScreen() {
 	const [addCode , setAddCode] = useState("");
 	const [addCodeError, setAddCodeError] = useState("");
 
-	const { optionsOpen, setOptionsOpen } = useMonitor();
 	const { pacientState, setPacientState, shareState, setShareState } = useRelations();
 	const keyboardHook = useKeyboard();
 	const navigator = useNavigation();
@@ -57,14 +58,13 @@ export default function TabThreeScreen() {
 	//refs
 	const monitorListModalRef = useRef<BottomSheetModal>(null);
 	const addPacientModalRef  = useRef<BottomSheetModal>(null);
-	const bottomSheetRef = useRef<BottomSheetModal>(null);//El general
+	const bottomSheetRef = useRef<BottomSheetModal>(null); //El general
 	const monitorIndex = useRef<number>(0);
-	const [showBottomBar, setShowBottomBar] = useState<number>(0);
 	
 	//variables
-	const addSnapPoints = useMemo(() => ["28%",],[]);
+	const addSnapPoints = useMemo(() => ["25%",],[]);
 
-	const generalSnapPoints = useMemo(() => ['40%',], []);
+	const generalSnapPoints = useMemo(() => ['30%',], []);
 
 	const monitorSnapPoints = useMemo(() => ['72%', '100%'], []);
 	
@@ -73,7 +73,6 @@ export default function TabThreeScreen() {
 	// callbacks
 	const handleMonitorSheetChange = useCallback((index: number) => {
 		monitorIndex.current = index;
-		setShowBottomBar(index)
 
 		if (index === 0) 
 			Keyboard.dismiss()
@@ -87,7 +86,6 @@ export default function TabThreeScreen() {
 		bottomSheetRef.current?.dismiss();
 		addPacientModalRef.current?.present();
 		Keyboard.dismiss();
-		setOptionsOpen(true)
 	}
 
 	const openShareCodeSheet = () => {
@@ -96,7 +94,6 @@ export default function TabThreeScreen() {
 	}
 
 	//Funcs
-
 	const handleAddPatient = async() => {
 		console.log("pacientState: ", pacientState);
 		
@@ -185,11 +182,8 @@ export default function TabThreeScreen() {
 	);
 
 	useEffect(() => {
-		if (!keyboardHook.keyboardShown) {
-			Keyboard.dismiss()
-		} else {
-			monitorListModalRef.current?.expand()
-		}		
+		if (keyboardHook.keyboardShown)
+			monitorListModalRef.current?.expand()	
 	}, [keyboardHook.keyboardShown])
 		
 	useFocusEffect(
@@ -203,13 +197,6 @@ export default function TabThreeScreen() {
 					navigator.goBack()
 			}
 
-			/*if (optionsOpen) {
-				setOptionsOpen(false)
-				addPacientModalRef.current?.close()
-			} else
-				if (navigator.canGoBack())
-					navigator.goBack()*/
-
 			return true;
 		  };
 	  
@@ -221,17 +208,20 @@ export default function TabThreeScreen() {
 			BackHandler.removeEventListener(
 			  'hardwareBackPress', onBackPress
 			);
-		}, [optionsOpen])
+		}, [])
 	);
 
 	return (
 		<View style={styles.viewArea}>
-
-			<ImageBackground source={BackgroundImage} style={styles.imageBackground} />
-
 			<BottomSheetModalProvider>
 
-				<MonitorHeader />
+				<ImageBackground source={BackgroundImage} style={styles.imageBackground} />
+
+				<UserHeader showUserName={false} transparent>
+					<Button onPress={() => router.push("/configuration/shareoptions")} backgroundColor={Colors.white} alignSelf="center" size="$6" circular>
+						<ShareOptionsIcon />
+					</Button>
+				</UserHeader>
 					
 				<View style={[ styles.container, styles.headerView]}>
 					<HeaderAction 
@@ -255,18 +245,19 @@ export default function TabThreeScreen() {
 					enableOverDrag={false}
 					bottomInset={bottomSafeArea - 24}
 					backdropComponent={(backdropProps: BottomSheetBackdropProps) => (
-						<BlurredBackgroundNew
+						<BlurredBackground
 						  {...backdropProps}
 						  appearsOnIndex={1}
 						  disappearsOnIndex={0}
 						  backgroundColor={Colors.white}
 						  opacity={1}
 						  pressBehavior={'collapse'}
+						  name='Monitor'
 						/>
 					  )}
 				>
 
-					<TabBar headerPadding={24}>
+					<TabBar.TabBar headerPadding={24}>
 						<TabBar.Item Icon={PersonIcon} title='Pacientes' height={(Dimensions.get("screen").height * 0.75) - bottomSafeArea + 12}>
 							
 							<SearchList 
@@ -306,7 +297,7 @@ export default function TabThreeScreen() {
 								setState={setShareState}
 								noData={{
 									title: "No hay monitores",
-									BackgroundImage: pacientBackground,
+									BackgroundImage: monitorBackground,
 									message: "Comparte la información de tu inhaLux con los que más quieres"
 								}}
 								ListData={
@@ -319,7 +310,7 @@ export default function TabThreeScreen() {
 								}
 							/>
 						</TabBar.Item>
-					</TabBar>
+					</TabBar.TabBar>
 				</BottomSheetModal>
 			</BottomSheetModalProvider>
 
@@ -327,16 +318,31 @@ export default function TabThreeScreen() {
 				ref={bottomSheetRef}
 				snapPoints={generalSnapPoints}
 				index={0}
-				backdropComponent={BlurredDeviceBackground}
+				backdropComponent={(backdropProps: BottomSheetBackdropProps) => (
+					<BlurredBackground
+					  {...backdropProps}
+					  appearsOnIndex={0}
+					  disappearsOnIndex={-1}
+					  backgroundColor={Colors.black}
+					  pressBehavior={'close'}
+					/>
+				)}
 			>
 				<View style={stylesBottom.container}>
-					<MontserratSemiText style={stylesBottom.title}>{`¿Qué deseas hacer?`}</MontserratSemiText>
-					<Button onPress={() => openShareCodeSheet()} style={styles.addButton} size="$6" borderRadius={'$radius.10'}>
-						<MontserratSemiText style={{color: Colors.black}}>Compartir mi Cuenta</MontserratSemiText>
-					</Button>
-					<Button onPress={() => openAddPacientSheet()} style={styles.addButton} size="$6" borderRadius={'$radius.10'}>
-						<MontserratSemiText>Agregar una Cuenta</MontserratSemiText>
-					</Button>
+					<View style={stylesBottom.titleContent}>
+						<MontserratSemiText style={stylesBottom.title}>¿Qué deseas hacer?</MontserratSemiText>
+					</View>
+					
+					<View style={{ gap: 16 }}>
+						<Button onPress={() => openShareCodeSheet()} backgroundColor={Colors.lightGrey} size="$6" borderRadius={'$radius.10'}>
+							<ShareIcon />
+							<MontserratSemiText style={{color: Colors.black}}>Compartir mi Cuenta</MontserratSemiText>
+						</Button>
+						<Button onPress={() => openAddPacientSheet()} backgroundColor={Colors.lightGrey} size="$6" borderRadius={'$radius.10'}>
+							<AddPersonIcon />
+							<MontserratSemiText>Agregar una Cuenta</MontserratSemiText>
+						</Button>
+					</View>
 				</View>
 
 			</BottomSheetModal>
@@ -349,7 +355,7 @@ export default function TabThreeScreen() {
 				snapPoints={addSnapPoints}
 				enableOverDrag={false}
 				backdropComponent={(backdropProps: BottomSheetBackdropProps) => (
-					<BlurredBackgroundNew
+					<BlurredBackground
 						{...backdropProps}
 						appearsOnIndex={0}
 						disappearsOnIndex={-1}
@@ -499,10 +505,11 @@ const styles = StyleSheet.create({
 	},
 	imageBackground: {
 		position: "absolute",
+		width: Dimensions.get("window").width,
+		height: Dimensions.get("window").height,
 		resizeMode: 'cover',
-		width: Dimensions.get('window').width,
-		height: Dimensions.get('window').height,
-		zIndex: -2
+		justifyContent: 'center',
+    	alignItems: 'center',
 	},
 })
 
@@ -516,7 +523,7 @@ const stylesBottom = StyleSheet.create({
 	container: {
 	  display: "flex",
 	  flexDirection: "column",
-	  gap: 32,
+	  gap: 16,
 	  paddingHorizontal: 24,
 	  paddingTop: 16
 	},

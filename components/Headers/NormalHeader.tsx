@@ -7,7 +7,6 @@ import { useNavigation } from 'expo-router'
 
 // Resources
 import ArrowBackIcon from "@/assets/icons/arrow_back.svg";
-import { MontserratSemiText } from '../StyledText'
 
 interface HeaderProps {
     title: string;
@@ -41,8 +40,8 @@ export default function NormalHeader({ title, animHeaderValue, positionHeader, c
     }
 
     return (
-        <Animated.View style={[ styles.header, animatedStyle, { position: positionHeader ? positionHeader : "absolute", }]}>
-            <SafeAreaView>  
+        <Animated.View style={[ styles.header, animatedStyle, { position: positionHeader ? positionHeader : "absolute" }]}>
+            <SafeAreaView style={styles.safeAre}>  
                 
                     <View style={{         
                         position: "relative",
@@ -80,9 +79,11 @@ export default function NormalHeader({ title, animHeaderValue, positionHeader, c
 const styles = StyleSheet.create({
     header: {
         width: "100%",
+    },
+    safeAre: {
+        paddingTop: 24,
+        paddingBottom: 13,
         paddingHorizontal: 24,
-        paddingTop: 32,
-        paddingBottom: 4,
     },
     headerTitle: {
         width: "100%",

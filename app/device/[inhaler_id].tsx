@@ -19,7 +19,7 @@ import * as NavigationBar from 'expo-navigation-bar';
 import TabBarMultiple from '@/components/TabBarMultiple'
 import { Dialog, Divider, Menu, Portal } from 'react-native-paper'
 import Ripple from 'react-native-material-ripple'
-import BlurredBackgroundNew from '@/components/blurredBackground/BlurredBackgroundNew'
+import BlurredBackground from '@/components/BlurredBackground'
 
 // Resources
 import inhalerShadow from "@/assets/images/inhaler-shadow-img.png"
@@ -43,6 +43,8 @@ import VOCIcon from "@/assets/icons/total_dissolved_solids.svg"
 import MoreIcon from "@/assets/icons/more_vert.svg"
 import AirUnit from "@/assets/icons/ac_unit.svg"
 import ScanImage from "@/assets/images/inhaler-check.png"
+import DatePicker from '@/components/DatePicker'
+import { getDate } from '@/helpers/date'
 
 NavigationBar.setBackgroundColorAsync("transparent")
 NavigationBar.setButtonStyleAsync("dark")
@@ -84,32 +86,6 @@ const Page = () => {
 		return () => clearInterval(interval);
 	}, []);
 
-	const handleUpdateInhaler = async() => {
-		const { data, error } = await supabase
-			.from('inhalers')
-			.update({ name: inhalerName })
-			.eq('id', inhaler_id)
-			.select()
-
-		setItem((prevItem) => {
-			if (prevItem) {
-			  return { ...prevItem, title: inhalerName };
-			}
-			return prevItem;
-		});
-
-		setSupaInhalers(prevSupaInhalers => {
-			return prevSupaInhalers.map((inhaler) =>
-				inhaler.id === inhaler_id ? { ...inhaler, title: inhalerName } : inhaler
-			);
-		});
-
-		console.log("supaInhalers ANTES", supaInhalers);
-		console.log("item", item);
-		console.log("supaInhalers DESPUES", supaInhalers);
-
-	}
-
 	const handleDeleteInhaler = async() => {
 		
 		const { error } = await supabase
@@ -129,9 +105,6 @@ const Page = () => {
 	// ref
 	const bottomSheetRef = useRef<BottomSheetModal>(null);
 
-	// variables
-	const snapPoints = useMemo(() => ['50%', '80%'], []);
-  
 	// callbacks
 	const handleOpenPress = useCallback(() => {
 		bottomSheetRef.current?.present();
@@ -139,23 +112,12 @@ const Page = () => {
 
 	let scrollOffsetY = useRef(new Animated.Value(0)).current;
 
-	const stadisticListModalRef = useRef<BottomSheetModal>(null);
-
 	const barData = [
 		{value: 3, label: '27 nov'},
 		{value: 7, label: '28 nov'},
 		{value: 5, label: '29 nov'},
 		{value: 12, label: '30 nov'},
 	];
-
-	/*
-		const barData = [
-		{value: 30, label: '27 nov'},
-		{value: 50, label: '28 nov'},
-		{value: 10, label: '29 nov'},
-		{value: 50, label: '30 nov'},
-	];
-	*/
 
 	const screenWidth = Dimensions.get("window").width - 48;
 
@@ -173,6 +135,12 @@ const Page = () => {
 	}
 
 	const hideDialog = () => setDialog(false);
+
+	console.log("Santa is cumming for you")
+
+	const onDateChange = useCallback((dateRange: { start: string | null; end: string | null; }) => {
+		console.log(dateRange)
+	}, [])
 
   	return (
 		<>
@@ -273,7 +241,9 @@ const Page = () => {
 
 					<MontserratSemiText style={styles.sectionTitle}>Estadísticas</MontserratSemiText>
 
-					<TabBar>
+					</View>
+
+					<TabBar.TabBar headerPadding={24}>
 						<TabBar.Item Icon={InhalerIcon} title='Inhalux' height={750}>
 							<View style={stylesTab.content}>
 
@@ -289,8 +259,14 @@ const Page = () => {
 								</View>
 
 								<View style={stylesTab.sectionView}>
-									<View style={stylesTab.titleView}>
+									<View style={stylesTab.subtitleView}>
 										<MontserratSemiText style={stylesTab.title}>Resumen de uso</MontserratSemiText>
+
+										<DatePicker 
+											onDateChange={onDateChange}
+											startRange={getDate(-7)}
+											endRange={getDate(0)}
+										/>
 									</View>
 
 									<View>
@@ -377,7 +353,6 @@ const Page = () => {
 
 									<TabBarMultiple>
 										<TabBarMultiple.Item title='Calidad del aire'>
-
 											<BarChart
 												data={barData}
 												barWidth={42}
@@ -405,7 +380,6 @@ const Page = () => {
 										</TabBarMultiple.Item>
 
 										<TabBarMultiple.Item title='CO2'>
-
 											<BarChart
 												data={barData}
 												barWidth={42}
@@ -547,9 +521,7 @@ const Page = () => {
 								</View>
 							</View>
 						</TabBar.Item>
-
-					</TabBar>
-					</View>
+					</TabBar.TabBar>
 				</View>
 			
 				<Image style={styles.inahlerImageBackground} source={InhalerBackground} />
@@ -561,7 +533,7 @@ const Page = () => {
 				snapPoints={scanSnapPoints}
 				enablePanDownToClose
 				backdropComponent={(backdropProps: BottomSheetBackdropProps) => (
-					<BlurredBackgroundNew
+					<BlurredBackground
 					  	{...backdropProps}
 					  	appearsOnIndex={0}
 					  	disappearsOnIndex={-1}
@@ -658,6 +630,7 @@ const stylesTab = StyleSheet.create({
 		flexDirection: "column",
 		width: "100%",
 		paddingVertical: 24,
+		paddingHorizontal: 24,
 		gap: 32,
 	},
 	sectionView: {
@@ -665,10 +638,16 @@ const stylesTab = StyleSheet.create({
 		flexDirection: "column",
 		gap: 16,
 	},
+	subtitleView: {
+		display: "flex",
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center"
+	},
 	titleView: {
 		display: "flex",
 		flexDirection: "column",
-		gap: 4
+		gap: 16
 	},
 	titleContent: {
 		display: "flex",
@@ -808,11 +787,11 @@ const styles = StyleSheet.create({
 	stadisticContent: {
 		borderRadius: 38,
 		marginTop: 32,
-		backgroundColor: Colors.white,
-		paddingHorizontal: 24,
+		backgroundColor: Colors.white
 	},
 	stadisticView: {
 		marginTop: 32,
+		paddingHorizontal: 24
 	},
 	sectionTitle: {
 		fontSize: 16

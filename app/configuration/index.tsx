@@ -1,4 +1,4 @@
-import { View, ImageBackground, StyleSheet, ScrollView, Alert } from 'react-native'
+import { View, ImageBackground, StyleSheet, ScrollView, Alert, Dimensions } from 'react-native'
 import Colors from '@/constants/Colors'
 import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/components/StyledText'
 import Card from '@/components/Card/Card'
@@ -10,6 +10,7 @@ import BackgroundImage from "@/assets/images/background.png"
 import ArrowBackIcon from "@/assets/icons/arrow_back_simple.svg"
 import NotificationIcon from "@/assets/icons/notifications_active.svg"
 import PasswordIcon from "@/assets/icons/encrypted.svg"
+import CheckIcon from "@/assets/icons/check_box.svg"
 import LogoutIcon from "@/assets/icons/move_item.svg"
 import ShareIcon from "@/assets/icons/share.svg"
 import { useAuth } from '@/context/Authprovider'
@@ -83,7 +84,7 @@ const ConfigurationScreen = () => {
                       </Avatar>
 
                       <View style={styles.profileTextView}>
-                        <MontserratBoldText style={styles.profileNameText}>{supaUser?.name}</MontserratBoldText>
+                        <MontserratBoldText style={styles.profileNameText} numberOfLines={1}>{supaUser?.name}</MontserratBoldText>
                         <MontserratText style={styles.profileEmailText}>{supaUser?.email}</MontserratText>
                       </View>
                     </View>
@@ -105,6 +106,11 @@ const ConfigurationScreen = () => {
               <CardOptionsList.ItemView onPressFunction={() => router.push("/configuration/notifications")}>
                 <NotificationIcon />
                 <CardOptionsList.ItemText>Notificaciones</CardOptionsList.ItemText>
+              </CardOptionsList.ItemView>
+
+              <CardOptionsList.ItemView onPressFunction={() => router.push("/configuration/permissions")}>
+                <CheckIcon />
+                <CardOptionsList.ItemText>Configurar permisos</CardOptionsList.ItemText>
               </CardOptionsList.ItemView>
 
               <CardOptionsList.ItemView onPressFunction={() => router.push("/configuration/password")}>
@@ -172,7 +178,8 @@ const styles = StyleSheet.create({
     gap: 4
   },
   profileNameText: {
-    fontSize: 14
+    fontSize: 14,
+    width: Dimensions.get("window").width - 210
   },
   profileEmailText: {
     fontSize: 12

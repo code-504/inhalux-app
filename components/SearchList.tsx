@@ -1,8 +1,10 @@
-import { View, Text, StyleSheet, NativeSyntheticEvent, TextInputChangeEventData, TouchableOpacity, Pressable } from 'react-native'
+import { View, Text, StyleSheet, NativeSyntheticEvent, TextInputChangeEventData, TouchableOpacity, Pressable, TextInput } from 'react-native'
 import React, {
     Dispatch,
     SetStateAction,
+    memo,
     useEffect,
+    useRef,
     useState
 } from 'react'
 import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/components/StyledText'
@@ -12,31 +14,32 @@ import Colors from '@/constants/Colors'
 import { Avatar, Input, ScrollView, Spinner } from 'tamagui'
 
 // Resources
-import pacientBackground from "@/assets/images/pacients-empty.png"
-import AddIcon from "@/assets/icons/add.svg"
+import CloseIcon from "@/assets/icons/close_search.svg"
 import SearchIcon from "@/assets/icons/search.svg"
-import ContactCardPatient from '@/components/Card/ContactCardPacients'
-import { FlashList } from '@shopify/flash-list'
 import { SearchListProps } from '@/interfaces/Monitor'
 
 const SearchList = ({ title, state, setState, noData, ListData, placeHolder }: SearchListProps) => {
 
     const [hasData, setHasData] = useState<boolean>(false);
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
-    const [ isLoading, setIsLoading ] = useState<boolean>(false);
+    const [showQuit, setShowQuit] = useState<boolean>(false);
+    const inputRef = useRef<TextInput>(null);
 
     const handleChange = (e: NativeSyntheticEvent<TextInputChangeEventData>) => {
+        if (e.nativeEvent.text)
+            setShowQuit(true)
+        else
+            setShowQuit(false)
+
         setDebouncedSearchTerm(e.nativeEvent.text)
     }
 
     useEffect(() => {
-        setIsLoading(true);
         const timerId = setTimeout(() => {
             setState(prevState => ({
                 ...prevState,
                 filterText: debouncedSearchTerm || "",
             }));
-            setIsLoading(false)
         }, 400);
     
         // Limpia el temporizador en cada cambio de searchTerm
@@ -46,15 +49,20 @@ const SearchList = ({ title, state, setState, noData, ListData, placeHolder }: S
       }, [debouncedSearchTerm]);
 
     useEffect(() => {
-        if (state.data === null)
-            setHasData(false)
-        else
+        if (state.data.length > 0)
             setHasData(true)
-
+        else
+            setHasData(false)
     }, [])
 
+    const clearInput = () => {
+        setDebouncedSearchTerm("")
+        setShowQuit(false)
+        inputRef.current?.clear()
+    }
+
     return (
-        <View>
+        <View style={styles.content}>
             {
                 hasData ? 
                 (
@@ -63,12 +71,14 @@ const SearchList = ({ title, state, setState, noData, ListData, placeHolder }: S
 
                         <View style={styles.searchInputView}>
                             { title && <MontserratSemiText style={styles.subTitle}>{title}</MontserratSemiText> }
-                            <Input style={styles.searchInput} borderRadius="$10" borderWidth={0} placeholder={placeHolder ? placeHolder : ""} onChange={(value) => handleChange(value)} />
-                            <SearchIcon style={styles.searchIcon}/>
+                            <Input ref={inputRef} style={styles.searchInput} borderRadius="$10" borderWidth={0} placeholder={placeHolder ? placeHolder : ""} onChange={(value) => handleChange(value)} />
+                            {
+                                showQuit ? <CloseIcon style={styles.searchIcon} onTouchStart={clearInput}/> : <SearchIcon style={styles.searchIcon} />
+                            }
                         </View>
 
                         {
-                            isLoading && <Spinner />
+                            state.loading && <Spinner />
                         }
                     </View>
 
@@ -92,9 +102,12 @@ const SearchList = ({ title, state, setState, noData, ListData, placeHolder }: S
     )
 }
 
-export default SearchList
+export default memo(SearchList)
 
 const styles = StyleSheet.create({
+    content: {
+        paddingTop: 16
+    },
     emptyView: {
         display: "flex",
         flexDirection: "column",
@@ -104,7 +117,7 @@ const styles = StyleSheet.create({
     imageEmpy: {
         marginTop: 24,
         height: "100%",
-        maxHeight: '20%',
+        maxHeight: '28%',
     	aspectRatio: 1 / 1,
     },
     infoText: {
@@ -128,8 +141,9 @@ const styles = StyleSheet.create({
         position: "relative"
     },
     searchInput: {
+        position: "relative",
         marginTop: 12,
-        marginBottom: 24,
+        marginBottom: 12,
         height: 64,
         paddingLeft: 24,
         paddingRight: 60,
@@ -137,7 +151,7 @@ const styles = StyleSheet.create({
     },
     searchIcon: {
         position: "absolute",
-        top: "42%",
+        top: "46%",
         right: 24
     },
     subTitle: {

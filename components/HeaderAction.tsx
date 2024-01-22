@@ -4,19 +4,22 @@ import Colors from '@/constants/Colors'
 import { MontserratBoldText, MontserratText } from './StyledText'
 import { Button } from 'tamagui'
 
-const HeaderAction = ({ title, subtitle, Icon, action }: HeaderActionProps) => {
-  return (
-    <View style={styles.header}>
-		<View style={styles.headerText}>
-			<MontserratBoldText style={styles.headerTitleText}>{ title }</MontserratBoldText>
-			<MontserratText style={styles.headerSubtitleText}>{ subtitle }</MontserratText>
+const HeaderAction = ({ title, subtitle, Icon, action, color }: HeaderActionProps) => {
+
+	const backgroundColor = color || Colors.primary;
+
+	return (
+		<View style={styles.header}>
+			<View style={styles.headerText}>
+				<MontserratBoldText style={styles.headerTitleText}>{ title }</MontserratBoldText>
+				<MontserratText style={styles.headerSubtitleText}>{ subtitle }</MontserratText>
+			</View>
+							
+			<Button backgroundColor={backgroundColor} alignSelf="center" size="$6" circular onPress={action}>
+				<Icon />
+			</Button>
 		</View>
-						
-		<Button style={styles.addButton} alignSelf="center" size="$6" circular onPress={action}>
-		    <Icon />
-		</Button>
-	</View>
-  )
+	)
 }
 
 export default HeaderAction
@@ -40,8 +43,5 @@ const styles = StyleSheet.create({
 	headerSubtitleText: {
 		fontSize: 14,
 		color: Colors.light.grayText
-	},
-	addButton: {
-		backgroundColor: Colors.primary
 	},
 })

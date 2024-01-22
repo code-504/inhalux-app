@@ -9,10 +9,6 @@ import InhalerIcon from "@/assets/icons/inhaler.svg";
 import TreatmentIcon from "@/assets/icons/treatment.svg";
 import MonitorIcon from "@/assets/icons/monitor.svg";
 import LocationIcon from "@/assets/icons/location.svg";
-import DeviceHeader from '@/components/Headers/DeviceHeader';
-import MonitorHeader from '@/components/Headers/MonitorHeader';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/components/StyledText';
 
 /**
  * You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
@@ -84,6 +80,7 @@ export default function TabLayout() {
                 <Tabs.Screen
                     name="treatment"
                     options={{
+                        headerShown: false,
                         tabBarIcon: ({ color, focused }) => <TabBarIcon Icon={TreatmentIcon} color={color} focused={focused} title='Tratamiento' />,
                     }}
                 />

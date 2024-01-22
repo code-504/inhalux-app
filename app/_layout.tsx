@@ -13,7 +13,6 @@ import { useColorScheme } from 'react-native';
 import { AuthProvider, useAuth } from '@/context/Authprovider';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import '@tamagui/core/reset.css'
 import { TamaguiProvider } from 'tamagui'
 import appConfig from "@/tamagui.config"
 import { MonitorProvider } from '@/context/MonitorProvider';
@@ -35,7 +34,6 @@ export const unstable_settings = {
 
 
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import SimpleHeader from '@/components/Headers/SimpleHeader';
 import { PaperProvider } from 'react-native-paper';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -102,6 +100,7 @@ function RootLayoutNav() {
             <Stack.Screen name="device/edit_name" />
             <Stack.Screen name="configuration/index" options={{ header: () => <NormalHeader positionHeader='relative' title="Configuración" /> }} />
             <Stack.Screen name="configuration/profile" options={{ header: () => <NormalHeader positionHeader='relative' title="Perfil de usuario" /> }} />
+            <Stack.Screen name="configuration/permissions" />
             <Stack.Screen name="configuration/password" />
             <Stack.Screen name="configuration/notifications" />
             <Stack.Screen name="configuration/shareoptions" />
