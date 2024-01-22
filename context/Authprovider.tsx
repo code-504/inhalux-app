@@ -4,6 +4,7 @@ import { Session } from '@supabase/supabase-js'
 import { useRouter, useSegments, useRootNavigationState } from 'expo-router';
 import { supabase } from '@/services/supabase';
 import { Avatar } from 'tamagui';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Props {
   children?: React.ReactNode;
@@ -62,6 +63,14 @@ export function AuthProvider({ children }: Props) {
         external_provider: users[0].external_provider
       };
 
+      try {
+        await AsyncStorage.setItem('inhalux_user_id', user.id)
+        //await AsyncStorage.removeItem('inhalux_supa');
+        await AsyncStorage.setItem('inhalux_supa', JSON.stringify(supabase));
+        //console.log("supabase: ", supabase);
+      } catch (error) {
+        console.log("Async_Storage_Error", error);
+      }
       setSupaUser(initializedUser);
   };
 

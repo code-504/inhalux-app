@@ -142,7 +142,7 @@ export function RelationProvider({ children }: Props) {
         pending_state: share.pending_state
       }));
 
-      console.log(transformedShareData);
+      //console.log(transformedShareData);
 
       setShareState({
         ...shareState,

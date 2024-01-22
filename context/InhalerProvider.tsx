@@ -110,7 +110,7 @@ export function InhalerProvider({ children }: Props) {
           latitude: String(inhalersData.inhaler_ubication.latitude),
         }
 
-        console.log(transformedData)
+        //console.log(transformedData)
         return transformedData;
       } 
 
@@ -136,7 +136,7 @@ export function InhalerProvider({ children }: Props) {
       })
 
     } catch (error) {
-      console.log(error)
+      //console.log(error)
     }
   }
 

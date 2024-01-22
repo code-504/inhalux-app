@@ -22,7 +22,7 @@ import HistorialSearch from '@/components/HistorialSearch';
 import { supabase } from '@/services/supabase';
 import { useAuth } from '@/context/Authprovider';
 import { useRelations } from '@/context/RelationsProvider';
-import { getPacientInhalers } from '@/helpers/pacient_view';
+import { checkIfPacientHasTreatment, getHistorialData, getPacientInhalers } from '@/helpers/pacient_view';
 
 const screenWidth = Dimensions.get("window").width - 48;
 
@@ -40,13 +40,27 @@ const PacientViewPage = () => {
 	const navigation = useNavigation();
 
 	const [pacientInhalers, setPacientInhalers] = useState<any[]>([]);
+	const [hasTreatment, setHasTreatment] = useState<boolean>(false);
+	const [pacientHistorial, setPacientHistorial] = useState<any[]>([]);
+
 	useEffect(() => {
 		const getInhalers = async() => {
 			const data = await getPacientInhalers(String(pacient_id));
 			if(data) setPacientInhalers(data);
-		}
+		}//getInhalers
+		const checkTreatment = async() => {
+			const data = await checkIfPacientHasTreatment(String(pacient_id));
+			if(data){
+				setHasTreatment(data);
+
+				const historialData = await getHistorialData(String(pacient_id));
+				console.log("historialData: ", historialData);
+				setPacientHistorial(historialData);
+			} 
+		}//checkTreatment
 	  	
 		getInhalers();
+		checkTreatment();
 	}, [])
 
     const [visible, setVisible] = useState(false);
@@ -288,11 +302,10 @@ const PacientViewPage = () => {
 								<View>
 									<TagSelect 
 										tags={[
-											{label: "todo", value: "all"},
-											{label: "aceptado", value: "accepted"},
-											{label: "cancelado", value: "canceled"},
-											{label: "pendiente", value: "pending"},
-											{label: "rechazado", value: "denied"},
+											{label: "Todo", value: "3"},
+											{label: "Realizado", value: "0"},
+											{label: "Omitido", value: "1"},
+											{label: "Pendiente", value: "2"},
 										]}
 										selected={selectedTreatment}
 										setSelected={setSelectedTreatment}
@@ -300,7 +313,7 @@ const PacientViewPage = () => {
 								</View>
 
 								<HistorialSearch 
-										data={DATA}
+										data={/*DATA*/pacientHistorial}
 									/>
 							</View>	
 						</TabBar.Item>

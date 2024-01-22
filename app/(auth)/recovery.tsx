@@ -46,8 +46,8 @@ export default function Login() {
 		setLoading(true);
 		const { data, error } = await supabase.auth.resetPasswordForEmail(email)
 
-		console.log(data);
-		console.log(error);
+		//console.log(data);
+		//console.log(error);
 
 		if(!error) Alert.alert("Checa tu correo para confirmar tus permisos");
 

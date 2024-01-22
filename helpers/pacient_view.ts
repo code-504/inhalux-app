@@ -21,7 +21,99 @@ export const getPacientInhalers = async(id: string) => {
       }));
 
     return transformedData;
-}}
+}}//getPacientInhalers
+
+export const checkIfPacientHasTreatment = async(id: string) => {
+    const { data: treatmentData, error: treatmentError } = await supabase
+        .from('treatment')
+        .select("*")
+        .eq('fk_user_id', id)
+        .single()
+
+    if(treatmentData) return true;
+    else return false;
+}//checkIfPacientHasTreatment
+
+export const getHistorialData = async(id: string) => {
+    const { data: historialData, error: historialError } = await supabase
+        .from('historial')
+        .select("*")
+        .eq('fk_user_id', id)
+
+    if(!historialData) return [];
+    else{
+        const transformedData = transformHistorialData(historialData);
+        return transformedData;
+    }
+    
+}//getHistorialData
+
+interface TreatmentData {
+  title: string;
+  message: string;
+  hour: string;
+  type: number;
+}
+
+interface GroupedData {
+  title: string;
+  data: TreatmentData[];
+}
+
+const transformHistorialData = (arreglo: any[]): GroupedData[] => {
+  const groupedByDate: Record<string, GroupedData> = {};
+
+  arreglo.forEach((item: { state: string, date: string, message: string }) => {
+      // Obtener la fecha sin la hora para agrupar
+      const date = new Date(item.date).toLocaleDateString();
+
+      // Crear la estructura si no existe
+      if (!groupedByDate[date]) {
+          groupedByDate[date] = {
+              title: date,
+              data: [],
+          };
+      }
+
+      let title: string, type: number;
+      
+      switch (item.state) {
+          case 'Realizado':
+              title = 'Tratamiento Realizado';
+              type = 0;
+              break;
+          case 'Omitido':
+              title = 'Tratamiento Omitido';
+              type = 1;
+              break;
+          case 'Pendiente':
+              title = 'Tratamiento Pendiente';
+              type = 2;
+              break;
+          default:
+              title = 'Tratamiento Desconocido';
+              type = -1;
+      }
+
+      // Obtener la hora de la fecha
+      const hour = new Date(item.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      // Agregar el elemento al grupo correspondiente
+      groupedByDate[date].data.push({
+          title,
+          message: item.message,
+          hour,
+          type
+      });
+  });
+
+  // Convertir el objeto de grupos a un arreglo y ordenarlo por fecha
+  const nuevoArreglo = Object.values(groupedByDate).sort((a, b) => new Date(b.title).getTime() - new Date(a.title).getTime());
+
+  return nuevoArreglo;
+}
+
+  
 
 const calculateTimeAgo = (lastSeen: string): string => {
     const today = new Date();

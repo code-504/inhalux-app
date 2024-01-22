@@ -105,6 +105,7 @@ function RootLayoutNav() {
             <Stack.Screen name="configuration/password" />
             <Stack.Screen name="configuration/notifications" />
             <Stack.Screen name="configuration/shareoptions" />
+            <Stack.Screen name="configuration/treatment_register" options={{ headerShown: false }} />
             <Stack.Screen name="device/search_device" />
             <Stack.Screen name="device/connect_device" />
             <Stack.Screen name="monitor/scan_pacient" options={{ header: () => <NormalHeader title="Escanear" /> }}  />

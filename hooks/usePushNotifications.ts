@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef, SetStateAction, Dispatch } from "react";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
-
 import Constants from "expo-constants";
+import uuid from 'react-native-uuid';
 
 import { Platform } from "react-native";
+import { checkInhalationState, createInhalationRegister, getTodayDate, updateInhalationRegister } from "@/helpers/usePushNotificationsHelper";
+import { router } from "expo-router";
 
 export interface PushNotificationState {
   expoPushToken?: Notifications.ExpoPushToken;
@@ -32,8 +34,7 @@ export const usePushNotifications = (): PushNotificationState => {
   async function registerForPushNotificationsAsync() {
     let token;
     if (Device.isDevice) {
-      const { status: existingStatus } =
-        await Notifications.getPermissionsAsync();
+      const { status: existingStatus } = await Notifications.getPermissionsAsync();
       let finalStatus = existingStatus;
 
       if (existingStatus !== "granted") {
@@ -65,19 +66,53 @@ export const usePushNotifications = (): PushNotificationState => {
     return token;
   }
 
+  Notifications.setNotificationCategoryAsync("interactive", [
+    {
+      buttonTitle: "Omitir",
+      identifier: "Omitido",
+      options: {
+        opensAppToForeground: false,
+        isDestructive: true
+      },
+    },
+
+    {
+      buttonTitle: "Realizar",
+      identifier: "Realizado",
+      options: {
+        opensAppToForeground: false,
+        isDestructive: true
+      },
+    },
+    
+  ]);
+
   async function schedulePushNotification(day:any, hour:any, minute:any) {
+    const todayFormatedDate = getTodayDate();
+    const fechaActual: Date = new Date();
+    const year = fechaActual.getFullYear();
+    const month = (fechaActual.getMonth() + 1).toString().padStart(2, '0'); // Sumamos 1 porque los meses van de 0 a 11
+    const dia = fechaActual.getDate().toString().padStart(2, '0');
+    const fechaFormateadaActual = `${year}-${month}-${dia}`;
+
     await Notifications.scheduleNotificationAsync({
       content: {
         title: `Inhalux - ¡Son la ${hour}:${minute < 10 ? "0"+minute : minute}!`,
         body: '¡Es hora de medicarse!',
-        data: { data: 'goes here' },
+        data: { day, hour, minute, todayDate: fechaFormateadaActual, todayFormatedDate: todayFormatedDate },
+        vibrate: [0, 255, 255, 255],
+        sound: "default",
+        //categoryIdentifier: "interactive",
+        autoDismiss: false,
+        sticky: true,
       },
-      trigger: {weekday: day, hour:hour, minute: minute, repeats: true}
+      trigger: {/*weekday: day, hour:hour, minute: minute, repeats: true*/seconds: 3}
     });
   }
 
   async function cancelAllNotifications() {
     await Notifications.cancelAllScheduledNotificationsAsync();
+    await Notifications.dismissAllNotificationsAsync(); //Linea usada en el test
   };
 
   useEffect(() => {
@@ -87,13 +122,41 @@ export const usePushNotifications = (): PushNotificationState => {
     });
 
     notificationListener.current =
-      Notifications.addNotificationReceivedListener((notification) => {
+      Notifications.addNotificationReceivedListener(async(notification) => {
         setNotification(notification);
+        // await createInhalationRegister(notification.request.identifier)
+        console.log("Recibido: ", notification.request.content.data);
+
+        /*
+        setTimeout(async () => {
+          await checkInhalationState(notification.request.identifier);
+        }, 30000);*/
       });
 
     responseListener.current =
-      Notifications.addNotificationResponseReceivedListener((response) => {
-        console.log(response);
+      Notifications.addNotificationResponseReceivedListener(async(response) => {
+        console.log("response ", response);
+
+        router.push("/(tabs)/device");
+        router.push({ pathname: "/configuration/treatment_register", params: { 
+          notificationId: response.notification.request.identifier,
+          notificationDay: response.notification.request.content.data.day,
+          notificationHour: response.notification.request.content.data.hour,
+          notificationMinute: response.notification.request.content.data.minute,
+          todayDate: response.notification.request.content.data.todayDate,
+          todayFormatedDate: response.notification.request.content.data.todayFormatedDate
+        }});
+
+        // if(response.actionIdentifier === "Realizado"){
+        //   await updateInhalationRegister(response.notification.request.identifier, "Realizado");
+        //   await Notifications.dismissAllNotificationsAsync();
+        //   console.log("Soy el bueno");
+        // } 
+        // if(response.actionIdentifier === "Omitido"){
+        //   await updateInhalationRegister(response.notification.request.identifier, "Omitido");
+        //   await Notifications.dismissAllNotificationsAsync();
+        //   console.log("Soy el malo");
+        // } 
       });
 
     return () => {
