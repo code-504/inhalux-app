@@ -1,12 +1,9 @@
 import Colors from '@/constants/Colors';
-import React, { NamedExoticComponent, memo, useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, LayoutChangeEvent, TouchableHighlightBase, Dimensions, Keyboard } from 'react-native';
+import React, { memo, useEffect, useRef, useState } from 'react';
+import { View, StyleSheet, Dimensions, Keyboard, FlatList } from 'react-native';
 import Animated, { useSharedValue, withSpring } from 'react-native-reanimated';
 import { MontserratSemiText } from './StyledText';
-import { Button, ScrollView } from 'tamagui';
-import { FlatList } from 'react-native-gesture-handler';
 import Ripple from 'react-native-material-ripple';
-import { FlashList } from '@shopify/flash-list';
 
 interface TabProps {
     children: React.ReactElement<Tab> | React.ReactElement<Tab>[],
@@ -27,11 +24,10 @@ const ITEM_WIDTH = screenWidth;
 
 const TabBar = memo(({ children, headerPadding }: TabProps) => {
     
-	const [activeTab, setActiveTab] = useState<number>(0);
     const [heightScroll, setHeightScroll] = useState<number>(0);
 	const [ width, setWidth ] = useState<number>(0);
 	const translateX = useSharedValue(2);
-	const scrollViewRef = useRef<ScrollView>();
+	const scrollViewRef = useRef<FlatList | null>(null);
     const hPadding = headerPadding ? headerPadding : 0;
 
     useEffect(() => {
@@ -42,9 +38,9 @@ const TabBar = memo(({ children, headerPadding }: TabProps) => {
 	const handleTabPress = (index: number) => {
 		Keyboard.dismiss();
 
-		setActiveTab(index);
+		//scrollToIndex(index)
 
-		scrollToIndex(index)
+        scrollViewRef.current?.scrollToIndex({ index, animated: true })
 
         const selectedTab = React.Children.toArray(children)[index] as React.ReactElement<Tab>;
 
@@ -57,36 +53,34 @@ const TabBar = memo(({ children, headerPadding }: TabProps) => {
 			overshootClamping: false,
 			restDisplacementThreshold: 0.01,
 			restSpeedThreshold: 0.01,
-		  })
+		});
 	};
 
-	const handleLayout = (event: LayoutChangeEvent) => {
+	const handleLayout = (event: { nativeEvent: { layout: { width: number } } }) => {
 		const { width } = event.nativeEvent.layout;
 		setWidth(width);
 	};
 
-	const scrollToIndex = (index:number) => {
+	/*const scrollToIndex = (index:number) => {
         let newScrollX = index > 0 ? ITEM_WIDTH * index + 24 : ITEM_WIDTH * index;
-        scrollViewRef.current?.scrollTo({x: newScrollX, y: 0, animated: true,});
-	};
+        scrollViewRef.current?.scrollToOffset({ offset: newScrollX, animated: true });
+	};*/
 
 	return (
 		<View>
 			<View style={[styles.tabView, { paddingHorizontal: hPadding }]}>
 				<View style={styles.container}>
 					<View style={styles.tabsContainer}>
-                        {
-                            React.Children.map(children, (child, index) => (
-                                <Ripple
-                                    key={index}
-                                    onTouchEnd={() => handleTabPress(index)}
-                                    style={[styles.tab]}
-                                >
-                                        <child.props.Icon fill={Colors.black} />
-                                        <MontserratSemiText>{child.props.title}</MontserratSemiText>
-                                </Ripple>
-                            ))
-                        }
+                        {React.Children.map(children, (child, index) => (
+                            <Ripple
+                                key={index}
+                                onTouchEnd={() => handleTabPress(index)}
+                                style={[styles.tab]}
+                            >
+                                <child.props.Icon fill={Colors.black} />
+                                <MontserratSemiText>{child.props.title}</MontserratSemiText>
+                            </Ripple>
+                        ))}
 					</View>
 
 					<Animated.View
@@ -104,34 +98,25 @@ const TabBar = memo(({ children, headerPadding }: TabProps) => {
 				</View>
 			</View>
 
-            <ScrollView
+            <FlatList
                 ref={scrollViewRef}
-				automaticallyAdjustContentInsets={false}
-				horizontal={true}
-				showsHorizontalScrollIndicator={false}
-				showsVerticalScrollIndicator={false}
-				directionalLockEnabled={true}
-				scrollsToTop={false}
-				scrollEnabled={false}
-				contentContainerStyle={styles.scrollContainer}
-                scrollEventThrottle={16}
-			>
-                
-                {
-                    React.Children.map(children, (child) => (
-                        child
-                    ))
-                }
-				
-			</ScrollView>
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ height: heightScroll }}
+                data={React.Children.toArray(children)}
+                keyExtractor={(_, index) => index.toString()}
+                renderItem={({ item }) => <React.Fragment>{item}</React.Fragment>}
+                //initialNumToRender={1} // Adjust as needed
+            />
 		
-			{ /*tabComponents[activeTab] && tabComponents[activeTab]*/ }
+			{/* tabComponents[activeTab] && tabComponents[activeTab] */}
 		</View>
 	);
 });
 
 const Item = memo(({ children }: Tab) => {
-
+    
 	return (
         <View style={{ width: ITEM_WIDTH }}>
             {children}
@@ -188,11 +173,5 @@ const styles = StyleSheet.create({
         zIndex: -1,
         borderTopLeftRadius: 38,
         borderTopRightRadius: 38,
-    },
-    scrollContainer: {
-        display: "flex",
-        flexDirection: "row",
-        gap: 24,
-        height: "auto"
     },
 });

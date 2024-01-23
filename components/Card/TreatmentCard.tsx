@@ -3,7 +3,10 @@ import React from 'react'
 import Colors from '@/constants/Colors'
 import { MontserratBoldText, MontserratSemiText, MontserratText } from '../StyledText';
 
-import OkIcon from "@/assets/icons/pill_card.svg"
+import AcceptedIcon from "@/assets/icons/beenhere.svg"
+import DeniedIcon from "@/assets/icons/do_not_disturb_off.svg"
+import CancelIcon from "@/assets/icons/do_not_disturb_on.svg"
+import PendingIcon from "@/assets/icons/pending.svg"
 
 export interface TreatmentCardProps {
     title   : string;
@@ -22,19 +25,19 @@ const TreatmentCard = ({ title, message, hour, type }: TreatmentCardProps) => {
 	const iconList:TypeProps[] = [
 		{
 			color: Colors.greenLight,
-			Icon: OkIcon
+			Icon: AcceptedIcon
 		},
 		{
 			color: Colors.redLight,
-			Icon: OkIcon
+			Icon: DeniedIcon
 		},
 		{
 			color: Colors.brownLight,
-			Icon: OkIcon
+			Icon: PendingIcon
 		},
 		{
 			color: Colors.purpleLight,
-			Icon: OkIcon
+			Icon: CancelIcon
 		}
 	]
 
@@ -58,7 +61,7 @@ const TreatmentCard = ({ title, message, hour, type }: TreatmentCardProps) => {
 
 const IconRender = ({ Icon, color }: TypeProps) => (
 	<View style={[styles.cardIcon, { backgroundColor: color }]}>				
-    	<Icon />
+    	<Icon width={16} />
     </View>
 )
 

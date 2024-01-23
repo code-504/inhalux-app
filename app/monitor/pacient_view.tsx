@@ -11,20 +11,20 @@ import { MontserratSemiText, MontserratText } from '@/components/StyledText';
 import TabBar from '@/components/TabBar';
 import SimpleWeatherCard, { FillType } from '@/components/Card/SimpleWeatherCard';
 import { BarChart, yAxisSides } from 'react-native-gifted-charts';
-
-// Resources
-import MoreIcon from "@/assets/icons/more_vert.svg"
-import InhalerIcon from "@/assets/icons/inhaler.svg";
-import TreatmentIcon from "@/assets/icons/prescriptions.svg" 
-import PillIcon from "@/assets/icons/pill.svg"
-import TagSelect, { Tag } from '@/components/TagSelect';
-import HistorialSearch from '@/components/HistorialSearch';
 import { supabase } from '@/services/supabase';
 import { useAuth } from '@/context/Authprovider';
 import { useRelations } from '@/context/RelationsProvider';
 import { getPacientInhalers } from '@/helpers/pacient_view';
 import DatePicker from '@/components/DatePicker';
 import { getDate } from '@/helpers/date';
+import TagSelect, { Tag } from '@/components/TagSelect';
+import HistorialSearch from '@/components/HistorialSearch';
+
+// Resources
+import MoreIcon from "@/assets/icons/more_vert.svg"
+import InhalerIcon from "@/assets/icons/inhaler.svg";
+import TreatmentIcon from "@/assets/icons/prescriptions.svg" 
+import PillIcon from "@/assets/icons/pill.svg"
 
 const screenWidth = Dimensions.get("window").width - 48;
 
@@ -224,20 +224,21 @@ const PacientViewPage = () => {
 										<MontserratSemiText style={stylesTab.title}>Uso del inhalador</MontserratSemiText>
 
 										<View>
-										<TagSelect 
-											tags={[
-												...pacientInhalers.map((inhaler) => ({
-													label: inhaler.title,
-													value: inhaler.id,
-													time: inhaler.connection,
-													inhalations: inhaler.pulsations,
-													battery: inhaler.battery  
-												})),
-											]}
-											selected={selectedInhaler}
-											setSelected={setSelectedInhaler}
-										/>
-									</View>
+											<TagSelect 
+												tags={[
+													...pacientInhalers.map((inhaler) => ({
+														label: inhaler.title,
+														value: inhaler.id,
+														time: inhaler.connection,
+														inhalations: inhaler.pulsations,
+														battery: inhaler.battery  
+													})),
+												]}
+												selected={selectedInhaler}
+												setSelected={setSelectedInhaler}
+											/>
+										</View>
+										
 										<MontserratText style={stylesTab.description}>
 											{`Ultima conexión ${selectedInhaler.time}, con un ${selectedInhaler.battery}% de batería`}
 										</MontserratText>
@@ -304,7 +305,7 @@ const PacientViewPage = () => {
 							
 						</TabBar.Item>
 
-						<TabBar.Item title='Tratamiento' Icon={TreatmentIcon} height={1000}>
+						<TabBar.Item title='Tratamiento' Icon={TreatmentIcon} height={600}>
 							<View style={stylesTab.content}>
 								<View>
 									<MontserratSemiText>Historial</MontserratSemiText>
@@ -403,6 +404,11 @@ const stylesTab = StyleSheet.create({
 		flexDirection: "row",
 		justifyContent: "space-between",
 		alignItems: "center"
+	},
+	titleView: {
+		display: "flex",
+		flexDirection: "column",
+		gap: 8
 	},
 	titleView: {
 		display: "flex",

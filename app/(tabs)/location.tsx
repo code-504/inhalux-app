@@ -23,7 +23,6 @@ import BottomSheetView from '@/components/BottomSheetView';
 import * as NavigationBar from 'expo-navigation-bar';
 import * as Location from 'expo-location';
 import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/components/StyledText';
-import axios from 'axios';
 import { StatusBar } from 'expo-status-bar';
 import HeaderAction from '@/components/HeaderAction';
 import { Avatar, Button, Spinner } from 'tamagui';
@@ -33,7 +32,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import BlurredBackground from '@/components/BlurredBackground';
 import { stores } from '@/constants/Data';
 import { useFocusEffect, useNavigation } from 'expo-router';
-import { BottomSheetState, ButtonLocationState, InitLocation, LocationPermissions, LocationPoints, LocationType } from '../../interfaces/Location';
+import { BottomSheetState, ButtonLocationState} from '../../interfaces/Location';
 
 // Resources
 import LocationOptionIcon from "@/assets/icons/location_gear.svg"
@@ -42,13 +41,11 @@ import StoreIcon from "@/assets/icons/store.svg"
 import LocationUnknowIcon from "@/assets/icons/location_searching.svg"
 import LocationCurrentIcon from "@/assets/icons/my_location.svg"
 import LocationDisabledIcon from "@/assets/icons/location_disabled.svg"
-import { FlashList } from '@shopify/flash-list';
 import BatteryIcon from "@/assets/icons/battery.svg"
 import SoundIcon from "@/assets/icons/volume_up.svg"
 import RouteIcon from "@/assets/icons/alt_route.svg"
 import CloseIcon from "@/assets/icons/close.svg"
 
-import { GeofencingEventType } from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 import { supabase } from '@/services/supabase';
 import { useInhalers } from '@/context/InhalerProvider';

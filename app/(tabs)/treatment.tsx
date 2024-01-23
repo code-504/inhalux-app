@@ -1,7 +1,7 @@
 import Colors from '@/constants/Colors'
 import { View, StyleSheet, ImageBackground, BackHandler, Pressable, Dimensions, Keyboard, Alert, NativeSyntheticEvent, TextInputChangeEventData, Share } from 'react-native';
 import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/components/StyledText';
-import { BottomSheetBackdropProps, BottomSheetFlatList, BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { BottomSheetBackdropProps, BottomSheetFlatList, BottomSheetModal, BottomSheetModalProvider, BottomSheetScrollView, BottomSheetSectionList } from '@gorhom/bottom-sheet';
 import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useMonitor } from '@/context/MonitorProvider';
 import { router, useFocusEffect, useNavigation } from 'expo-router';
@@ -19,61 +19,80 @@ import ContactCardPatient from '@/components/Card/ContactCardPacients';
 import ContactCardShare from '@/components/Card/ContactCardShare';
 import SearchList from '@/components/SearchList';
 import UserHeader from '@/components/Headers/UserHeader';
-import TagSelect, { Tag } from '@/components/TagSelect';
-import HistorialSearch from '@/components/HistorialSearch';
 
 // Resources
 import BackgroundImage from "@/assets/images/background.png"
-import HistoryIcon from "@/assets/icons/history.svg"
-import TreatmentIcon from "@/assets/icons/prescriptions.svg"
-import NotificationsIcon from "@/assets/icons/notifications.svg"
 import AddIcon from "@/assets/icons/add.svg"
+import TreatmentIcon from "@/assets/icons/prescriptions.svg"
+import HistoryIcon from "@/assets/icons/history.svg"
 import ShareOptionsIcon from "@/assets/icons/share_options.svg"
+import TagSelect, { TabItem, Tag } from '@/components/TagSelect';
+import HistorialSearch from '@/components/HistorialSearch';
+import TreatmentCard from '@/components/Card/TreatmentCard';
+import { FlatList } from 'react-native-gesture-handler';
 
-export default function TabFourScreen() {
+export default function TabThreeScreen() {
 
 	const navigator = useNavigation();
 
 	//refs
-	const bottomListModalRef = useRef<BottomSheetModal>(null);
-	const bottomIndex = useRef<number>(0);
+	const monitorListModalRef = useRef<BottomSheetModal>(null);
+	const addPacientModalRef  = useRef<BottomSheetModal>(null);
+	const bottomSheetRef = useRef<BottomSheetModal>(null); //El general
+	const monitorIndex = useRef<number>(0);
 	
 	//variables
-	const bottomSnapPoints = useMemo(() => ['72%', '100%'], []);
+	const monitorSnapPoints = useMemo(() => ['72%', '100%'], []);
 	
 	const { bottom: bottomSafeArea, top: topSafeArea } = useSafeAreaInsets();
-  const [selectedTreatment, setSelectedTreatment] = useState<Tag>({ label: "todo", value: "all" })
 
 	// callbacks
+	const handleMonitorSheetChange = useCallback((index: number) => {
+		monitorIndex.current = index;
+	}, [])
+
+	const handleOpenPress = () => {
+		bottomSheetRef.current?.present();
+	};
+
 	useFocusEffect(
 		useCallback(() => {
-      console.log("lalala")
-      bottomListModalRef.current?.present();
 
+			monitorListModalRef.current?.present();
+
+			return () => {
+				addPacientModalRef.current?.close();
+				monitorListModalRef.current?.collapse();
+			};
+		}, [])
+	);
+
+	useFocusEffect(
+		useCallback(() => {
 		  const onBackPress = () => {
-        if (bottomIndex.current === 1) {
-          bottomListModalRef.current?.collapse();
-        } else {
-          if (navigator.canGoBack())
-            navigator.goBack()
-        }
 
-        return true;
-        };
+			if (monitorIndex.current === 1) {
+				monitorListModalRef.current?.collapse();
+			} else {
+				if (navigator.canGoBack())
+					navigator.goBack()
+			}
+
+			return true;
+		  };
 	  
 		  BackHandler.addEventListener(
 			'hardwareBackPress', onBackPress
 		  );
 	  
-		  return () => {
-        BackHandler.removeEventListener(
-          'hardwareBackPress', onBackPress
-        );
-      }
+		  return () =>
+			BackHandler.removeEventListener(
+			  'hardwareBackPress', onBackPress
+			);
 		}, [])
 	);
 
-  const DATA = [
+	const DATA = [
 		{
 		  title: 'Hoy',
 		  data: [
@@ -119,7 +138,15 @@ export default function TabFourScreen() {
 			  }
 			],
 		  },
-	  ];
+	];
+
+	const tags=[
+		{label: "todo", value: "all"},
+		{label: "aceptado", value: "accepted"},
+		{label: "cancelado", value: "canceled"},
+		{label: "pendiente", value: "pending"},
+		{label: "rechazado", value: "denied"},
+	]
 
 	return (
 		<View style={styles.viewArea}>
@@ -135,21 +162,22 @@ export default function TabFourScreen() {
 					
 				<View style={[ styles.container, styles.headerView]}>
 					<HeaderAction 
-						title="Tratamiento"
-						subtitle="Recuerda tus inhalaciones"
+						title="Monitoreo"
+						subtitle="Comparte y mira la cuenta de otros"
 						Icon={AddIcon}
-						action={()=> {}}
+						action={()=> handleOpenPress()}
 					/>
 				</View>
 
 				<BottomSheetModal
-					ref={bottomListModalRef}
-					key="BottomListSheet"
-					name="BottomListSheet"
+					ref={monitorListModalRef}
+					key="MonitorListSheet"
+					name="MonitorListSheet"
 					index={0}
 					topInset={topSafeArea}
-					snapPoints={bottomSnapPoints}
+					snapPoints={monitorSnapPoints}
 					enablePanDownToClose={false}
+					onChange={handleMonitorSheetChange}
 					enableHandlePanningGesture={false}
 					enableOverDrag={false}
 					bottomInset={bottomSafeArea - 24}
@@ -161,7 +189,7 @@ export default function TabFourScreen() {
 						  backgroundColor={Colors.white}
 						  opacity={1}
 						  pressBehavior={'collapse'}
-						  name='Tratamiento'
+						  name='Monitor'
 						/>
 					  )}
 				>
@@ -169,32 +197,65 @@ export default function TabFourScreen() {
 					<TabBar.TabBar headerPadding={24}>
 						<TabBar.Item Icon={TreatmentIcon} title='Tratamiento' height={(Dimensions.get("screen").height * 0.75) - bottomSafeArea + 12}>
 							
-              <MontserratSemiText>Hola</MontserratSemiText>
+							<MontserratText>Hola</MontserratText>
 						</TabBar.Item>
 
-						<TabBar.Item Icon={HistoryIcon} title='Historial' height={(Dimensions.get("screen").height * 0.75) - bottomSafeArea + 12}>
-              <View style={stylesTab.content}>
-                  <View>
-                    <MontserratSemiText>Historial</MontserratSemiText>
-                  </View>
+						<TabBar.Item title='Historial' Icon={HistoryIcon} height={(Dimensions.get("screen").height * 0.75) - bottomSafeArea}>
+							<View style={stylesTab.content}>
+								<View>
+									<MontserratSemiText>Historial</MontserratSemiText>
+								</View>
+								<TagSelect 
+									tags={tags}
+									renderTabs={(tags, handleTabPress, activeTab) => (
+										<FlatList
+											data={tags}
+											style={{ width: "100%", height: 64 }}
+											contentContainerStyle={styles.containerTabs}
+											horizontal={true}
+											showsHorizontalScrollIndicator={false} 
+											renderItem={({ item, index}) => (
+												<TabItem 
+														key={index} 
+														index={index} 
+														activeTab={activeTab} 
+														handleTabPress={handleTabPress} 
+														label={item.label} 
+													/>
+											)} 
+										/>
+									)}
+								/>	
+							</View>	
 
-                  <View>
-                    <TagSelect 
-                      tags={[
-                        {label: "todo", value: "all"},
-                        {label: "aceptado", value: "accepted"},
-                        {label: "cancelado", value: "canceled"},
-                        {label: "pendiente", value: "pending"},
-                        {label: "rechazado", value: "denied"},
-                      ]}
-                      onTabChange={(index) => console.log(index)}
-                    />
-                  </View>
-
-                  <HistorialSearch 
-                      data={DATA}
-                    />
-                </View>	
+							<HistorialSearch 
+									data={DATA}
+									renderSection={(data) => (
+										<BottomSheetSectionList 
+											nestedScrollEnabled
+											showsVerticalScrollIndicator={false}
+											sections={data}
+											keyExtractor={(_, index) => index.toString()}
+											renderItem={({item}) => (
+												<TreatmentCard 
+													title={item.title}
+													message={item.message}
+													hour={item.hour}
+													type={item.type}
+												/>
+											)}
+											ItemSeparatorComponent={() => (
+												<View style={{ height: 16 }}></View>
+											)}
+											renderSectionHeader={({section: {title}}) => (
+												<MontserratSemiText style={styles.header}>{title}</MontserratSemiText>
+											)}
+											
+											onEndReached={() => console.log("hola")}
+											contentContainerStyle={{ paddingHorizontal: 24 }}
+										/>
+									)}
+								/>
 						</TabBar.Item>
 					</TabBar.TabBar>
 				</BottomSheetModal>
@@ -204,6 +265,12 @@ export default function TabFourScreen() {
 }
 
 const styles = StyleSheet.create({
+	header: {
+		fontSize: 16,
+		color: Colors.darkGray,
+		backgroundColor: '#fff',
+		paddingVertical: 16
+	},
 	addButton: {
 		flex: 1,
 		backgroundColor: Colors.primary,
@@ -222,6 +289,14 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		paddingHorizontal: 24,
+	},
+	containerTabs: {
+		display: "flex",
+		flexDirection: "row",
+        height: 64,
+		gap: 4,
+        padding: 4,
+        backgroundColor: Colors.lightGrey
 	},
 	headerView: {
 		marginTop: 24
@@ -250,10 +325,17 @@ const stylesTab = StyleSheet.create({
 		flexDirection: "column",
 		gap: 16,
 	},
+	subtitleView: {
+		display: "flex",
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center"
+	},
 	titleView: {
 		display: "flex",
-		flexDirection: "column",
-		gap: 16
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center"
 	},
 	titleContent: {
 		display: "flex",

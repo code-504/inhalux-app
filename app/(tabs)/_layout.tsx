@@ -68,6 +68,7 @@ export default function TabLayout() {
                     },
                     tabBarShowLabel:false,
                     tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+                    lazy: true
                 }}
                 initialRouteName='device'
             >

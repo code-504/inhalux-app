@@ -53,7 +53,12 @@
     },
     "plugins": [
       "@react-native-google-signin/google-signin",
-      "expo-router",
+      [
+        "expo-router",
+        {
+          "asyncRoutes": "development"
+        }
+      ],
       "react-native-ble-plx",
       [
         "react-native-vision-camera",

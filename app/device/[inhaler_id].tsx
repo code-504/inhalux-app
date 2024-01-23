@@ -647,7 +647,7 @@ const stylesTab = StyleSheet.create({
 	titleView: {
 		display: "flex",
 		flexDirection: "column",
-		gap: 16
+		gap: 8
 	},
 	titleContent: {
 		display: "flex",

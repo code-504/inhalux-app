@@ -233,6 +233,7 @@ export default function TabThreeScreen() {
 				</View>
 
 				<BottomSheetModal
+					keyboardBehavior='interactive'
 					ref={monitorListModalRef}
 					key="MonitorListSheet"
 					name="MonitorListSheet"
