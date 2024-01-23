@@ -62,6 +62,10 @@ function useBLE(): BluetoothLowEnergyApi {
       }
     );
 
+    console.log("bluetoothScanPermission: ", bluetoothScanPermission);
+    console.log("bluetoothConnectPermission: ", bluetoothConnectPermission);
+    console.log("fineLocationPermission: ", fineLocationPermission);
+
     return (
       bluetoothScanPermission === "granted" &&
       bluetoothConnectPermission === "granted" &&

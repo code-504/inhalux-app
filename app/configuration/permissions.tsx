@@ -1,7 +1,7 @@
-import { View, StyleSheet, ImageBackground, Dimensions, Animated, Alert } from 'react-native'
-import React, { useRef } from 'react'
+import { View, StyleSheet, ImageBackground, Dimensions, Animated, Alert, Linking } from 'react-native'
+import React, { useRef, useState } from 'react'
 import Colors from '@/constants/Colors'
-import { ScrollView } from 'tamagui'
+import { AlertDialog, Button, ScrollView } from 'tamagui'
 import { MontserratBoldText, MontserratSemiText, MontserratText } from '@/components/StyledText'
 import { Stack, router } from 'expo-router'
 import NormalHeader from '@/components/Headers/NormalHeader'
@@ -15,30 +15,74 @@ import LocationIcon from "@/assets/icons/location_on_access.svg"
 import BackgroundIcon from "@/assets/icons/my_location_access.svg"
 import NotificationIcon from "@/assets/icons/circle_notifications_access.svg"
 import CameraIcon from "@/assets/icons/photo_camera_access.svg"
+import * as Notifications from "expo-notifications";
 import useBLE from '@/hooks/useBLE'
+import { Camera } from 'react-native-vision-camera'
 
 const PermissionsPage = () => {
     
     let scrollOffsetY = useRef(new Animated.Value(0)).current;
 
-    const { 
-		requestPermissions
-	} = useBLE();
+    const { requestPermissions } = useBLE();
+    const [permissionSituation, setPermissionDialog] = useState(false);
+    const [generalOpenDialog, setGeneralOpenDialog] = useState(false);
+    const [backgroundLocationOpenDialog, setBackgroundLocationOpenDialog] = useState(false);
 
-    const requestBLEPermission = async () => {
-        console.log("hola")
-        await requestPermissions()
+    const requestBluetoothPermissions = async () => {
+        const permission = await requestPermissions();
+
+        if(permission === true){ setPermissionDialog(true); setGeneralOpenDialog(true); }
+        else if(permission === false){ setPermissionDialog(false); setGeneralOpenDialog(true); }
+        
+        console.log(permission);
     }
 
-    const requestForegroundPermission = async () => {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-    
-        if (status !== 'granted') {
-            console.log("No tiene permiso")
-        } else {
-            console.log("Si tiene permiso")
+    const requestLocationForegroundPermissions = async() => {//Done
+        const permission = await Location.getForegroundPermissionsAsync();
+
+        if(permission.status === "granted"){ setPermissionDialog(true); setGeneralOpenDialog(true); }
+        else if(permission.status === "denied"){ setPermissionDialog(false); setGeneralOpenDialog(true); }
+        else await Location.requestForegroundPermissionsAsync();
+
+        console.log(permission);
+    }
+
+    const requestLocationBackgroundPermissions = async() => {
+        const permissionFg = await Location.getForegroundPermissionsAsync();
+
+        if(permissionFg.status !== "granted"){
+            setBackgroundLocationOpenDialog(true);
+            return;
         }
-      }
+
+        const permissionBg = await Location.getBackgroundPermissionsAsync();
+
+        if(permissionBg.status === "granted"){ setPermissionDialog(true); setGeneralOpenDialog(true); }
+        else if(permissionBg.status === "denied"){ setPermissionDialog(false); setGeneralOpenDialog(true); }
+        else await Location.requestBackgroundPermissionsAsync();
+
+        console.log(permissionBg);
+    }
+
+    const requestNotificationsPermissions = async() => {//Done
+        const permission = await Notifications.getPermissionsAsync();
+
+        if(permission.status === "granted"){ setPermissionDialog(true); setGeneralOpenDialog(true); }
+        else if(permission.status === "denied"){ setPermissionDialog(false); setGeneralOpenDialog(true); }
+        else await Location.requestForegroundPermissionsAsync();
+
+        console.log(permission);
+    }
+
+    const requestCameraPermissions = async() => {//Done
+        const permission = await Camera.getCameraPermissionStatus();
+
+        if(permission === "granted"){ setPermissionDialog(true); setGeneralOpenDialog(true); }
+        else if(permission === "denied"){ setPermissionDialog(false); setGeneralOpenDialog(true); }
+        else await Camera.requestCameraPermission();
+
+        console.log(permission);
+    }
     
     return (
         <View style={styles.safeArea}>
@@ -61,7 +105,7 @@ const PermissionsPage = () => {
 
                     <View style={styles.downView}>
                         <OptionsList title="Lista de permisos">
-                            <OptionsList.ItemView onPressFunction={requestBLEPermission}>
+                            <OptionsList.ItemView onPressFunction={requestBluetoothPermissions}>
                                 <BluetoothIcon />
                                 <OptionsList.TextView>
                                     <OptionsList.ItemText>Permiso de bluetooth</OptionsList.ItemText>
@@ -69,7 +113,7 @@ const PermissionsPage = () => {
                                 </OptionsList.TextView>
                             </OptionsList.ItemView>
 
-                            <OptionsList.ItemView onPressFunction={requestForegroundPermission}>
+                            <OptionsList.ItemView onPressFunction={requestLocationForegroundPermissions}>
                                 <LocationIcon />
                                 <OptionsList.TextView>
                                     <OptionsList.ItemText>Permiso de ubicación</OptionsList.ItemText>
@@ -77,7 +121,7 @@ const PermissionsPage = () => {
                                 </OptionsList.TextView>
                             </OptionsList.ItemView>
 
-                            <OptionsList.ItemView onPressFunction={() => {}}>
+                            <OptionsList.ItemView onPressFunction={requestLocationBackgroundPermissions}>
                                 <BackgroundIcon />
                                 <OptionsList.TextView>
                                     <OptionsList.ItemText>Permiso de ubicación en segundo plano</OptionsList.ItemText>
@@ -85,7 +129,7 @@ const PermissionsPage = () => {
                                 </OptionsList.TextView>
                             </OptionsList.ItemView>
 
-                            <OptionsList.ItemView onPressFunction={() => {}}>
+                            <OptionsList.ItemView onPressFunction={requestNotificationsPermissions}>
                                 <NotificationIcon />
                                 <OptionsList.TextView>
                                     <OptionsList.ItemText>Permiso de notificaciones</OptionsList.ItemText>
@@ -93,7 +137,7 @@ const PermissionsPage = () => {
                                 </OptionsList.TextView>
                             </OptionsList.ItemView>
 
-                            <OptionsList.ItemView onPressFunction={() => {}}>
+                            <OptionsList.ItemView onPressFunction={requestCameraPermissions}>
                                 <CameraIcon />
                                 <OptionsList.TextView>
                                     <OptionsList.ItemText>Permiso de camara</OptionsList.ItemText>
@@ -104,6 +148,117 @@ const PermissionsPage = () => {
                         </OptionsList>
                     </View>
             </ScrollView>
+
+            <AlertDialog open={backgroundLocationOpenDialog}>
+
+                <AlertDialog.Portal>
+                    <AlertDialog.Overlay
+                        key="overlay"
+                        animation="quick"
+                        opacity={0.5}
+                        enterStyle={{ opacity: 0 }}
+                        exitStyle={{ opacity: 0 }}
+                        />
+                        <AlertDialog.Content
+                        bordered
+                        elevate
+                        key="content"
+                        animation={[
+                            'quick',
+                            {
+                            opacity: {
+                                overshootClamping: true,
+                            },
+                            },
+                        ]}
+                        enterStyle={{ x: 0, y: -20, opacity: 0, scale: 0.9 }}
+                        exitStyle={{ x: 0, y: 10, opacity: 0, scale: 0.95 }}
+                        x={0}
+                        scale={1}
+                        opacity={1}
+                        y={0}
+                        borderRadius={24}
+                        padding={24}
+                        backgroundColor={Colors.white}
+                    >
+                    <View style={stylesDialog.content}>
+
+                        <View>
+                            <AlertDialog.Title style={stylesDialog.titleDialog}>
+                                Permisos de Ubicación Requeridos
+                            </AlertDialog.Title>
+                            <AlertDialog.Description>
+                                Antes de configurar estos permisos, asegurese de haber concedido los permisos de ubicación
+                            </AlertDialog.Description>
+                        </View>
+
+                        <View style={stylesDialog.buttonsView}>
+                            <AlertDialog.Action asChild>
+                                <Button onPress={() => setBackgroundLocationOpenDialog(false) } backgroundColor={Colors.greenLight} color={Colors.green}>Aceptar</Button>
+                            </AlertDialog.Action>
+                        </View>
+                    </View>
+                    </AlertDialog.Content>
+                </AlertDialog.Portal>
+            </AlertDialog>
+
+            <AlertDialog open={generalOpenDialog}>
+
+                <AlertDialog.Portal>
+                    <AlertDialog.Overlay
+                        key="overlay"
+                        animation="quick"
+                        opacity={0.5}
+                        enterStyle={{ opacity: 0 }}
+                        exitStyle={{ opacity: 0 }}
+                        />
+                        <AlertDialog.Content
+                        bordered
+                        elevate
+                        key="content"
+                        animation={[
+                            'quick',
+                            {
+                            opacity: {
+                                overshootClamping: true,
+                            },
+                            },
+                        ]}
+                        enterStyle={{ x: 0, y: -20, opacity: 0, scale: 0.9 }}
+                        exitStyle={{ x: 0, y: 10, opacity: 0, scale: 0.95 }}
+                        x={0}
+                        scale={1}
+                        opacity={1}
+                        y={0}
+                        borderRadius={24}
+                        padding={24}
+                        backgroundColor={Colors.white}
+                    >
+                    <View style={stylesDialog.content}>
+
+                        <View>
+                            <AlertDialog.Title style={stylesDialog.titleDialog}>
+                                {permissionSituation ? 'Permisos ya concedidos' : 'Permisos Revocados'}
+                            </AlertDialog.Title>
+                            <AlertDialog.Description>
+                                {permissionSituation
+                                ? `Parece que usted ya ha concedido los permisos para esta característica.\n\nSi quiere revocarlos, tendrá que hacerlo desde la configuración de su dispositivo. ¿Quiere ser redirigido?`
+                                : `Parece que usted ha revocado los permisos para esta característica.\n\nSi quiere concederlos, tendrá que hacerlo desde la configuración de su dispositivo. ¿Quiere ser redirigido?`}
+                            </AlertDialog.Description>
+                        </View>
+
+                        <View style={stylesDialog.buttonsView}>
+                        <AlertDialog.Cancel asChild>
+                            <Button onPress={() => setGeneralOpenDialog(false)}  backgroundColor={Colors.redLight} color={Colors.red}>Cancelar</Button>
+                        </AlertDialog.Cancel>
+                        <AlertDialog.Action asChild>
+                            <Button onPress={() => {Linking.openSettings(); setGeneralOpenDialog(false)}} backgroundColor={Colors.greenLight} color={Colors.green}>Aceptar</Button>
+                        </AlertDialog.Action>
+                        </View>
+                    </View>
+                    </AlertDialog.Content>
+                </AlertDialog.Portal>
+            </AlertDialog>
         </View>
     )
 }
@@ -118,6 +273,8 @@ const stylesDialog = StyleSheet.create({
     },
     titleDialog: {
       fontSize: 20,
+      lineHeight: 30,
+      marginBottom:20
     },
     buttonsView: {
       display: "flex",

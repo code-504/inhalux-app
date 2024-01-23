@@ -22,13 +22,9 @@ import HistorialSearch from '@/components/HistorialSearch';
 import { supabase } from '@/services/supabase';
 import { useAuth } from '@/context/Authprovider';
 import { useRelations } from '@/context/RelationsProvider';
-<<<<<<< HEAD
-import { checkIfPacientHasTreatment, getHistorialData, getPacientInhalers } from '@/helpers/pacient_view';
-=======
 import { getPacientInhalers } from '@/helpers/pacient_view';
 import DatePicker from '@/components/DatePicker';
 import { getDate } from '@/helpers/date';
->>>>>>> 6bafa90a5cda59c085cda379058ccb9350a8c295
 
 const screenWidth = Dimensions.get("window").width - 48;
 

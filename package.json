@@ -28,13 +28,9 @@
     "axios": "^1.6.2",
     "babel-plugin-transform-inline-environment-variables": "^0.4.4",
     "base64-arraybuffer": "^1.0.2",
-<<<<<<< HEAD
     "deprecated-react-native-prop-types": "^5.0.0",
     "expo": "^49.0.13",
     "expo-background-fetch": "~11.3.0",
-=======
-    "expo": "^49.0.21",
->>>>>>> 6bafa90a5cda59c085cda379058ccb9350a8c295
     "expo-build-properties": "~0.8.3",
     "expo-constants": "~14.4.2",
     "expo-dev-client": "~2.4.12",
