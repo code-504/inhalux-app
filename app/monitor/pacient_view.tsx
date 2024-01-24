@@ -23,7 +23,11 @@ import { BarChart, yAxisSides } from "react-native-gifted-charts";
 import { supabase } from "@/services/supabase";
 import { useAuth } from "@/context/Authprovider";
 import { useRelations } from "@/context/RelationsProvider";
-import { getPacientInhalers } from "@/helpers/pacient_view";
+import {
+    checkIfPacientHasTreatment,
+    getHistorialData,
+    getPacientInhalers,
+} from "@/helpers/pacient_view";
 import DatePicker from "@/components/DatePicker";
 import { getDate } from "@/helpers/date";
 import TagSelect, { Tag } from "@/components/TagSelect";
@@ -64,12 +68,29 @@ const PacientViewPage = () => {
                 );
                 console.log("historialData: ", historialData);
                 setPacientHistorial(historialData);
+                setSelectedTreatment({ label: "Todo", value: "3" });
             }
         }; //checkTreatment
 
         getInhalers();
         checkTreatment();
     }, []);
+
+    useEffect(() => {
+        console.log("Esta cambiando a: ", selectedTreatment.value);
+
+        const newfilteredHistorial = pacientHistorial.map((day) => ({
+            ...day,
+            data: day.data.filter(
+                (item: any) =>
+                    selectedTreatment.value === "3" ||
+                    item.type.toString() === selectedTreatment.value
+            ),
+        }));
+
+        console.log("NUEVO: ", newfilteredHistorial);
+        setFilteredHistorial(newfilteredHistorial);
+    }, [selectedTreatment]);
 
     const [visible, setVisible] = useState(false);
 
