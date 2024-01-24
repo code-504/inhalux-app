@@ -145,6 +145,13 @@ const PacientViewPage = () => {
 			],
 		  },
 	  ];
+
+	const tags = [
+		{label: "Todo", value: "3"},
+		{label: "Realizado", value: "0"},
+		{label: "Omitido", value: "1"},
+		{label: "Pendiente", value: "2"},
+	];
 	
 	const [dialog, setDialog] = useState(false);
 
@@ -249,8 +256,7 @@ const PacientViewPage = () => {
 														battery: inhaler.battery  
 													})),
 												]}
-												selected={selectedInhaler}
-												setSelected={setSelectedInhaler}
+												
 											/>
 										</View>
 										
@@ -328,14 +334,8 @@ const PacientViewPage = () => {
 
 								<View>
 									<TagSelect 
-										tags={[
-											{label: "Todo", value: "3"},
-											{label: "Realizado", value: "0"},
-											{label: "Omitido", value: "1"},
-											{label: "Pendiente", value: "2"},
-										]}
-										selected={selectedTreatment}
-										setSelected={setSelectedTreatment}
+										tags={tags}
+										onTabChange={ index => setSelectedTreatment( tags[index] )}
 									/>
 								</View>
 
