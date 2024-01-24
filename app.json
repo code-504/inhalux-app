@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "inhalux",
-    "slug": "inhalux",
+    "slug": "inhaLux",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -84,12 +84,13 @@
     },
     "extra": {
       "router": {
-        "origin": false
+        "origin": false,
+        "asyncRoutes": "development"
       },
       "eas": {
-        "projectId": "37fe2c7d-6c78-44c2-93df-e4daa805c8f6"
+        "projectId": "f9822285-6761-48ff-9ba7-2562be1e4cba"
       }
     },
-    "owner": "rogelioexpo"
+    "owner": "code-504"
   }
 }
