@@ -52,6 +52,16 @@ const PacientViewPage = () => {
     const [pacientInhalers, setPacientInhalers] = useState<any[]>([]);
     const [hasTreatment, setHasTreatment] = useState<boolean>(false);
     const [pacientHistorial, setPacientHistorial] = useState<any[]>([]);
+    const [filteredHistorial, setFilteredHistorial] = useState<any[]>([]);
+
+    const [selectedInhaler, setSelectedInhaler] = useState<any>({
+        label: "todo",
+        value: "all",
+    });
+    const [selectedTreatment, setSelectedTreatment] = useState<Tag>({
+        label: "Todo",
+        value: "3",
+    });
 
     useEffect(() => {
         const getInhalers = async () => {
@@ -155,15 +165,6 @@ const PacientViewPage = () => {
             ],
         },
     ];
-
-    const [selectedInhaler, setSelectedInhaler] = useState<any>({
-        label: "todo",
-        value: "all",
-    });
-    const [selectedTreatment, setSelectedTreatment] = useState<Tag>({
-        label: "todo",
-        value: "all",
-    });
 
     const [dialog, setDialog] = useState(false);
 
