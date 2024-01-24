@@ -12,7 +12,7 @@ export interface PushNotificationState {
   expoPushToken?: Notifications.ExpoPushToken;
   notification?: Notifications.Notification;
   schedulePushNotification?: Dispatch<SetStateAction<any[]>>;
-  cancelAllNotifications?: Dispatch<SetStateAction<any[]>>;
+  cancelAllNotifications: () => Promise<void>;
 }
 
 export const usePushNotifications = (): PushNotificationState => {
@@ -106,7 +106,7 @@ export const usePushNotifications = (): PushNotificationState => {
         autoDismiss: false,
         sticky: true,
       },
-      trigger: {/*weekday: day, hour:hour, minute: minute, repeats: true*/seconds: 3}
+      trigger: {weekday: day, hour:hour, minute: minute, repeats: true/*seconds: 3*/}
     });
   }
 

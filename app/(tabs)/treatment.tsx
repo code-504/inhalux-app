@@ -153,7 +153,7 @@ export default function TabThreeScreen() {
 		{label: "rechazado", value: "denied"},
 	]
 
-	const { schedulePushNotification, cancelAllNotifications } = usePushNotifications();
+  const { schedulePushNotification, cancelAllNotifications } = usePushNotifications();
   const { supaTreatment, setSupaTreatment } = useTreatment();
   const { supaUser } = useAuth();
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
