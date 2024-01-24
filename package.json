@@ -15,7 +15,7 @@
   "dependencies": {
     "@expo/image-utils": "^0.3.9",
     "@expo/vector-icons": "^13.0.0",
-    "@gorhom/bottom-sheet": "^4.5.1",
+    "@gorhom/bottom-sheet": "^4.6.0",
     "@react-native-async-storage/async-storage": "1.18.2",
     "@react-native-community/hooks": "^3.0.0",
     "@react-native-google-signin/google-signin": "^11.0.0",

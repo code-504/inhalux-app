@@ -5,7 +5,7 @@ import { Button, Spinner } from 'tamagui'
 import BottomSheet, { BottomSheetBackdropProps, BottomSheetModal } from '@gorhom/bottom-sheet'
 import { StatusBar } from 'expo-status-bar'
 import { RefreshControl } from 'react-native-gesture-handler'
-import { useCallback, useEffect, useMemo, useRef, useState, lazy } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, lazy, memo } from 'react'
 import SimpleWeatherCard, { FillType } from '@/components/Card/SimpleWeatherCard'
 import { Image } from 'expo-image';
 import { inhalerProps } from '@/context/InhalerProvider'
@@ -59,7 +59,7 @@ const Page = () => {
   const [item, setItem] = useState<inhalerProps | null>(null);
   //const [ isLoading, setIsLoading ] = useState<boolean>(false);
   const {supaInhalers, setSupaInhalers} = useInhalers();
-  const [ inhalerName, setInhalerName ] = useState<string>("");
+  //const [ inhalerName, setInhalerName ] = useState<string>("");
   const router = useRouter();
 
   const scanModalRef = useRef<BottomSheetModal>(null);
@@ -75,15 +75,15 @@ const Page = () => {
 		const foundInhaler = supaInhalers?.find((inhaler) => inhaler.id === inhaler_id);
 		const clonedInhaler = { ...foundInhaler };
 		setItem(clonedInhaler);
-		setInhalerName(foundInhaler.title);
+		//setInhalerName(foundInhaler.title);
 	}, [inhaler_id, supaInhalers]);
 
 	const pullRequest = useCallback(async () => {
-		setRefresh(true);
+		/*setRefresh(true);
 		const interval = setInterval(() => {
 		  setRefresh(false);
 		}, 300);
-		return () => clearInterval(interval);
+		return () => clearInterval(interval);*/
 	}, []);
 
 	const handleDeleteInhaler = async() => {
@@ -136,11 +136,13 @@ const Page = () => {
 
 	const hideDialog = () => setDialog(false);
 
-	console.log("Santa is cumming for you")
-
 	const onDateChange = useCallback((dateRange: { start: string | null; end: string | null; }) => {
 		console.log(dateRange)
 	}, [])
+
+	const handleOpenAnalysis = () => {
+		scanModalRef.current?.present()
+	}
 
   	return (
 		<>
@@ -179,7 +181,6 @@ const Page = () => {
 				refreshControl={
 					<RefreshControl refreshing={refresh} onRefresh={pullRequest}></RefreshControl>
 				}
-			
 				scrollEventThrottle={16}
                 onScroll={Animated.event(
                     [{ nativeEvent: { contentOffset: { y: scrollOffsetY}}}],
@@ -227,7 +228,7 @@ const Page = () => {
 						</View>
 
 						<View style={{ height: 64 }}>
-							<Button style={styles.inhalerButtonPrimary} size="$6" borderRadius={'$radius.10'} height={64} onPress={() => scanModalRef.current?.present()}>
+							<Button style={styles.inhalerButtonPrimary} size="$6" borderRadius={'$radius.10'} height={64} onPress={handleOpenAnalysis}>
 								<TrackChangesIcon />
 								<MontserratSemiText>Análisis</MontserratSemiText>
 							</Button>
@@ -579,7 +580,7 @@ const Page = () => {
   	)
 }
 
-export default Page
+export default memo(Page)
 
 const stylesBottom = StyleSheet.create({
 	conainer: {

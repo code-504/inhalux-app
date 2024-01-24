@@ -59,6 +59,7 @@ export default function TabThreeScreen() {
 
 	const handleOpenPress = () => {
 		bottomSheetRef.current?.present();
+		router.push("/configuration/treatment_register")
 	};
 
 	useFocusEffect(
