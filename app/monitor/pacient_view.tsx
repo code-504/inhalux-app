@@ -14,7 +14,7 @@ import { BarChart, yAxisSides } from 'react-native-gifted-charts';
 import { supabase } from '@/services/supabase';
 import { useAuth } from '@/context/Authprovider';
 import { useRelations } from '@/context/RelationsProvider';
-import { getPacientInhalers } from '@/helpers/pacient_view';
+import { checkIfPacientHasTreatment, getHistorialData, getPacientInhalers } from '@/helpers/pacient_view';
 import DatePicker from '@/components/DatePicker';
 import { getDate } from '@/helpers/date';
 import TagSelect, { Tag } from '@/components/TagSelect';
@@ -44,6 +44,10 @@ const PacientViewPage = () => {
 	const [pacientInhalers, setPacientInhalers] = useState<any[]>([]);
 	const [hasTreatment, setHasTreatment] = useState<boolean>(false);
 	const [pacientHistorial, setPacientHistorial] = useState<any[]>([]);
+	const [filteredHistorial, setFilteredHistorial] = useState<any[]>([]);
+
+	const [selectedInhaler, setSelectedInhaler] = useState<any>({ label: "todo", value: "all" })
+	const [selectedTreatment, setSelectedTreatment] = useState<Tag>({ label: "Todo", value: "3" })
 
 	useEffect(() => {
 		const getInhalers = async() => {
@@ -58,12 +62,26 @@ const PacientViewPage = () => {
 				const historialData = await getHistorialData(String(pacient_id));
 				console.log("historialData: ", historialData);
 				setPacientHistorial(historialData);
+				setSelectedTreatment({ label: "Todo", value: "3" });
 			} 
 		}//checkTreatment
 	  	
 		getInhalers();
 		checkTreatment();
 	}, [])
+
+	useEffect(() => {
+		console.log("Esta cambiando a: ", selectedTreatment.value);
+		
+		const newfilteredHistorial = pacientHistorial.map((day) => ({
+			...day,
+			data: day.data.filter((item: any) => selectedTreatment.value === "3" || item.type.toString() === selectedTreatment.value)
+		  }));
+		
+		console.log("NUEVO: ", newfilteredHistorial);
+		setFilteredHistorial(newfilteredHistorial);
+	}, [selectedTreatment])
+	
 
     const [visible, setVisible] = useState(false);
     
@@ -127,9 +145,6 @@ const PacientViewPage = () => {
 			],
 		  },
 	  ];
-
-	const [selectedInhaler, setSelectedInhaler] = useState<any>({ label: "todo", value: "all" })
-	const [selectedTreatment, setSelectedTreatment] = useState<Tag>({ label: "todo", value: "all" })
 	
 	const [dialog, setDialog] = useState(false);
 
@@ -325,7 +340,7 @@ const PacientViewPage = () => {
 								</View>
 
 								<HistorialSearch 
-										data={/*DATA*/pacientHistorial}
+										data={/*DATA*//*pacientHistorial*/filteredHistorial}
 									/>
 							</View>	
 						</TabBar.Item>

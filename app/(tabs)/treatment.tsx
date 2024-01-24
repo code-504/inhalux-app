@@ -35,6 +35,7 @@ import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { SwitchWithLabel } from '@/components/SwitchWithLabel';
 import { TimePickerModal } from 'react-native-paper-dates';
 import SingleChip from '@/components/Chip';
+import { checkIfPacientHasTreatment, getHistorialData, getPacientInhalers } from '@/helpers/pacient_view';
 
 export default function TabThreeScreen() {
 
@@ -97,6 +98,40 @@ export default function TabThreeScreen() {
 		}, [])
 	);
 
+	const [hasTreatment, setHasTreatment] = useState<boolean>(false);
+	const [selectedTreatment, setSelectedTreatment] = useState<Tag>({ label: "Todo", value: "3" })
+	const [historial, setHistorial] = useState<any[]>([]);
+	const [filteredHistorial, setFilteredHistorial] = useState<any[]>([]);
+
+	useEffect(() => {
+		
+		const checkTreatment = async() => {
+			const data = await checkIfPacientHasTreatment(String(supaUser?.id));
+			if(data){
+				setHasTreatment(data);
+
+				const historialData = await getHistorialData(String(supaUser?.id));
+				console.log("historialData: ", historialData);
+				setHistorial(historialData);
+				setSelectedTreatment({ label: "Todo", value: "3" });
+			} 
+		}//checkTreatment
+	  	
+		checkTreatment();
+	}, [])
+
+	useEffect(() => {
+		console.log("Esta cambiando a: ", selectedTreatment.value);
+		
+		const newfilteredHistorial = historial.map((day) => ({
+			...day,
+			data: day.data.filter((item: any) => selectedTreatment.value === "3" || item.type.toString() === selectedTreatment.value)
+		  }));
+		
+		console.log("NUEVO: ", newfilteredHistorial);
+		setFilteredHistorial(newfilteredHistorial);
+	}, [selectedTreatment])
+
 	const DATA = [
 		{
 		  title: 'Hoy',
@@ -146,11 +181,10 @@ export default function TabThreeScreen() {
 	];
 
 	const tags=[
-		{label: "todo", value: "all"},
-		{label: "aceptado", value: "accepted"},
-		{label: "cancelado", value: "canceled"},
-		{label: "pendiente", value: "pending"},
-		{label: "rechazado", value: "denied"},
+		{label: "Todo", value: "3"},
+		{label: "Realizado", value: "0"},
+		{label: "Omitido", value: "1"},
+		{label: "Pendiente", value: "2"},
 	]
 
   const { schedulePushNotification, cancelAllNotifications } = usePushNotifications();
@@ -418,6 +452,8 @@ export default function TabThreeScreen() {
 								</View>
 								<TagSelect 
 									tags={tags}
+									selected={selectedTreatment}
+									setSelected={setSelectedTreatment}
 									renderTabs={(tags, handleTabPress, activeTab) => (
 										<FlatList
 											data={tags}
@@ -440,7 +476,7 @@ export default function TabThreeScreen() {
 							</View>	
 
 							<HistorialSearch 
-									data={DATA}
+									data={/*DATA*/filteredHistorial/*historial*/}
 									renderSection={(data) => (
 										<BottomSheetSectionList 
 											nestedScrollEnabled
