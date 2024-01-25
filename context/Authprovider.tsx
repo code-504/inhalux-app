@@ -18,6 +18,7 @@ export function AuthProvider({ children }: Props) {
     const router = useRouter();
 
     const { data, isLoading: userIsLoading, isSuccess } = useUserData();
+
     const [
         authInitialized,
         session,

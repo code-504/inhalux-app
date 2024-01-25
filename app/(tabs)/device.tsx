@@ -72,18 +72,18 @@ export default function TabOneScreen() {
     const scrollX = useRef(new AnimatedReact.Value(0)).current;
     const [refresh, setRefresh] = useState<boolean>(false);
     const { /* supaInhalers,*/ weatherData } = useInhalers();
-    const [supaInhalers, setSupaInhalers] = useInhalerStore(
+    /*const [supaInhalers, setSupaInhalers] = useInhalerStore(
         (state) => [state.supaInhalers, state.setSupaInhalers],
         shallow
-    );
+    );*/
 
-    const { data: idata } = useInhalersData();
+    const { data } = useInhalersData();
 
-    useEffect(() => {
+    /*useEffect(() => {
         console.log("inhalersData: ", idata);
 
         setSupaInhalers(idata);
-    }, [idata]);
+    }, [idata]);*/
 
     const { width: screenWidth } = Dimensions.get("window");
     const SPACING = 12;
@@ -96,8 +96,6 @@ export default function TabOneScreen() {
 
         //return () => clearInterval(interval);
     };
-
-    console.log("re-render");
 
     //console.log("DEVICE-DATA", data);
 
@@ -346,11 +344,11 @@ export default function TabOneScreen() {
                     </View>
                     {/* Inicio */}
 
-                    {supaInhalers && supaInhalers.length > 0 ? (
+                    {data && data.length > 0 ? (
                         <>
                             <View style={styles.carouselView}>
                                 <FlashList
-                                    data={supaInhalers}
+                                    data={data}
                                     keyExtractor={(item: any) => item.id}
                                     horizontal
                                     showsHorizontalScrollIndicator={false}
@@ -396,7 +394,7 @@ export default function TabOneScreen() {
                                 />
                                 <View style={styles.dotContainer}>
                                     <ExpandingDot
-                                        data={supaInhalers}
+                                        data={data}
                                         expandingDotWidth={30}
                                         scrollX={scrollX}
                                         inActiveDotOpacity={0.6}

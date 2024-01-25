@@ -20,9 +20,23 @@ import { TreatmentProvider } from "@/context/TreatmentProvider";
 import { RelationProvider } from "@/context/RelationsProvider";
 import { NotificationProvider } from "@/context/NotificationsProvider";
 import NormalHeader from "@/components/Headers/NormalHeader";
-import { QueryClient, QueryClientProvider } from "react-query";
 
-const queryClient = new QueryClient();
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { QueryClient } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
+
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            cacheTime: 1000 * 60 * 60 * 24, // 24 hours
+        },
+    },
+});
+
+const asyncStoragePersister = createAsyncStoragePersister({
+    storage: AsyncStorage,
+});
 
 export {
     // Catch any errors thrown by the Layout component.
@@ -65,7 +79,10 @@ export default function RootLayout() {
     }
 
     return (
-        <QueryClientProvider client={queryClient}>
+        <PersistQueryClientProvider
+            client={queryClient}
+            persistOptions={{ persister: asyncStoragePersister }}
+        >
             <AuthProvider>
                 <InhalerProvider>
                     <NotificationProvider>
@@ -77,7 +94,7 @@ export default function RootLayout() {
                     </NotificationProvider>
                 </InhalerProvider>
             </AuthProvider>
-        </QueryClientProvider>
+        </PersistQueryClientProvider>
     );
 }
 

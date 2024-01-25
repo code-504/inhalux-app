@@ -1,6 +1,6 @@
 import { SupaUser } from "@/interfaces/User";
 import { supabase } from "@/services/supabase";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
 const fetchSupaUser = async () => {
     const {
@@ -35,7 +35,10 @@ const fetchSupaUser = async () => {
 };
 
 const useUserData = () => {
-    return useQuery("userData", fetchSupaUser);
+    return useQuery({
+        queryKey: ["userData"],
+        queryFn: fetchSupaUser,
+    });
 };
 
 export { useUserData };

@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Avatar } from "tamagui";
 import Colors from "@/constants/Colors";
 import { MontserratBoldText, MontserratText } from "../StyledText";
-import { useUserStore } from "@/stores/user";
+import { useUserData } from "@/api/user";
 import { Link } from "expo-router";
 
 import SettingsIcon from "@/assets/icons/settings_bold.svg";
@@ -20,7 +20,7 @@ const UserHeader = ({
     children,
     transparent,
 }: UserHeaderProps) => {
-    const { supaUser } = useUserStore();
+    const { data } = useUserData();
     const transparentView = transparent || false;
 
     return (
@@ -41,7 +41,7 @@ const UserHeader = ({
                             <Avatar size="$6" circular>
                                 <Avatar.Image
                                     accessibilityLabel="Cam"
-                                    src={supaUser?.avatar}
+                                    src={data?.avatar}
                                 />
                                 <Avatar.Fallback
                                     backgroundColor={Colors.darkGray}
@@ -65,7 +65,7 @@ const UserHeader = ({
                                 style={styles.headerTitleNameText}
                                 numberOfLines={1}
                             >
-                                {supaUser?.name || "Conectando..."}
+                                {data?.name || "Conectando..."}
                             </MontserratBoldText>
                         </View>
                     )}

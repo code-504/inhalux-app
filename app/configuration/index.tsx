@@ -34,6 +34,7 @@ import { useInhalers } from "@/context/InhalerProvider";
 import { useNotifications } from "@/context/NotificationsProvider";
 import { useRelations } from "@/context/RelationsProvider";
 import { useTreatment } from "@/context/TreatmentProvider";
+import { useUserData } from "@/api/user";
 import { useUserStore } from "@/stores/user";
 import { useInhalerStore } from "@/stores/inhaler";
 import { useInhalersData } from "@/api/inhaler";
@@ -49,13 +50,15 @@ const ConfigurationScreen = () => {
 
     //const { setSupaInhalers } = useInhalers();
     const { supaInhalers, setSupaInhalers } = useInhalerStore();
-	const { data: idata } = useInhalersData();
+    const { data: idata } = useInhalersData();
+
+    const { data } = useUserData();
 
     useEffect(() => {
         console.log("inhalersData: ", idata);
-        
+
         setSupaInhalers(idata);
-    }, [idata])
+    }, [idata]);
 
     const contextCleanUp = () => {
         setSupaUser(null);
@@ -111,7 +114,7 @@ const ConfigurationScreen = () => {
                                             <Avatar size="$6" circular>
                                                 <Avatar.Image
                                                     accessibilityLabel="Cam"
-                                                    src={supaUser?.avatar}
+                                                    src={data?.avatar}
                                                 />
                                                 <Avatar.Fallback backgroundColor="$blue10" />
                                             </Avatar>
@@ -125,14 +128,14 @@ const ConfigurationScreen = () => {
                                                     }
                                                     numberOfLines={1}
                                                 >
-                                                    {supaUser?.name}
+                                                    {data?.name}
                                                 </MontserratBoldText>
                                                 <MontserratText
                                                     style={
                                                         styles.profileEmailText
                                                     }
                                                 >
-                                                    {supaUser?.email}
+                                                    {data?.email}
                                                 </MontserratText>
                                             </View>
                                         </View>

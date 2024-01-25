@@ -1,11 +1,10 @@
 import { supabase } from "@/services/supabase";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
 const calculateDaysAgo = (lastSeen: string): string => {
     const today = new Date();
     const lastSeenDate = new Date(lastSeen);
-    const differenceInMilliseconds =
-        today.getTime() - lastSeenDate.getTime();
+    const differenceInMilliseconds = today.getTime() - lastSeenDate.getTime();
     const differenceInDays = Math.floor(
         differenceInMilliseconds / (1000 * 60 * 60 * 24)
     );
@@ -48,7 +47,7 @@ const fetchSupaInhalers = async () => {
             latitude: inhaler.inhaler_ubication.latitude,
             address: inhaler.inhaler_ubication.address,
         }));
-       
+
         return transformedData;
     }
 
@@ -56,7 +55,10 @@ const fetchSupaInhalers = async () => {
 };
 
 const useInhalersData = () => {
-    return useQuery("inhalersData", fetchSupaInhalers);
+    return useQuery({
+        queryKey: ["inhalersData"],
+        queryFn: fetchSupaInhalers,
+    });
 };
 
 export { useInhalersData };
