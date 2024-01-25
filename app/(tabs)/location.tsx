@@ -65,6 +65,8 @@ import CloseIcon from "@/assets/icons/close.svg";
 import * as TaskManager from "expo-task-manager";
 import { supabase } from "@/services/supabase";
 import { useInhalers } from "@/context/InhalerProvider";
+import { useInhalerStore } from "@/stores/inhaler";
+import { useInhalersData } from "@/api/inhaler";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 NavigationBar.setBackgroundColorAsync("white");
@@ -98,7 +100,15 @@ const TabTwoScreen = () => {
         secondSheetActive: false,
     });
 
-    const { supaInhalers } = useInhalers();
+    //const { supaInhalers } = useInhalers();
+    const { supaInhalers, setSupaInhalers } = useInhalerStore();
+	const { data: idata } = useInhalersData();
+
+    useEffect(() => {
+        console.log("inhalersData: ", idata);
+        
+        setSupaInhalers(idata);
+    }, [])
 
     const data: any[] = supaInhalers;
     /*[

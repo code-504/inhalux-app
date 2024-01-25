@@ -110,72 +110,18 @@ const PacientViewPage = () => {
 
     const closeMenu = () => setVisible(false);
 
-<<<<<<< HEAD
-	const DATA = [
-		{
-		  title: 'Hoy',
-		  data: [
-			{
-				title: "Tratamiento aceptado",
-				message: "El tratamiento fue cumplido",
-				hour: "12:00 pm",
-				type: 0
-			},
-			{
-				title: "Tratamiento no realizado",
-				message: "No se registró la inhalación",
-				hour: "1:00 pm",
-				type: 1
-			},
-			{
-				title: "Pendiente",
-				message: "Tratamiento en espera",
-				hour: "7:00 pm",
-				type: 2
-			},
-			{
-				title: "Cancelado",
-				message: "Se canceló el uso del inhalador",
-				hour: "8:00 pm",
-				type: 3
-			}
-		  ],
-		},{
-			title: 'Ayer',
-			data: [
-			  {
-				  title: "Pendiente",
-				  message: "Tratamiento en espera",
-				  hour: "7:00 pm",
-				  type: 2
-			  },
-			  {
-				  title: "Cancelado",
-				  message: "Se canceló el uso del inhalador",
-				  hour: "8:00 pm",
-				  type: 3
-			  }
-			],
-		  },
-	  ];
-
-	const tags = [
-		{label: "Todo", value: "3"},
-		{label: "Realizado", value: "0"},
-		{label: "Omitido", value: "1"},
-		{label: "Pendiente", value: "2"},
-	];
-	
-	const [dialog, setDialog] = useState(false);
-=======
     const barData = [
         { value: 3, label: "27 nov" },
         { value: 7, label: "28 nov" },
         { value: 5, label: "29 nov" },
         { value: 12, label: "30 nov" },
     ];
->>>>>>> 531a62333540e6dc42af66334353bce9833e38e7
-
+	const tags=[
+		{label: "Todo", value: "3"},
+		{label: "Realizado", value: "0"},
+		{label: "Omitido", value: "1"},
+		{label: "Pendiente", value: "2"},
+	]
     const DATA = [
         {
             title: "Hoy",
@@ -353,27 +299,6 @@ const PacientViewPage = () => {
                                             Uso del inhalador
                                         </MontserratSemiText>
 
-<<<<<<< HEAD
-										<View>
-											<TagSelect 
-												tags={[
-													...pacientInhalers.map((inhaler) => ({
-														label: inhaler.title,
-														value: inhaler.id,
-														time: inhaler.connection,
-														inhalations: inhaler.pulsations,
-														battery: inhaler.battery  
-													})),
-												]}
-												
-											/>
-										</View>
-										
-										<MontserratText style={stylesTab.description}>
-											{`Ultima conexión ${selectedInhaler.time}, con un ${selectedInhaler.battery}% de batería`}
-										</MontserratText>
-									</View>
-=======
                                         <TagSelect
                                             tags={[
                                                 ...pacientInhalers.map(
@@ -388,10 +313,7 @@ const PacientViewPage = () => {
                                                     })
                                                 ),
                                             ]}
-                                            selected={selectedInhaler}
-                                            setSelected={setSelectedInhaler}
                                         />
->>>>>>> 531a62333540e6dc42af66334353bce9833e38e7
 
                                         <MontserratText
                                             style={stylesTab.description}
@@ -520,24 +442,12 @@ const PacientViewPage = () => {
                                 </MontserratSemiText>
                             </View>
 
-<<<<<<< HEAD
 								<View>
 									<TagSelect 
 										tags={tags}
 										onTabChange={ index => setSelectedTreatment( tags[index] )}
 									/>
 								</View>
-=======
-                            <TagSelect
-                                tags={[
-                                    { label: "Todo", value: "3" },
-                                    { label: "Realizado", value: "0" },
-                                    { label: "Omitido", value: "1" },
-                                    { label: "Pendiente", value: "2" },
-                                ]}
-                                onTabChange={(index) => console.log(index)}
-                            />
->>>>>>> 531a62333540e6dc42af66334353bce9833e38e7
 
                             <HistorialSearch data={/*DATA*/ pacientHistorial} />
                         </View>
