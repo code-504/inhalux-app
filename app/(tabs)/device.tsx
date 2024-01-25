@@ -1,7 +1,7 @@
 import { ImageBackground, View, StyleSheet, Dimensions, Animated as AnimatedReact, Image } from 'react-native'
 import { FlashList } from "@shopify/flash-list";
 import { Button, Input, ScrollView } from 'tamagui'
-import React, { useCallback, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Colors from '@/constants/Colors'
 import Card from '@/components/Card/Card'
 import SimpleWeatherCard from '@/components/Card/SimpleWeatherCard'
@@ -43,6 +43,8 @@ import TempIcon from "@/assets/icons/device_thermostat.svg"
 import NitroIcon from "@/assets/icons/circles_ext.svg"
 import OzonoIcon from "@/assets/icons/radio_button_checked.svg"
 import NotificationIcon from "@/assets/icons/notifications.svg";
+import { useInhalersData } from '@/api/inhaler';
+import { useInhalerStore } from '@/stores/inhaler';
 
 NavigationBar.setBackgroundColorAsync("transparent")
 NavigationBar.setButtonStyleAsync("dark")
@@ -52,26 +54,15 @@ export default function TabOneScreen() {
 
 	const scrollX = useRef(new AnimatedReact.Value(0)).current
 	const [ refresh, setRefresh ] = useState<boolean>(false);
-	const { supaInhalers: data, setSupaInhalers, weatherData } = useInhalers();
+	const {/* supaInhalers,*/ weatherData } = useInhalers();
+	const { supaInhalers: data, setSupaInhalers } = useInhalerStore();
+	const { data: idata } = useInhalersData();
 
-	//const [ data, setData ] = useState<any[]>([]);
-
-	// const { session, } = useAuth();
-
-	// const inhalerlist = async () => {
-	// 	const inhalers = await getInhalers(session?.user.id);
-		
-	// 	if (inhalers)
-	// 		setData(inhalers)
-	// 	else
-	// 		setData([])
-	// }
-
-	// useEffect(() => {
-	// 	inhalerlist()
-	// }, [])
-
-	//console.log(pruebasData);
+	useEffect(() => {
+	  console.log("inhalersData: ", idata);
+	  
+	  setSupaInhalers(idata);
+	}, [idata])
 
 	const { width: screenWidth } = Dimensions.get('window');
 	const SPACING = 12;

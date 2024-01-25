@@ -35,16 +35,27 @@ import { useNotifications } from "@/context/NotificationsProvider";
 import { useRelations } from "@/context/RelationsProvider";
 import { useTreatment } from "@/context/TreatmentProvider";
 import { useUserStore } from "@/stores/user";
+import { useInhalerStore } from "@/stores/inhaler";
+import { useInhalersData } from "@/api/inhaler";
 
 NavigationBar.setBackgroundColorAsync("transparent");
 NavigationBar.setButtonStyleAsync("dark");
 
 const ConfigurationScreen = () => {
     const { supaUser, setSupaUser } = useUserStore();
-    const { setSupaInhalers } = useInhalers();
     const { setSupaNotifications } = useNotifications();
     const { setPacientState, setShareState } = useRelations();
     const { setSupaTreatment } = useTreatment();
+
+    //const { setSupaInhalers } = useInhalers();
+    const { supaInhalers, setSupaInhalers } = useInhalerStore();
+	const { data: idata } = useInhalersData();
+
+    useEffect(() => {
+        console.log("inhalersData: ", idata);
+        
+        setSupaInhalers(idata);
+    }, [idata])
 
     const contextCleanUp = () => {
         setSupaUser(null);

@@ -1,7 +1,20 @@
 import { supabase } from "@/services/supabase";
 import { useQuery } from "react-query";
 
-const fetchData = async () => {
+const calculateDaysAgo = (lastSeen: string): string => {
+    const today = new Date();
+    const lastSeenDate = new Date(lastSeen);
+    const differenceInMilliseconds =
+        today.getTime() - lastSeenDate.getTime();
+    const differenceInDays = Math.floor(
+        differenceInMilliseconds / (1000 * 60 * 60 * 24)
+    );
+
+    if (differenceInDays === -1) return "un momento";
+    else return `${differenceInDays} días`;
+};
+
+const fetchSupaInhalers = async () => {
     const {
         data: { user },
     } = await supabase.auth.getUser();
@@ -35,12 +48,15 @@ const fetchData = async () => {
             latitude: inhaler.inhaler_ubication.latitude,
             address: inhaler.inhaler_ubication.address,
         }));
-        setSupaInhalers(transformedData);
-        //console.log("inhalersData", inhalersData);
-        //console.log("transformedData", transformedData);
+       
+        return transformedData;
     }
+
+    return {};
 };
 
-const useSupabaseData = () => {
-    return useQuery("supabaseData", fetchData);
+const useInhalersData = () => {
+    return useQuery("inhalersData", fetchSupaInhalers);
 };
+
+export { useInhalersData };

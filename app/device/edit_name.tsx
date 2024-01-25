@@ -13,6 +13,8 @@ import * as NavigationBar from 'expo-navigation-bar';
 // Resources
 import SaveIcon from "@/assets/icons/save.svg"
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { useInhalerStore } from '@/stores/inhaler'
+import { useInhalersData } from '@/api/inhaler'
 
 NavigationBar.setBackgroundColorAsync("transparent")
 NavigationBar.setButtonStyleAsync("dark")
@@ -20,13 +22,22 @@ NavigationBar.setPositionAsync("absolute");
 
 const EditDeviceNamePage = () => {
 	const { name } = useLocalSearchParams();
-	const {supaInhalers, setSupaInhalers} = useInhalers();
+	//const {supaInhalers, setSupaInhalers} = useInhalers();
+	const { supaInhalers, setSupaInhalers, setSupaInhalersMapByName } = useInhalerStore();
+	const { data: idata } = useInhalersData();
+
+    useEffect(() => {
+        //console.log("inhalersData: ", idata);
+        
+        setSupaInhalers(idata);
+    }, [idata])
+
 	const [inhalerName, setInhalerName] = useState<string>("");
 
 	useEffect(() => {
 		const foundInhaler = supaInhalers?.find(inhaler => inhaler.id === name);
 		setInhalerName(foundInhaler.title);
-	}, [])
+	}, [idata])
 
 	const handleUpdateInhaler = async() => {
 		const { data, error } = await supabase
@@ -35,11 +46,7 @@ const EditDeviceNamePage = () => {
 			.eq('id', name)
 			.select()
 
-		setSupaInhalers(prevSupaInhalers => {
-			return prevSupaInhalers.map((inhaler) =>
-				inhaler.id === name ? { ...inhaler, title: inhalerName } : inhaler
-			);
-		});
+		setSupaInhalersMapByName(supaInhalers, String(name), inhalerName);
 
 		console.log("supaInhalers ANTES", supaInhalers);
 		console.log("supaInhalers DESPUES", supaInhalers);

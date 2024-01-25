@@ -45,6 +45,8 @@ import AirUnit from "@/assets/icons/ac_unit.svg"
 import ScanImage from "@/assets/images/inhaler-check.png"
 import DatePicker from '@/components/DatePicker'
 import { getDate } from '@/helpers/date'
+import { useInhalerStore } from '@/stores/inhaler'
+import { useInhalersData } from '@/api/inhaler'
 
 NavigationBar.setBackgroundColorAsync("transparent")
 NavigationBar.setButtonStyleAsync("dark")
@@ -58,7 +60,17 @@ const Page = () => {
   //const { fetchSupaInhalerById } = useInhalers();
   const [item, setItem] = useState<inhalerProps | null>(null);
   //const [ isLoading, setIsLoading ] = useState<boolean>(false);
-  const {supaInhalers, setSupaInhalers} = useInhalers();
+  //const {supaInhalers, setSupaInhalers} = useInhalers();
+
+  const { supaInhalers, setSupaInhalers, setSupaInhalersFilterById } = useInhalerStore();
+  const { data: idata } = useInhalersData();
+
+  useEffect(() => {
+	  console.log("inhalersData: ", idata);
+	  
+	  setSupaInhalers(idata);
+  }, [idata])
+
   //const [ inhalerName, setInhalerName ] = useState<string>("");
   const router = useRouter();
 
@@ -73,6 +85,7 @@ const Page = () => {
 
 	useEffect(() => {
 		const foundInhaler = supaInhalers?.find((inhaler) => inhaler.id === inhaler_id);
+		console.log("se uso filter");
 		const clonedInhaler = { ...foundInhaler };
 		setItem(clonedInhaler);
 		//setInhalerName(foundInhaler.title);
@@ -93,9 +106,7 @@ const Page = () => {
 			.delete()
 			.eq('id', inhaler_id)
 
-		setSupaInhalers((prevSupaInhalers) =>
-			prevSupaInhalers.filter((inhaler) => inhaler.id !== inhaler_id)
-		);
+		setSupaInhalersFilterById(supaInhalers, String(inhaler_id));
 
 		setDialog(false);
 

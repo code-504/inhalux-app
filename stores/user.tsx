@@ -1,6 +1,7 @@
 import { UserStore, SupaUser } from "@/interfaces/User";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 const useUserStore = create<UserStore>(
     // @ts-ignore
@@ -18,7 +19,8 @@ const useUserStore = create<UserStore>(
         }),
         {
             name: "userStore", // Unique name for the persist storage
-            getStorage: () => sessionStorage, // Choose between localStorage or sessionStorage
+            storage: createJSONStorage(() => AsyncStorage),
+            //getStorage: () => sessionStorage, // Choose between localStorage or sessionStorage
         }
     )
 );
