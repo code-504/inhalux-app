@@ -612,8 +612,9 @@ export default function TabThreeScreen() {
                                 </View>
                                 <TagSelect
                                     tags={tags}
-                                    selected={selectedTreatment}
-                                    setSelected={setSelectedTreatment}
+                                    onTabChange={(index) =>
+                                        setSelectedTreatment(tags[index])
+                                    }
                                     renderTabs={(
                                         tags,
                                         handleTabPress,
