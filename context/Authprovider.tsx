@@ -1,136 +1,85 @@
-import React, { Dispatch, SetStateAction } from 'react';
-import { useContext, useEffect, useState, createContext } from 'react';
-import { Session } from '@supabase/supabase-js'
-import { useRouter, useSegments, useRootNavigationState } from 'expo-router';
-import { supabase } from '@/services/supabase';
-import { Avatar } from 'tamagui';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { Dispatch, SetStateAction } from "react";
+import { useContext, useEffect, useState, createContext } from "react";
+import { Session } from "@supabase/supabase-js";
+import { useRouter, useSegments, useRootNavigationState } from "expo-router";
+import { supabase } from "@/services/supabase";
+import { Avatar } from "tamagui";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useUserData } from "@/api/user";
+import { useUserStore } from "@/stores/user";
 
 interface Props {
-  children?: React.ReactNode;
+    children?: React.ReactNode;
 }
-
-export type InitializedUser = {
-  id: string;
-  name: string;
-  email: string;
-  avatar: string | undefined;
-  token: string;
-  external_provider: boolean;
-}
-
-export interface AuthContextType {
-  session: Session | null | undefined;
-  authInitialized: boolean;
-  isLoading: boolean;
-  supaUser: InitializedUser | null | undefined;
-  setSupaUser: Dispatch<SetStateAction<any>>;
-}
-
-export const AuthContext = createContext<AuthContextType | undefined>(
-  undefined
-);
 
 export function AuthProvider({ children }: Props) {
-  const segments = useSegments();
-  const router = useRouter();
+    const segments = useSegments();
+    const router = useRouter();
 
-  const [session, setSession] = useState<Session | null>(null);
-  const [authInitialized, setAuthInitialized] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [supaUser, setSupaUser] = useState<InitializedUser | null>(null);
+    //const [session, setSession] = useState<Session | null>(null);
+    //const [authInitialized, setAuthInitialized] = useState(false);
+    //const [isLoading, setIsLoading] = useState(true);
 
-  const navigationState = useRootNavigationState();
+    const { data, isLoading: userIsLoading, isSuccess } = useUserData();
+    const {
+        authInitialized,
+        session,
+        setSupaUser,
+        setIsLoading,
+        setSession,
+        setAuthInitialized,
+    } = useUserStore();
 
-  const fetchSupaUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
+    const navigationState = useRootNavigationState();
 
-    if(!user) return;
+    useEffect(() => {
+        if (!navigationState?.key || !authInitialized) return;
 
-    let { data: users, error } = await supabase
-      .from('users')
-      .select("name, last_name, avatar, token, external_provider")
-      .eq('id', user.id)
+        const inAuthGroup = segments[0] === "(auth)";
 
-      if(!users) return;
-
-      const initializedUser: InitializedUser = {
-        id: user.id,
-        name: users[0].name + " " + (users[0].last_name == null ? "" : users[0].last_name),
-        email: user.email ? user.email : "",
-        avatar: users[0].avatar == null ? "https://ckcwfpbvhbstslprlbgr.supabase.co/storage/v1/object/public/avatars/default_avatar.png?t=2023-12-19T02%3A43%3A15.423Z" : users[0].avatar,
-        token: users[0].token,
-        external_provider: users[0].external_provider
-      };
-
-      try {
-        await AsyncStorage.setItem('inhalux_user_id', user.id)
-        //await AsyncStorage.removeItem('inhalux_supa');
-        await AsyncStorage.setItem('inhalux_supa', JSON.stringify(supabase));
-        //console.log("supabase: ", supabase);
-      } catch (error) {
-        console.log("Async_Storage_Error", error);
-      }
-      setSupaUser(initializedUser);
-  };
-
-  useEffect(() => {
-    if (!navigationState?.key || !authInitialized) return;
-    
-    const inAuthGroup = segments[0] === '(auth)';
-
-    if (
-      // If the user is not signed in and the initial segment is not anything in the auth group.
-      !session?.user &&
-      !inAuthGroup
-    ) {
-      router.replace('/(auth)/login');
-    } else if (session?.user && inAuthGroup) {
-      // Redirect away from the sign-in page.
-      router.replace('/(tabs)/device'); // to tabs
-    }
-  }, [session, segments, authInitialized, navigationState?.key]);
-
-  useEffect(() => {
-    if (authInitialized) { setIsLoading(false); return };
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setIsLoading(false);
-    });
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setSession(session);
-        setAuthInitialized(true);
-        setIsLoading(false);
-
-        if (_event == 'TOKEN_REFRESHED') {
-          //Handle Accordinngly
+        if (
+            // If the user is not signed in and the initial segment is not anything in the auth group.
+            !session?.user &&
+            !inAuthGroup
+        ) {
+            router.replace("/(auth)/login");
+        } else if (session?.user && inAuthGroup) {
+            // Redirect away from the sign-in page.
+            router.replace("/(tabs)/device"); // to tabs
         }
-      }
-    );
+    }, [session, segments, authInitialized, navigationState?.key]);
 
-    return () => {
-      authListener.subscription.unsubscribe(); //.unsuscribe() added
-    };
-  }, []);
+    useEffect(() => {
+        if (authInitialized) {
+            setIsLoading(false);
+            return;
+        }
 
-  useEffect(() => {
-    fetchSupaUser();
-  }, [session])
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            setSession(session);
+            setIsLoading(false);
+        });
 
-  return (
-    <AuthContext.Provider value={{ session, authInitialized, isLoading, supaUser, setSupaUser }}>
-      {children}
-    </AuthContext.Provider>
-  );
+        const { data: authListener } = supabase.auth.onAuthStateChange(
+            async (_event, session) => {
+                setSession(session);
+                setAuthInitialized(true);
+                setIsLoading(false);
+
+                if (_event == "TOKEN_REFRESHED") {
+                    //Handle Accordinngly
+                }
+            }
+        );
+
+        return () => {
+            authListener.subscription.unsubscribe(); //.unsuscribe() added
+        };
+    }, []);
+
+    useEffect(() => {
+        setSupaUser(data || null);
+    }, [data]);
+
+    return children;
 }
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error(`useAuth must be used within a MyUserContextProvider.`);
-  }
-  return context;
-};

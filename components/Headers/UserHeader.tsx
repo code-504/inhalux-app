@@ -1,26 +1,39 @@
-import {  View, StyleSheet, Dimensions } from 'react-native'
-import React from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { Avatar } from 'tamagui'
-import Colors from '@/constants/Colors'
-import { MontserratBoldText, MontserratText } from '../StyledText'
-import { useAuth } from '@/context/Authprovider'
-import { Link } from 'expo-router'
+import { View, StyleSheet, Dimensions } from "react-native";
+import React from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Avatar } from "tamagui";
+import Colors from "@/constants/Colors";
+import { MontserratBoldText, MontserratText } from "../StyledText";
+import { useUserStore } from "@/stores/user";
+import { Link } from "expo-router";
 
-import SettingsIcon from "@/assets/icons/settings_bold.svg"
+import SettingsIcon from "@/assets/icons/settings_bold.svg";
 
 interface UserHeaderProps {
     showUserName: boolean;
     transparent?: boolean;
-    children: JSX.Element | JSX.Element[]
+    children: JSX.Element | JSX.Element[];
 }
 
-const UserHeader = ({ showUserName, children, transparent }: UserHeaderProps) => {
-    const { supaUser } = useAuth();
-    const transparentView = transparent || false
+const UserHeader = ({
+    showUserName,
+    children,
+    transparent,
+}: UserHeaderProps) => {
+    const { supaUser } = useUserStore();
+    const transparentView = transparent || false;
 
     return (
-        <SafeAreaView style={[styles.safeAre, { backgroundColor: transparentView ? "transparent" : Colors.lightGrey }]}>
+        <SafeAreaView
+            style={[
+                styles.safeAre,
+                {
+                    backgroundColor: transparentView
+                        ? "transparent"
+                        : Colors.lightGrey,
+                },
+            ]}
+        >
             <View style={styles.header}>
                 <View style={styles.containerView}>
                     <Link href="/configuration">
@@ -30,34 +43,41 @@ const UserHeader = ({ showUserName, children, transparent }: UserHeaderProps) =>
                                     accessibilityLabel="Cam"
                                     src={supaUser?.avatar}
                                 />
-                                <Avatar.Fallback backgroundColor={Colors.darkGray} />
+                                <Avatar.Fallback
+                                    backgroundColor={Colors.darkGray}
+                                />
                             </Avatar>
 
                             <View style={styles.avatarGear}>
                                 <SettingsIcon />
                             </View>
-
                         </View>
                     </Link>
-                    
-                    {
-                        showUserName &&
+
+                    {showUserName && (
                         <View style={styles.headerTitleView}>
-                            <MontserratText style={styles.headerTitleWellcomeText}>Bienvenido 👋</MontserratText>
-                            <MontserratBoldText style={styles.headerTitleNameText} numberOfLines={1}>{supaUser?.name || "Conectando..."}</MontserratBoldText>
+                            <MontserratText
+                                style={styles.headerTitleWellcomeText}
+                            >
+                                Bienvenido 👋
+                            </MontserratText>
+                            <MontserratBoldText
+                                style={styles.headerTitleNameText}
+                                numberOfLines={1}
+                            >
+                                {supaUser?.name || "Conectando..."}
+                            </MontserratBoldText>
                         </View>
-                    }
+                    )}
                 </View>
 
-                <View>
-                    {children}
-                </View>
+                <View>{children}</View>
             </View>
         </SafeAreaView>
-    )
-}
+    );
+};
 
-export default UserHeader
+export default UserHeader;
 
 const styles = StyleSheet.create({
     safeAre: {
@@ -66,7 +86,7 @@ const styles = StyleSheet.create({
     containerView: {
         display: "flex",
         flexDirection: "row",
-        alignItems: "center"
+        alignItems: "center",
     },
     header: {
         display: "flex",
@@ -81,15 +101,15 @@ const styles = StyleSheet.create({
     headerTitleWellcomeText: {
         color: Colors.light.grayText,
         fontSize: 14,
-        marginBottom: 2
+        marginBottom: 2,
     },
     headerTitleNameText: {
         color: Colors.light.text,
         fontSize: 16,
-        width: Dimensions.get("window").width - 210
+        width: Dimensions.get("window").width - 210,
     },
     avatarWrap: {
-        position: "relative"
+        position: "relative",
     },
     avatarGear: {
         position: "absolute",
@@ -102,5 +122,5 @@ const styles = StyleSheet.create({
         borderRadius: 100,
         width: 22,
         height: 22,
-    }
-})
+    },
+});

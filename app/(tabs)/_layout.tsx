@@ -1,8 +1,8 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Link, Stack, Tabs } from 'expo-router';
-import { useColorScheme, StyleSheet, View } from 'react-native';
-import Push from '../../components/Push';
-import Colors from '@/constants/Colors'
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { Link, Stack, Tabs } from "expo-router";
+import { useColorScheme, StyleSheet, View } from "react-native";
+import Push from "../../components/Push";
+import Colors from "@/constants/Colors";
 
 // Resources
 import InhalerIcon from "@/assets/icons/inhaler.svg";
@@ -47,56 +47,86 @@ function TabBarIcon(props: {
     return (
         <View style={styles.tabBarIcon}>
             <View>
-                <Icon fill={ focused ? Colors.tint : '#272727' } />
+                <Icon fill={focused ? Colors.tint : "#272727"} />
             </View>
 
-            <View style={[ styles.tabBarDot, { opacity: focused ? 1 : 0 }]}></View>
+            <View
+                style={[styles.tabBarDot, { opacity: focused ? 1 : 0 }]}
+            ></View>
         </View>
-    )
+    );
 }
 
 export default function TabLayout() {
     const colorScheme = useColorScheme();
-    
+
     return (
         <>
             {/* <Push/> */}
             <Tabs
                 screenOptions={{
                     tabBarStyle: {
-                        ...styles.navigationStyle
+                        ...styles.navigationStyle,
                     },
-                    tabBarShowLabel:false,
-                    tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-                    lazy: true
+                    tabBarShowLabel: false,
+                    tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+                    lazy: true,
                 }}
-                initialRouteName='device'
+                initialRouteName="device"
             >
                 <Tabs.Screen
                     name="device"
                     options={{
-                        tabBarIcon: ({ color, focused }) => <TabBarIcon Icon={InhalerIcon} color={color} focused={focused} title='Dispositivo' />
+                        tabBarIcon: ({ color, focused }) => (
+                            <TabBarIcon
+                                Icon={InhalerIcon}
+                                color={color}
+                                focused={focused}
+                                title="Dispositivo"
+                            />
+                        ),
                     }}
                 />
                 <Tabs.Screen
                     name="treatment"
                     options={{
                         headerShown: false,
-                        tabBarIcon: ({ color, focused }) => <TabBarIcon Icon={TreatmentIcon} color={color} focused={focused} title='Tratamiento' />,
+                        tabBarIcon: ({ color, focused }) => (
+                            <TabBarIcon
+                                Icon={TreatmentIcon}
+                                color={color}
+                                focused={focused}
+                                title="Tratamiento"
+                            />
+                        ),
                     }}
                 />
                 <Tabs.Screen
                     name="monitor"
                     options={{
                         headerShown: false,
-                        tabBarIcon: ({ color, focused }) => <TabBarIcon Icon={MonitorIcon} color={color} focused={focused} title='Monitoreo' />,      
+                        tabBarIcon: ({ color, focused }) => (
+                            <TabBarIcon
+                                Icon={MonitorIcon}
+                                color={color}
+                                focused={focused}
+                                title="Monitoreo"
+                            />
+                        ),
                     }}
                 />
                 <Tabs.Screen
                     name="location"
                     options={{
                         header: () => null,
-                        tabBarIcon: ({ color, focused }) => <TabBarIcon Icon={LocationIcon} color={color} focused={focused} title='Ubicación' />,
+                        tabBarIcon: ({ color, focused }) => (
+                            <TabBarIcon
+                                Icon={LocationIcon}
+                                color={color}
+                                focused={focused}
+                                title="Ubicación"
+                            />
+                        ),
                     }}
                 />
             </Tabs>
@@ -110,14 +140,14 @@ const styles = StyleSheet.create({
         height: 94,
         backgroundColor: Colors.white,
         borderTopWidth: 0,
-        elevation: 0
+        elevation: 0,
     },
     tabBarIcon: {
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
-        gap: 6
+        gap: 6,
     },
     iconFocused: {
         display: "flex",
@@ -126,7 +156,7 @@ const styles = StyleSheet.create({
         width: 50,
         paddingVertical: 4,
         borderRadius: 100,
-        backgroundColor: Colors.primary
+        backgroundColor: Colors.primary,
     },
     iconNotFocused: {
         display: "flex",
@@ -134,15 +164,15 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         width: 50,
         paddingVertical: 4,
-        backgroundColor: Colors.white
+        backgroundColor: Colors.white,
     },
     bottomText: {
-        fontSize: 12
+        fontSize: 12,
     },
     tabBarDot: {
         width: 4,
         height: 4,
         borderRadius: 10,
-        backgroundColor: Colors.tint
-    }
-})
+        backgroundColor: Colors.tint,
+    },
+});

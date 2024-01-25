@@ -16,7 +16,7 @@ import Ripple from "react-native-material-ripple";
 import { ListMonitor } from "@/interfaces/Monitor";
 import { useRelations } from "@/context/RelationsProvider";
 import { supabase } from "@/services/supabase";
-import { useAuth } from "@/context/Authprovider";
+import { useUserStore } from "@/stores/user";
 import { useRouter } from "expo-router";
 
 const ContactCardShare = ({
@@ -28,7 +28,7 @@ const ContactCardShare = ({
 }: ListMonitor) => {
     const [openDialog, setOpenDialog] = useState(false);
     const { shareState, setShareState } = useRelations();
-    const { supaUser } = useAuth();
+    const { supaUser } = useUserStore();
     const router = useRouter();
 
     const handleAcceptUser = async () => {

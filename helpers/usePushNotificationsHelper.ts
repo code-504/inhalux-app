@@ -1,12 +1,15 @@
-import { useAuth } from "@/context/Authprovider"
-import { supabase } from "@/services/supabase"
+import { supabase } from "@/services/supabase";
 import { measure } from "react-native-reanimated";
-import * as TaskManager from 'expo-task-manager';
+import * as TaskManager from "expo-task-manager";
 import * as BackgroundFetch from "expo-background-fetch";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
 
-export const createInhalationRegister = async(id: string, hour: string, date: string) => {
+export const createInhalationRegister = async (
+    id: string,
+    hour: string,
+    date: string
+) => {
     /*TaskManager.defineTask('mi-tarea', async() => {
         const userId = await AsyncStorage.getItem('inhalux_user_id')
         console.log("a ver si es cierto: ", userId);
@@ -29,79 +32,101 @@ export const createInhalationRegister = async(id: string, hour: string, date: st
       });
 
       await Notifications.registerTaskAsync('mi-tarea', );
-    /**///const userId = await AsyncStorage.getItem('inhalux_user_id')
+    /**/ //const userId = await AsyncStorage.getItem('inhalux_user_id')
     console.log(date);
-    const supabaseString = (await supabase.auth.getSession()).data.session?.user.id;
+    const supabaseString = (await supabase.auth.getSession()).data.session?.user
+        .id;
 
     const { data, error } = await supabase
-        .from('historial')
+        .from("historial")
         .insert([
-            { 
+            {
                 id: id,
                 fk_user_id: supabaseString,
-                date: date, 
+                date: date,
                 hour: hour,
-                state: 'Pendiente',
-                message: 'La inhalación esta pendiente'
+                state: "Pendiente",
+                message: "La inhalación esta pendiente",
             },
         ])
-        .select()
+        .select();
 
-        console.log("data: ", data, "error: ", error);
-} //create...
+    console.log("data: ", data, "error: ", error);
+}; //create...
 
-export const updateInhalationRegister = async(id: string, state: string) => {
+export const updateInhalationRegister = async (id: string, state: string) => {
     console.log("id", id);
     let message = "";
 
-    if(state === "Realizado") message = "Se registró la inhalación";
+    if (state === "Realizado") message = "Se registró la inhalación";
     else message = "Se omitió la inhalación";
-    
+
     const { data, error } = await supabase
-        .from('historial')
-        .update({ 
+        .from("historial")
+        .update({
             state: state,
-            message: message
+            message: message,
         })
-        .eq('id', id)
-        .select()
+        .eq("id", id)
+        .select();
 
     console.log("data: ", data, "error: ", error);
-} 
+};
 
-export const checkInhalationState = async(id: string) => {
+export const checkInhalationState = async (id: string) => {
     console.log("id", id);
 
     const { data: stateData, error: stateError } = await supabase
-      .from('historial')
-      .select("state")
-      .eq('id', id)
-      .single()
+        .from("historial")
+        .select("state")
+        .eq("id", id)
+        .single();
 
     console.log("data: ", stateData, "error: ", stateError);
-    
-    if(stateData?.state === "Pendiente"){
+
+    if (stateData?.state === "Pendiente") {
         const { data, error } = await supabase
-        .from('historial')
-        .update({ 
-            state: "No registrada",
-            message: "La inhalación NO fue registrada"
-        })
-        .eq('id', id)
-        .select()
+            .from("historial")
+            .update({
+                state: "No registrada",
+                message: "La inhalación NO fue registrada",
+            })
+            .eq("id", id)
+            .select();
         console.log("data: ", data, "error: ", error);
     }
-} 
+};
 
 export const getTodayDate = () => {
     // Obtener la fecha actual
     const fechaActual: Date = new Date();
 
     // Días de la semana
-    const diasSemana: string[] = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+    const diasSemana: string[] = [
+        "Domingo",
+        "Lunes",
+        "Martes",
+        "Miércoles",
+        "Jueves",
+        "Viernes",
+        "Sábado",
+    ];
 
     // Meses
-    const meses: string[] = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    const meses: string[] = [
+        "Enero",
+        "Febrero",
+        "Marzo",
+        "Abril",
+        "Mayo",
+        "Junio",
+        "Julio",
+        "Agosto",
+        "Septiembre",
+        "Octubre",
+        "Noviembre",
+        "Diciembre",
+    ];
 
     // Obtener el día, mes y año
     const dia: number = fechaActual.getDate();
@@ -115,4 +140,4 @@ export const getTodayDate = () => {
     // Mostrar la fecha formateada
     console.log("FechaFormateada ", fechaFormateada);
     return fechaFormateada;
-}
+};

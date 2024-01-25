@@ -30,7 +30,7 @@ import HeaderAction from "@/components/HeaderAction";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useKeyboard } from "@react-native-community/hooks";
 import { z } from "zod";
-import { useAuth } from "@/context/Authprovider";
+import { useUserStore } from "@/stores/user";
 import { supabase } from "@/services/supabase";
 import TabBar from "@/components/TabBar";
 import ContactCardPatient from "@/components/Card/ContactCardPacients";
@@ -51,7 +51,7 @@ import ShareOptionsIcon from "@/assets/icons/share_options.svg";
 import AddPersonIcon from "@/assets/icons/person_add.svg";
 
 export default function TabThreeScreen() {
-    const { supaUser } = useAuth();
+    const { supaUser } = useUserStore();
 
     const [openDialog, setOpenDialog] = useState({
         option1: false,
@@ -86,7 +86,7 @@ export default function TabThreeScreen() {
 
     const generalSnapPoints = useMemo(() => ["30%"], []);
 
-    const monitorSnapPoints = useMemo(() => ["72%", "100%"], []);
+    const listSnapPoints = useMemo(() => ["72%", "100%"], []);
 
     const { bottom: bottomSafeArea, top: topSafeArea } = useSafeAreaInsets();
 
@@ -224,6 +224,8 @@ export default function TabThreeScreen() {
 
     useFocusEffect(
         useCallback(() => {
+            monitorListModalRef.current?.present();
+
             const onBackPress = () => {
                 if (monitorIndex.current === 1) {
                     monitorListModalRef.current?.collapse();
@@ -261,8 +263,8 @@ export default function TabThreeScreen() {
         (props: BottomSheetBackdropProps) => (
             <BlurredBackground
                 {...props}
-                appearsOnIndex={1}
-                disappearsOnIndex={0}
+                appearsOnIndex={2}
+                disappearsOnIndex={1}
                 backgroundColor={Colors.white}
                 opacity={1}
                 pressBehavior={"collapse"}
@@ -303,18 +305,17 @@ export default function TabThreeScreen() {
                 </View>
 
                 <BottomSheetModal
-                    keyboardBehavior="interactive"
                     ref={monitorListModalRef}
-                    key="MonitorListSheet"
-                    name="MonitorListSheet"
-                    index={0}
+                    key="MonitorsBottomSheet"
+                    name="MonitorsBottomSheet"
                     topInset={topSafeArea}
-                    snapPoints={monitorSnapPoints}
+                    snapPoints={listSnapPoints}
                     enablePanDownToClose={false}
                     onChange={handleMonitorSheetChange}
                     enableHandlePanningGesture={false}
                     enableOverDrag={false}
                     bottomInset={bottomSafeArea - 24}
+                    backdropComponent={renderBackdrop2}
                 >
                     <TabBar.TabBar headerPadding={24}>
                         <TabBar.Item

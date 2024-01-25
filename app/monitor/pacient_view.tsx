@@ -21,7 +21,7 @@ import SimpleWeatherCard, {
 } from "@/components/Card/SimpleWeatherCard";
 import { BarChart, yAxisSides } from "react-native-gifted-charts";
 import { supabase } from "@/services/supabase";
-import { useAuth } from "@/context/Authprovider";
+import { useUserStore } from "@/stores/user";
 import { useRelations } from "@/context/RelationsProvider";
 import {
     checkIfPacientHasTreatment,
@@ -45,7 +45,7 @@ const PacientViewPage = () => {
     const { pacient_id, pacient_avatar, pacient_kindred, pacient_name } =
         useLocalSearchParams();
 
-    const { supaUser } = useAuth();
+    const { supaUser } = useUserStore();
     const { pacientState, setPacientState } = useRelations();
     const navigation = useNavigation();
 
@@ -446,6 +446,7 @@ const PacientViewPage = () => {
                                     { label: "Omitido", value: "1" },
                                     { label: "Pendiente", value: "2" },
                                 ]}
+                                onTabChange={(index) => console.log(index)}
                             />
 
                             <HistorialSearch data={/*DATA*/ pacientHistorial} />

@@ -1,28 +1,33 @@
-import React from 'react'
-import { Redirect } from 'expo-router'
-import { useAuth } from '@/context/Authprovider'
-import {enableLatestRenderer} from 'react-native-maps';
+import React from "react";
+import { Redirect } from "expo-router";
+import { enableLatestRenderer } from "react-native-maps";
 
-import 'react-native-gesture-handler';
-import { gestureHandlerRootHOC } from 'react-native-gesture-handler';
-import Animated from 'react-native-reanimated';
-import { usePushNotifications } from '@/hooks/usePushNotifications';
+import "react-native-gesture-handler";
+import { gestureHandlerRootHOC } from "react-native-gesture-handler";
+import Animated from "react-native-reanimated";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { enableFreeze } from "react-native-screens";
+import { useUserStore } from "@/stores/user";
+import * as NavigationBar from "expo-navigation-bar";
 
 enableLatestRenderer();
 enableFreeze(true);
-console.log("hhheee")
+
+console.log("hhheee");
 const index = () => {
-  
-  const auth = useAuth();
-  const { expoPushToken } = usePushNotifications();
-  //console.log("expoPushToken: ", expoPushToken);
+    NavigationBar.setBackgroundColorAsync("transparent");
+    NavigationBar.setButtonStyleAsync("dark");
+    NavigationBar.setPositionAsync("absolute");
 
-  if (!auth.session) {
-    return <Redirect href="/(auth)/login" />;
-  }
+    const { authInitialized, isLoading } = useUserStore();
+    const { expoPushToken } = usePushNotifications();
+    //console.log("expoPushToken: ", expoPushToken);
 
-  return  <Redirect href="/(tabs)/device" />;
-}
+    if (isLoading) return null;
 
-export default gestureHandlerRootHOC(index)
+    if (!authInitialized) return <Redirect href="/(auth)/login" />;
+
+    return <Redirect href="/(tabs)/device" />;
+};
+
+export default gestureHandlerRootHOC(index);
