@@ -7,6 +7,7 @@ import { Avatar } from "tamagui";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useUserData } from "@/api/user";
 import { useUserStore } from "@/stores/user";
+import { shallow } from "zustand/shallow";
 
 interface Props {
     children?: React.ReactNode;
@@ -16,19 +17,25 @@ export function AuthProvider({ children }: Props) {
     const segments = useSegments();
     const router = useRouter();
 
-    //const [session, setSession] = useState<Session | null>(null);
-    //const [authInitialized, setAuthInitialized] = useState(false);
-    //const [isLoading, setIsLoading] = useState(true);
-
     const { data, isLoading: userIsLoading, isSuccess } = useUserData();
-    const {
+    const [
         authInitialized,
         session,
         setSupaUser,
         setIsLoading,
         setSession,
         setAuthInitialized,
-    } = useUserStore();
+    ] = useUserStore(
+        (state) => [
+            state.authInitialized,
+            state.session,
+            state.setSupaUser,
+            state.setIsLoading,
+            state.setSession,
+            state.setAuthInitialized,
+        ],
+        shallow
+    );
 
     const navigationState = useRootNavigationState();
 

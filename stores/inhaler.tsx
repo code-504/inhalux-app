@@ -29,10 +29,5 @@ const useInhalerStore = create<Device>(
         }
     )
 );
-import { persist } from "zustand/middleware";
-
-const useInhalerStore = create<Device>((set) => ({
-    inhalers: null,
-}));
 
 export { useInhalerStore };
