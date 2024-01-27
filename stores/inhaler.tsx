@@ -1,9 +1,10 @@
-import { create } from "zustand";
+import { createWithEqualityFn } from "zustand/traditional";
+import { shallow } from "zustand/shallow";
 import { Device } from "@/interfaces/Device";
 import { createJSONStorage, persist } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const useInhalerStore = create<Device>(
+const useInhalerStore = createWithEqualityFn<Device>(
     // @ts-ignore
     persist(
         (set) => ({
@@ -27,7 +28,8 @@ const useInhalerStore = create<Device>(
             storage: createJSONStorage(() => AsyncStorage),
             //getStorage: () => sessionStorage, // Choose between localStorage or sessionStorage
         }
-    )
+    ),
+    shallow
 );
 
 export { useInhalerStore };

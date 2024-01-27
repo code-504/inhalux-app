@@ -13,8 +13,15 @@ export interface Inhalers {
 export interface Device {
     supaInhalers: Inhalers[] | null;
     setSupaInhalers: (supaInhalers: Inhalers[] | null) => void;
-    setSupaInhalersFilterById: (prevSupaInhalers: Inhalers[] | null, inhalerId: String) => void;
-    setSupaInhalersMapByName: (prevSupaInhalers: Inhalers[] | null, name: String, newName: String) => void;
+    setSupaInhalersFilterById: (
+        prevSupaInhalers: Inhalers[] | null,
+        inhalerId: String
+    ) => void;
+    setSupaInhalersMapByName: (
+        prevSupaInhalers: Inhalers[] | null,
+        name: String,
+        newName: String
+    ) => void;
 }
 
 export interface WeatherData {

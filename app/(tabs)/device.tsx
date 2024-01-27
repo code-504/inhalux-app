@@ -33,7 +33,6 @@ import {
 } from "@gorhom/bottom-sheet";
 import UserHeader from "@/components/Headers/UserHeader";
 import BlurredBackground from "@/components/BlurredBackground";
-import { shallow } from "zustand/shallow";
 
 // Resourses
 import AddIcon from "@/assets/icons/add.svg";
@@ -84,6 +83,8 @@ export default function TabOneScreen() {
 
         setSupaInhalers(idata);
     }, [idata]);*/
+
+    console.log("re-renders");
 
     const { width: screenWidth } = Dimensions.get("window");
     const SPACING = 12;

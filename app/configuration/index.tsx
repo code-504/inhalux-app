@@ -43,7 +43,7 @@ NavigationBar.setBackgroundColorAsync("transparent");
 NavigationBar.setButtonStyleAsync("dark");
 
 const ConfigurationScreen = () => {
-    const { supaUser, setSupaUser } = useUserStore();
+    const { supaUser, setSupaUser, setSession } = useUserStore();
     const { setSupaNotifications } = useNotifications();
     const { setPacientState, setShareState } = useRelations();
     const { setSupaTreatment } = useTreatment();
@@ -61,6 +61,7 @@ const ConfigurationScreen = () => {
     }, [idata]);
 
     const contextCleanUp = () => {
+        setSession(null);
         setSupaUser(null);
         setSupaInhalers([]);
         setSupaNotifications([]);

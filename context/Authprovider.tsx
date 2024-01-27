@@ -17,7 +17,12 @@ export function AuthProvider({ children }: Props) {
     const segments = useSegments();
     const router = useRouter();
 
-    const { data, isLoading: userIsLoading, isSuccess } = useUserData();
+    const {
+        data,
+        isLoading: userIsLoading,
+        isSuccess,
+        refetch,
+    } = useUserData();
 
     const [
         authInitialized,
@@ -65,6 +70,8 @@ export function AuthProvider({ children }: Props) {
 
         supabase.auth.getSession().then(({ data: { session } }) => {
             setSession(session);
+            setAuthInitialized(true);
+            refetch();
             setIsLoading(false);
         });
 

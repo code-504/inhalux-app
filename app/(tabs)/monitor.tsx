@@ -405,6 +405,7 @@ export default function TabThreeScreen() {
                 ref={bottomSheetRef}
                 snapPoints={generalSnapPoints}
                 index={0}
+                animateOnMount={false}
                 backdropComponent={(
                     backdropProps: BottomSheetBackdropProps
                 ) => (
