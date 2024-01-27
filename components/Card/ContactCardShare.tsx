@@ -25,9 +25,9 @@ const ContactCardShare = ({
     kindred,
     avatar,
     pending_state,
-}: ListMonitor) => {
+    monitorRefetch
+}: ListMonitor & { monitorRefetch: () => void }) => {
     const [openDialog, setOpenDialog] = useState(false);
-    const { shareState, setShareState } = useRelations();
     const { supaUser } = useUserStore();
     const router = useRouter();
 
@@ -45,21 +45,7 @@ const ContactCardShare = ({
             setOpenDialog(false);
         }
 
-        const newState = shareState.data.map((item) => {
-            if (item.id === id) {
-                return {
-                    ...item,
-                    pending_state: false,
-                };
-            }
-            return item;
-        });
-
-        setShareState({
-            ...shareState,
-            filterText: "",
-            data: newState,
-        });
+        monitorRefetch();
 
         setOpenDialog(false);
     };
@@ -77,13 +63,7 @@ const ContactCardShare = ({
             setOpenDialog(false);
         }
 
-        const newState = shareState.data.filter((item) => item.id !== id);
-
-        setShareState({
-            ...shareState,
-            filterText: "",
-            data: newState,
-        });
+        monitorRefetch();
 
         setOpenDialog(false);
     };

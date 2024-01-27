@@ -41,6 +41,17 @@ export default function Signup() {
 		password
 	}
 
+	const todayDate = () => {
+        let fechaActual = new Date();
+
+        let año = fechaActual.getFullYear();
+        let mes = (fechaActual.getMonth() + 1).toString().padStart(2, '0'); // Se suma 1 al mes, ya que en JavaScript los meses van de 0 a 11
+        let dia = fechaActual.getDate().toString().padStart(2, '0');
+
+        let fechaFormateada = `${año}-${mes}-${dia}`;
+        return fechaFormateada;
+    }
+
 	async function signUpWithEmail() {
 		const validationResults = formSchema.safeParse(formData);
 
@@ -82,15 +93,24 @@ export default function Signup() {
 			password: password,
 		})
 
+		const today = todayDate();
 		const { data: userData, error: userError } = await supabase
 		.from('users')
 		.update({ 
 					name: name,
-					last_name: lastName
+					last_name: lastName,
+					created_at: today
 				})
 		.eq('email', email)
 		.select()
 
+		if(userError){
+			console.log("userError:", userError);
+			return;
+		}
+
+		console.log(userData);
+		
 		if (!session) Alert.alert('¡Checa tu correo electrónico para confirmar tu cuenta!')
 		setLoading(false)
 		router.replace('/(auth)/login');

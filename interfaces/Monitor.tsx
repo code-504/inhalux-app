@@ -25,8 +25,8 @@ export interface SearchListProps {
         message?: string;
         BackgroundImage: ImageSource;
     },
-    state: ListMonitorState;
-    setState: Dispatch<SetStateAction<ListMonitorState>>;
+    state: ListMonitorState/*string*/;
+    setState: Dispatch<SetStateAction<ListMonitorState/*string*/>>;
     ListData: React.ReactElement
 }
 

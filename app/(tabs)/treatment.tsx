@@ -36,7 +36,6 @@ import {
 } from "react";
 import { useMonitor } from "@/context/MonitorProvider";
 import { router, useFocusEffect, useNavigation } from "expo-router";
-import { useRelations } from "@/context/RelationsProvider";
 import BlurredBackground from "@/components/BlurredBackground";
 import { AlertDialog, Button, Input, XStack, YStack } from "tamagui";
 import HeaderAction from "@/components/HeaderAction";

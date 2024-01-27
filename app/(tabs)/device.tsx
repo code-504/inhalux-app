@@ -78,7 +78,8 @@ export default function TabOneScreen() {
     );*/
 
     const { data } = useInhalersData();
-
+    console.log("InhalersData: ", data);
+    
     /*useEffect(() => {
         console.log("inhalersData: ", idata);
 

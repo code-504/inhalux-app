@@ -32,48 +32,27 @@ import { useEffect } from "react";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { useInhalers } from "@/context/InhalerProvider";
 import { useNotifications } from "@/context/NotificationsProvider";
-import { useRelations } from "@/context/RelationsProvider";
 import { useTreatment } from "@/context/TreatmentProvider";
 import { useUserData } from "@/api/user";
 import { useUserStore } from "@/stores/user";
 import { useInhalerStore } from "@/stores/inhaler";
 import { useInhalersData } from "@/api/inhaler";
+import { err } from "react-native-svg/lib/typescript/xml";
 
 NavigationBar.setBackgroundColorAsync("transparent");
 NavigationBar.setButtonStyleAsync("dark");
 
 const ConfigurationScreen = () => {
-    const { supaUser, setSupaUser } = useUserStore();
+    const { supaUser, setSupaUser, setSession } = useUserStore();
     const { setSupaNotifications } = useNotifications();
-    const { setPacientState, setShareState } = useRelations();
     const { setSupaTreatment } = useTreatment();
-
-    //const { setSupaInhalers } = useInhalers();
-    const { supaInhalers, setSupaInhalers } = useInhalerStore();
-    const { data: idata } = useInhalersData();
 
     const { data } = useUserData();
 
-    useEffect(() => {
-        console.log("inhalersData: ", idata);
-
-        setSupaInhalers(idata);
-    }, [idata]);
-
     const contextCleanUp = () => {
+        setSession(null);
         setSupaUser(null);
-        setSupaInhalers([]);
         setSupaNotifications([]);
-        setPacientState({
-            data: [],
-            filterText: "",
-            loading: true,
-        });
-        setShareState({
-            data: [],
-            filterText: "",
-            loading: true,
-        });
         setSupaTreatment(null);
     };
 
@@ -85,6 +64,8 @@ const ConfigurationScreen = () => {
         contextCleanUp();
 
         if (error) Alert.alert("Error", error.message);
+        console.log("errorLogout: ", error);
+        //router.push("/(auth)/login");
     };
 
     return (
