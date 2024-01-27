@@ -57,7 +57,7 @@ const ContactCardPatient = ({
                         </MontserratBoldText>
                         {pending_state ? (
                             <MontserratText>
-                                ¡Nueva Solicitud Pendiente!
+                                Solicitud Pendiente...
                             </MontserratText>
                         ) : (
                             <MontserratText>{kindred}</MontserratText>

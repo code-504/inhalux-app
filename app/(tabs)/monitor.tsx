@@ -23,7 +23,6 @@ import {
 } from "@gorhom/bottom-sheet";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { router, useFocusEffect, useNavigation } from "expo-router";
-import { useRelations } from "@/context/RelationsProvider";
 import BlurredBackground from "@/components/BlurredBackground";
 import { AlertDialog, Button, Input } from "tamagui";
 import HeaderAction from "@/components/HeaderAction";
@@ -49,6 +48,7 @@ import monitorBackground from "@/assets/images/shares-empty.png";
 import pacientBackground from "@/assets/images/pacients-empty.png";
 import ShareOptionsIcon from "@/assets/icons/share_options.svg";
 import AddPersonIcon from "@/assets/icons/person_add.svg";
+import { useMonitorsData, usePacientsData } from "@/api/relations";
 
 export default function TabThreeScreen() {
     const { supaUser } = useUserStore();
@@ -59,9 +59,78 @@ export default function TabThreeScreen() {
     });
     const [addCode, setAddCode] = useState("");
     const [addCodeError, setAddCodeError] = useState("");
+    
+    /* PacientsDATA */
+    const { data: pacientsData, refetch: pacientsRefetch } = usePacientsData();
+    const [pacientSearch, setPacientSearch] = useState({
+        data: pacientsData,
+        filterText: "",
+        loading: true,
+    })
 
-    const { pacientState, setPacientState, shareState, setShareState } =
-        useRelations();
+    useEffect(() => {
+        setPacientSearch({
+            ...pacientSearch,
+            loading: true
+        })
+
+        if(!pacientsData){
+            setPacientSearch({
+                ...pacientSearch,
+                loading: false
+            })
+            return;
+        }
+
+        const resultadosFiltrados = pacientsData.filter(item => item.name.toLowerCase().includes(pacientSearch.filterText.toLowerCase())
+        );
+
+        setPacientSearch({
+            ...pacientSearch,
+            data: resultadosFiltrados,
+            loading: false
+        })
+    }, [pacientSearch.filterText, pacientsData])
+
+    useFocusEffect(
+        useCallback(() => {
+            pacientsRefetch();
+      }, [])) //Este useFocusEffect es para recargar la data SI se escanea un QR (viajes entre pantallas), si hay rerenders este puede ser el por qué
+    
+    const { data: monitorsData, refetch: monitorsRefetch } = useMonitorsData();
+    const [monitorSearch, setMonitorSearch] = useState({
+        data: [],
+        filterText: "",
+        loading: true,
+    })
+    useEffect(() => {
+        setMonitorSearch({
+            ...monitorSearch,
+            loading: true
+        })
+
+        if(!monitorsData){
+            setMonitorSearch({
+                ...monitorSearch,
+                loading: false
+            })
+            return;
+        }
+
+        const resultadosFiltrados = monitorsData.filter(item => item.name.toLowerCase().includes(monitorSearch.filterText.toLowerCase())
+        );
+
+        setMonitorSearch({
+            ...monitorSearch,
+            data: resultadosFiltrados,
+            loading: false
+        })
+    }, [monitorSearch.filterText, monitorsData])
+    
+
+    console.log("pacientesData: ", pacientsData);
+    console.log("monitorData: ", monitorsData);
+    
     const keyboardHook = useKeyboard();
     const navigator = useNavigation();
 
@@ -114,7 +183,6 @@ export default function TabThreeScreen() {
 
     //Funcs
     const handleAddPatient = async () => {
-        console.log("pacientState: ", pacientState);
 
         const validationResults = formSchema.safeParse(formData);
 
@@ -182,7 +250,8 @@ export default function TabThreeScreen() {
             return;
         }
 
-        setPacientState({
+        pacientsRefetch();
+        /*setPacientState({
             ...pacientState,
             filterText: "",
             data: [
@@ -199,13 +268,11 @@ export default function TabThreeScreen() {
                     pending_state: true,
                 },
             ],
-        });
+        });*/
 
         Alert.alert("¡Solicitud de Relación enviada!");
     }; //handleAddPatient
 
-    /*const pacients:PacientsInfo[] = []
-     */
 
     useFocusEffect(
         useCallback(() => {
@@ -330,8 +397,8 @@ export default function TabThreeScreen() {
                             <SearchList
                                 title="Buscar paciente"
                                 placeHolder="Buscar por nombre"
-                                state={pacientState}
-                                setState={setPacientState}
+                                state={pacientSearch}
+                                setState={setPacientSearch}
                                 noData={{
                                     title: "No hay pacientes",
                                     BackgroundImage: pacientBackground,
@@ -340,7 +407,7 @@ export default function TabThreeScreen() {
                                 }}
                                 ListData={
                                     <BottomSheetFlatList
-                                        data={pacientState.data}
+                                        data={pacientSearch.data}
                                         keyExtractor={(_, i) => i.toString()}
                                         renderItem={({ item }) => (
                                             <ContactCardPatient
@@ -370,8 +437,8 @@ export default function TabThreeScreen() {
                             <SearchList
                                 title="Buscar monitor"
                                 placeHolder="Buscar por nombre"
-                                state={shareState}
-                                setState={setShareState}
+                                state={monitorSearch}
+                                setState={setMonitorSearch}
                                 noData={{
                                     title: "No hay monitores",
                                     BackgroundImage: monitorBackground,
@@ -380,7 +447,7 @@ export default function TabThreeScreen() {
                                 }}
                                 ListData={
                                     <BottomSheetFlatList
-                                        data={shareState.data}
+                                        data={monitorSearch.data}
                                         keyExtractor={(_, i) => i.toString()}
                                         renderItem={({ item }) => (
                                             <ContactCardShare
@@ -391,6 +458,7 @@ export default function TabThreeScreen() {
                                                 pending_state={
                                                     item.pending_state
                                                 }
+                                                monitorRefetch={monitorsRefetch}
                                             />
                                         )}
                                     />

@@ -23,15 +23,13 @@ import {
 
 import BackgroundImage from "@/assets/images/background.png";
 import { Spinner } from "tamagui";
-import { useRelations } from "@/context/RelationsProvider";
 import { supabase } from "@/services/supabase";
 import { useUserStore } from "@/stores/user";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 
 const ScanPacientPage = () => {
     const device = useCameraDevice("back");
     const [isActive, setIsActive] = useState<boolean>(false);
-    const { pacientState, setPacientState } = useRelations();
     const { supaUser } = useUserStore();
     const [onLoading, setOnLoading] = useState(false);
 
@@ -56,7 +54,6 @@ const ScanPacientPage = () => {
     }, []);
 
     const handleAddPatient = async (addCode: any) => {
-        console.log("pacientState: ", pacientState);
 
         if (addCode === supaUser?.token) {
             //same code scenario
@@ -114,27 +111,8 @@ const ScanPacientPage = () => {
             return;
         }
 
-        setPacientState({
-            ...pacientState,
-            filterText: "",
-            data: [
-                ...pacientState.data,
-                {
-                    id: userNewRelation[0].id,
-                    name:
-                        userNewRelation[0].name +
-                        (userNewRelation[0].last_name
-                            ? " " + userNewRelation[0].last_name
-                            : ""),
-                    avatar: userNewRelation[0].avatar,
-                    kindred: "Relativo",
-                    pending_state: true,
-                },
-            ],
-        });
-
         Alert.alert("¡Solicitud de Relación enviada!");
-        router.back();
+        router.push("/(tabs)/monitor");
     }; //handleAddPatient
 
     const codeScanner = useCodeScanner({

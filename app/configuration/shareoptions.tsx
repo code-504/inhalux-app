@@ -24,12 +24,13 @@ import RegenerateIcon from "@/assets/icons/key.svg";
 import DeleteIcon from "@/assets/icons/delete_forever.svg";
 import { supabase } from "@/services/supabase";
 import uuid from "react-native-uuid";
-import { useRelations } from "@/context/RelationsProvider";
 import { useUserStore } from "@/stores/user";
+import { useMonitorStore } from "@/stores/relations";
+import { useMonitorsData } from "@/api/relations";
 
 const ShareOptionsPage = () => {
     const { supaUser, setSupaUser } = useUserStore();
-    const { setShareState, shareState } = useRelations();
+    const { data: monitorData } = useMonitorsData();
     const [openDialog, setOpenDialog] = useState({
         openOption1: false,
         openOption2: false,
@@ -75,7 +76,7 @@ const ShareOptionsPage = () => {
     }; //handleRegen
 
     const handleDeleteUsers = async () => {
-        if (shareState.data.length === 0) {
+        if (monitorData.length === 0) {
             Alert.alert("No hay usuarios que eliminar");
             setOpenDialog({
                 ...openDialog,
@@ -90,15 +91,7 @@ const ShareOptionsPage = () => {
             .eq("fk_user_patient", supaUser?.id);
 
         if (error) Alert.alert("Algo salió mal");
-        else {
-            setShareState({
-                ...shareState,
-                data: [],
-                loading: false,
-            });
-
-            Alert.alert("Relaciones eliminadas con éxito");
-        }
+        else Alert.alert("Relaciones eliminadas con éxito");
 
         setOpenDialog({
             ...openDialog,
