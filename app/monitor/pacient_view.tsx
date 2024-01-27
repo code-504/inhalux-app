@@ -22,7 +22,6 @@ import SimpleWeatherCard, {
 import { BarChart, yAxisSides } from "react-native-gifted-charts";
 import { supabase } from "@/services/supabase";
 import { useUserStore } from "@/stores/user";
-import { useRelations } from "@/context/RelationsProvider";
 import {
     checkIfPacientHasTreatment,
     getHistorialData,
@@ -46,7 +45,6 @@ const PacientViewPage = () => {
         useLocalSearchParams();
 
     const { supaUser } = useUserStore();
-    const { pacientState, setPacientState } = useRelations();
     const navigation = useNavigation();
 
     const [pacientInhalers, setPacientInhalers] = useState<any[]>([]);
@@ -192,15 +190,6 @@ const PacientViewPage = () => {
             Alert.alert("Algo salió mal...");
             return;
         }
-
-        const updatedPacientState = pacientState.data.filter(
-            (item) => item.id !== pacient_id
-        );
-        setPacientState({
-            ...pacientState,
-            filterText: "",
-            data: updatedPacientState,
-        });
 
         navigation.goBack();
     };

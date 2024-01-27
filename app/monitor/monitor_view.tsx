@@ -35,7 +35,6 @@ import {
 import WarningIcon from "@/assets/icons/warning.svg";
 import EditIcon from "@/assets/icons/edit.svg";
 import { supabase } from "@/services/supabase";
-import { useRelations } from "@/context/RelationsProvider";
 import BlurredBackground from "@/components/BlurredBackground";
 import { useUserStore } from "@/stores/user";
 
@@ -47,11 +46,10 @@ interface ListItem {
 const screenWidth = Dimensions.get("window").width - 48;
 
 const MonitorViewPage = () => {
-    const { monitor_id, monitor_name, monitor_kindred, monitor_avatar } =
+    const { monitor_id, monitor_name, monitor_kindred, monitor_avatar, created_at } =
         useLocalSearchParams();
 
     const { supaUser } = useUserStore();
-    const { shareState, setShareState } = useRelations();
     const navigation = useNavigation();
 
     const [visible, setVisible] = useState(false);
@@ -74,6 +72,31 @@ const MonitorViewPage = () => {
     const openMenu = () => setVisible(true);
 
     const closeMenu = () => setVisible(false);
+
+    function convertirFecha(fechaStr: string) {
+        // Convertir la cadena de fecha a objeto Date
+        let fechaObj = new Date(fechaStr);
+    
+        // Obtener el día, mes y año por separado
+        let dia = fechaObj.getDate();
+        let mes = obtenerNombreMes(fechaObj.getMonth());
+        let año = fechaObj.getFullYear();
+    
+        // Crear la cadena formateada
+        let fechaFormateada = `${dia+1} de ${mes} del ${año}`;
+    
+        return fechaFormateada;
+    }
+    
+    function obtenerNombreMes(numeroMes: number) {
+        // Array con los nombres de los meses en español
+        const meses = [
+            "enero", "febrero", "marzo", "abril", "mayo", "junio",
+            "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+        ];
+    
+        return meses[numeroMes];
+    }
 
     const barData = [
         { value: 3, label: "27 nov" },
@@ -180,19 +203,6 @@ const MonitorViewPage = () => {
             return;
         }
 
-        const updatedShareState = shareState.data.map((elem) => {
-            if (elem.id === monitor_id) {
-                return { ...elem, kindred: item.text };
-            }
-            return elem;
-        });
-
-        setShareState({
-            ...shareState,
-            filterText: "",
-            data: updatedShareState,
-        });
-
         console.log("monitor_kindred: ", monitor_kindred);
         console.log("patient_kindred: ", patientKindred);
         setSelectedKindred(item.text);
@@ -212,15 +222,6 @@ const MonitorViewPage = () => {
             Alert.alert("Algo salió mal...");
             return;
         }
-
-        const updatedShareState = shareState.data.filter(
-            (item) => item.id !== monitor_id
-        );
-        setShareState({
-            ...shareState,
-            filterText: "",
-            data: updatedShareState,
-        });
 
         navigation.goBack();
     };
@@ -304,7 +305,7 @@ const MonitorViewPage = () => {
                                     Fecha de registro
                                 </MontserratText>
                                 <MontserratBoldText style={styles.cardText}>
-                                    12 Enero 2024
+                                    { convertirFecha(String(created_at)) }
                                 </MontserratBoldText>
                             </View>
                         </View>

@@ -12,19 +12,20 @@ import NotificationIcon from "@/assets/icons/notifications_active.svg"
 import PasswordIcon from "@/assets/icons/encrypted.svg"
 import LogoutIcon from "@/assets/icons/move_item.svg"
 import ShareIcon from "@/assets/icons/share.svg"
-import { useNotifications } from '@/context/NotificationsProvider'
 import { getTitleByDate, groupByDate } from '@/helpers/notifications'
+import { useNotificationsData } from '@/api/notification'
 
 const NotificationScreen = () => {
-  const { supaNotifications } = useNotifications();
-  const groupedNotifications = groupByDate(supaNotifications);
+  const { data: notiData } = useNotificationsData();
+  console.log("notidata: ", notiData);
+  const groupedNotifications = groupByDate(notiData);
   console.log("grouped", groupedNotifications);
 
   return (
     
       <View style={styles.safeArea}>
         {
-          supaNotifications.length !== 0 
+          notiData?.length !== 0 
           ?
             <ImageBackground source={BackgroundImage} style={styles.imageBackground}>
             <ScrollView style={styles.scrollView}>

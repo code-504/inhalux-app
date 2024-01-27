@@ -63,7 +63,7 @@ export default function TabThreeScreen() {
     /* PacientsDATA */
     const { data: pacientsData, refetch: pacientsRefetch } = usePacientsData();
     const [pacientSearch, setPacientSearch] = useState({
-        data: pacientsData,
+        data: [],
         filterText: "",
         loading: true,
     })
@@ -95,6 +95,7 @@ export default function TabThreeScreen() {
     useFocusEffect(
         useCallback(() => {
             pacientsRefetch();
+            monitorsRefetch();
       }, [])) //Este useFocusEffect es para recargar la data SI se escanea un QR (viajes entre pantallas), si hay rerenders este puede ser el por qué
     
     const { data: monitorsData, refetch: monitorsRefetch } = useMonitorsData();
@@ -458,6 +459,7 @@ export default function TabThreeScreen() {
                                                 pending_state={
                                                     item.pending_state
                                                 }
+                                                created_at={item.created_at}
                                                 monitorRefetch={monitorsRefetch}
                                             />
                                         )}

@@ -49,7 +49,7 @@ const SearchList = ({ title, state, setState, noData, ListData, placeHolder }: S
       }, [debouncedSearchTerm]);
 
     useEffect(() => {
-        if (state.data.length > 0)
+        if (state.data && state.data.length > 0)
             setHasData(true)
         else
             setHasData(false)

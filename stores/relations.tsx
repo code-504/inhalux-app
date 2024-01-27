@@ -13,6 +13,7 @@ const usePacientStore = create<ListMonitor>(
             kindred: "",
             name: "",
             pending_state: false,
+            created_at: ""
         }),
         {
             name: "pacientStore", // Unique name for the persist storage
@@ -30,6 +31,7 @@ const useMonitorStore = create<ListMonitor>(
             kindred: "",
             name: "",
             pending_state: false,
+            created_at: ""
         }),
         {
             name: "monitorStore", // Unique name for the persist storage

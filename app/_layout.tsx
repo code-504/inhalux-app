@@ -17,7 +17,6 @@ import appConfig from "@/tamagui.config";
 import { MonitorProvider } from "@/context/MonitorProvider";
 import { InhalerProvider } from "@/context/InhalerProvider";
 import { TreatmentProvider } from "@/context/TreatmentProvider";
-import { RelationProvider } from "@/context/RelationsProvider";
 import { NotificationProvider } from "@/context/NotificationsProvider";
 import NormalHeader from "@/components/Headers/NormalHeader";
 
@@ -85,13 +84,13 @@ export default function RootLayout() {
         >
             <AuthProvider>
                 <InhalerProvider>
-                    <NotificationProvider>
+                    {/* <NotificationProvider> */}
                         <TreatmentProvider>
-                            <RelationProvider>
+                            {/* <RelationProvider> */}
                                 <RootLayoutNav />
-                            </RelationProvider>
+                            {/* </RelationProvider> */}
                         </TreatmentProvider>
-                    </NotificationProvider>
+                    {/* </NotificationProvider> */}
                 </InhalerProvider>
             </AuthProvider>
         </PersistQueryClientProvider>

@@ -28,23 +28,16 @@ import { supabase } from "@/services/supabase";
 import Ripple from "react-native-material-ripple";
 import { router } from "expo-router";
 import * as NavigationBar from "expo-navigation-bar";
-import { useEffect } from "react";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
-import { useInhalers } from "@/context/InhalerProvider";
-import { useNotifications } from "@/context/NotificationsProvider";
 import { useTreatment } from "@/context/TreatmentProvider";
 import { useUserData } from "@/api/user";
 import { useUserStore } from "@/stores/user";
-import { useInhalerStore } from "@/stores/inhaler";
-import { useInhalersData } from "@/api/inhaler";
-import { err } from "react-native-svg/lib/typescript/xml";
 
 NavigationBar.setBackgroundColorAsync("transparent");
 NavigationBar.setButtonStyleAsync("dark");
 
 const ConfigurationScreen = () => {
     const { supaUser, setSupaUser, setSession } = useUserStore();
-    const { setSupaNotifications } = useNotifications();
     const { setSupaTreatment } = useTreatment();
 
     const { data } = useUserData();
@@ -52,7 +45,6 @@ const ConfigurationScreen = () => {
     const contextCleanUp = () => {
         setSession(null);
         setSupaUser(null);
-        setSupaNotifications([]);
         setSupaTreatment(null);
     };
 
