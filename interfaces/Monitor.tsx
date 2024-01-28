@@ -9,6 +9,7 @@ export interface ListMonitor {
     kindred: string;
     name: string;
     pending_state: boolean;
+    created_at: string;
 }
 
 export interface ListMonitorState {

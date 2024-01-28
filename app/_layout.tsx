@@ -90,13 +90,13 @@ export default function RootLayout() {
                     >
                         <AuthProvider>
                             <InhalerProvider>
-                                <NotificationProvider>
-                                    <TreatmentProvider>
-                                        <RelationProvider>
-                                            <RootLayoutNav />
-                                        </RelationProvider>
-                                    </TreatmentProvider>
-                                </NotificationProvider>
+                               {/* <NotificationProvider> */}
+                        <TreatmentProvider>
+                            {/* <RelationProvider> */}
+                                <RootLayoutNav />
+                            {/* </RelationProvider> */}
+                        </TreatmentProvider>
+                    {/* </NotificationProvider> */}
                             </InhalerProvider>
                         </AuthProvider>
                     </PersistQueryClientProvider>

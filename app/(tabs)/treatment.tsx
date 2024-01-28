@@ -59,7 +59,7 @@ import ShareOptionsIcon from "@/assets/icons/share_options.svg";
 import TagSelect, { TabItem, Tag } from "@/components/TagSelect";
 import HistorialSearch from "@/components/HistorialSearch";
 import TreatmentCard from "@/components/Card/TreatmentCard";
-import { FlatList } from "react-native";
+import { FlatList } from "react-native-gesture-handler";
 import { useTreatment } from "@/context/TreatmentProvider";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { SwitchWithLabel } from "@/components/SwitchWithLabel";

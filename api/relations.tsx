@@ -15,7 +15,7 @@ const fetchSupaMonitors = async () => {
             `id, 
             name_from_patient,
             pending_state,
-            user: fk_user_monitor ( name, last_name, avatar, id )`
+            user: fk_user_monitor ( name, last_name, avatar, id, created_at )`
         )
         .eq("fk_user_patient", user.id)
         //.like("user.name", "%" + search + "%")
@@ -41,6 +41,7 @@ const fetchSupaMonitors = async () => {
                     ? monitor.name_from_patient
                     : "Relativo",
                 pending_state: monitor.pending_state,
+                created_at: monitor.user.created_at
             })
         );
     
@@ -61,7 +62,7 @@ const fetchSupaPacients = async () => {
             `id, 
             name_from_monitor,
             pending_state,
-            user: fk_user_patient ( name, last_name, avatar, id )`
+            user: fk_user_patient ( name, last_name, avatar, id, created_at )`
         )
         .eq("fk_user_monitor", user.id)
         //.like("user.name", "%" + search + "%")
@@ -87,6 +88,7 @@ const fetchSupaPacients = async () => {
                     ? patient.name_from_monitor
                     : "Relativo",
                 pending_state: patient.pending_state,
+                created_at: patient.user.created_at
             })
         );
     

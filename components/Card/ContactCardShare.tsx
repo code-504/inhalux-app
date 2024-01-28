@@ -14,7 +14,6 @@ import {
 } from "../StyledText";
 import Ripple from "react-native-material-ripple";
 import { ListMonitor } from "@/interfaces/Monitor";
-import { useRelations } from "@/context/RelationsProvider";
 import { supabase } from "@/services/supabase";
 import { useUserStore } from "@/stores/user";
 import { useRouter } from "expo-router";
@@ -25,7 +24,8 @@ const ContactCardShare = ({
     kindred,
     avatar,
     pending_state,
-    monitorRefetch
+    monitorRefetch,
+    created_at
 }: ListMonitor & { monitorRefetch: () => void }) => {
     const [openDialog, setOpenDialog] = useState(false);
     const { supaUser } = useUserStore();
@@ -78,6 +78,8 @@ const ContactCardShare = ({
                     monitor_name: name,
                     monitor_avatar: avatar,
                     monitor_kindred: kindred,
+                    created_at: created_at,
+                    monitorRefetch: monitorRefetch
                 },
             });
     };
